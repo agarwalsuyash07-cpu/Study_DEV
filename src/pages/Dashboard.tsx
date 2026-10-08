@@ -7,6 +7,7 @@ import { PageHeader } from '../components/ui'
 import { loadItems, minutesByDay, weeklyMinutes, type Item } from '../lib/data'
 import { todayIST, weekDates } from '../lib/date'
 import { fmtMin } from '../lib/format'
+import { trackLink } from '../lib/links'
 import { heatLevel, heatmapWeeks, streaks } from '../lib/stats'
 import { message, useCatalog } from '../lib/useCatalog'
 
@@ -225,13 +226,27 @@ export default function Dashboard() {
                 <ul className="mt-4 flex flex-col gap-2">
                   {items.slice(0, 5).map((i) => {
                     const t = i.topic_id ? cat.topicById.get(i.topic_id) : undefined
+                    const link = t && trackLink(t.trackId)
+                    const title = t?.title ?? i.label ?? 'Study block'
                     return (
                       <li key={i.id} className="flex items-center gap-2">
                         <span
                           aria-hidden="true"
                           className={`size-3.5 shrink-0 rounded-full border ${i.done_at ? 'border-done bg-done' : 'border-check'}`}
                         />
-                        <span className={`truncate ${i.done_at ? 'text-muted line-through' : ''}`}>{t?.title ?? i.label ?? 'Study block'}</span>
+                        {link ? (
+                          <a
+                            href={link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`truncate underline decoration-accent/60 underline-offset-2 hover:text-accent ${i.done_at ? 'text-muted line-through' : ''}`}
+                          >
+                            {title}
+                            <span className="sr-only"> (opens in a new tab)</span>
+                          </a>
+                        ) : (
+                          <span className={`truncate ${i.done_at ? 'text-muted line-through' : ''}`}>{title}</span>
+                        )}
                       </li>
                     )
                   })}

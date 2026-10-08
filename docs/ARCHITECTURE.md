@@ -23,13 +23,14 @@ There is no custom backend. All business logic that must be atomic lives in Post
 | Path | What |
 |---|---|
 | `seed/*.json` | Syllabus per track (modules → topics, module `estMinutes`) |
-| `scripts/import-seed.ts` | Idempotent import: tracks/modules/topics only, default schedule if empty |
+| `scripts/import-seed.ts` | Idempotent import: upserts tracks/modules/topics, deletes ones dropped from the seed unless they have progress, default schedule if empty |
 | `scripts/set-password.ts` | Sets (or creates) the login password for `IMPORT_USER_EMAIL` via the admin API |
 | `supabase/migrations/` | Schema, RLS, RPC, trigger, view |
 | `supabase/rollback/` | Down scripts per migration (run by hand) |
 | `src/lib/plan.ts` | Pure logic: `assignDay`, `previewDays`, `keptByBlock`, `topicEst`, `remainingEstimate`, `estCompletion`, `trackSummary` |
 | `src/lib/date.ts` | IST "today", weekday (0 = Sunday), Mon–Sun week |
 | `src/lib/stats.ts` | Pure dashboard math: `streaks`, `heatmapWeeks`, `heatLevel` |
+| `src/lib/links.ts` | Track id → external URL (DSA → takeuforward.org/dashboard); linked titles open in a new tab |
 | `src/lib/data.ts` | All Supabase reads/writes |
 | `src/lib/useCatalog.ts` | Catalog state + shared topic actions (done, star, minutes, estimate) |
 | `src/lib/useTimer.ts` | One active timer, persisted in localStorage |

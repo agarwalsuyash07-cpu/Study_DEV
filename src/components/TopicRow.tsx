@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import type { Topic } from '../lib/data'
 import { fmtClock, fmtMin } from '../lib/format'
+import { trackLink } from '../lib/links'
 import { Pill } from './ui'
 
 export type TopicActions = {
@@ -91,6 +92,7 @@ export default function TopicRow({
   }
 
   const offTimerPrompt = topic.done && !alwaysAllowMinutes
+  const link = trackLink(topic.trackId)
 
   return (
     <li className="px-3 py-2.5">
@@ -99,7 +101,16 @@ export default function TopicRow({
           <Check checked={topic.done} label={`Mark "${topic.title}" done`} onClick={toggleDone} disabled={busy} />
         </span>
         <div className="min-w-0 flex-1">
-          <p className={`leading-snug ${topic.done ? 'text-muted line-through decoration-muted/70' : 'text-soft'}`}>{topic.title}</p>
+          <p className={`leading-snug ${topic.done ? 'text-muted line-through decoration-muted/70' : 'text-soft'}`}>
+            {link ? (
+              <a href={link} target="_blank" rel="noopener noreferrer" className="underline decoration-accent/60 underline-offset-2 hover:text-accent">
+                {topic.title}
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            ) : (
+              topic.title
+            )}
+          </p>
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted tabular-nums">
             {showModule && <span className="truncate">{topic.moduleName}</span>}
             {topic.bloom && <Pill>{topic.bloom}</Pill>}

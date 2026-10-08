@@ -1,4 +1,4 @@
-// Idempotent seed import: upserts tracks/modules/topics only. Never touches progress, sessions or plans.
+// Idempotent seed import: upserts tracks/modules/topics, prunes ones dropped from the seed that have no progress. Never touches sessions-with-time, done/starred topics, plans or the schedule.
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { createClient } from '@supabase/supabase-js'
@@ -138,11 +138,34 @@ async function main() {
     ok(await db.from('modules').upsert(modulesNoEst, { onConflict: 'id' }), 'upsert modules')
   ok(await db.from('topics').upsert(topicRows, { onConflict: 'id' }), 'upsert topics')
 
+  // Topics/modules dropped from the seed are deleted, unless they carry progress (done, starred, or logged time).
   const seedTopicIds = new Set(topicRows.map((t) => t.id))
-  const dbTopics = await db.from('topics').select('id').eq('user_id', userId)
+  const dbTopics = await db.from('topics').select('id, done_at, revision').eq('user_id', userId)
   ok(dbTopics, 'select topics')
-  const orphans = (dbTopics.data ?? []).filter((t) => !seedTopicIds.has(t.id)).map((t) => t.id)
-  if (orphans.length) console.warn(`Orphan topics (in DB, not in seed; left untouched): ${orphans.join(', ')}`)
+  const orphans = (dbTopics.data ?? []).filter((t) => !seedTopicIds.has(t.id))
+  if (orphans.length) {
+    const logged = await db.from('sessions').select('topic_id').in('topic_id', orphans.map((t) => t.id))
+    ok(logged, 'select orphan sessions')
+    const hasTime = new Set((logged.data ?? []).map((s) => s.topic_id))
+    const kept = orphans.filter((t) => t.done_at !== null || t.revision || hasTime.has(t.id)).map((t) => t.id)
+    const dropped = orphans.map((t) => t.id).filter((id) => !kept.includes(id))
+    if (dropped.length) ok(await db.from('topics').delete().in('id', dropped), 'delete orphan topics')
+    console.log(`Removed ${dropped.length} topics no longer in the seed.`)
+    if (kept.length) console.warn(`Kept (not in seed but have progress): ${kept.join(', ')}`)
+  }
+
+  const seedModuleIds = new Set(allModules.map((m) => m.id))
+  const dbModules = await db.from('modules').select('id').eq('user_id', userId)
+  ok(dbModules, 'select modules')
+  const orphanModules = (dbModules.data ?? []).map((m) => m.id).filter((id) => !seedModuleIds.has(id))
+  if (orphanModules.length) {
+    const left = await db.from('topics').select('module_id').in('module_id', orphanModules)
+    ok(left, 'select orphan module topics')
+    const inUse = new Set((left.data ?? []).map((t) => t.module_id))
+    const emptyModules = orphanModules.filter((id) => !inUse.has(id))
+    if (emptyModules.length) ok(await db.from('modules').delete().in('id', emptyModules), 'delete orphan modules')
+    console.log(`Removed ${emptyModules.length} empty modules no longer in the seed.`)
+  }
 
   const blocks = await db
     .from('schedule_blocks')
