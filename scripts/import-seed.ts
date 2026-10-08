@@ -49,7 +49,7 @@ async function findUserId(email: string): Promise<string> {
   const { data, error } = await db.auth.admin.listUsers({ perPage: 1000 })
   if (error) throw new Error(`listUsers: ${error.message}`)
   const user = data.users.find((u) => u.email?.toLowerCase() === email.toLowerCase())
-  if (!user) throw new Error(`No auth user ${email}. Sign in once via magic link, then re-run.`)
+  if (!user) throw new Error(`No auth user ${email}. Run 'npm run set-password' first, then re-run.`)
   return user.id
 }
 

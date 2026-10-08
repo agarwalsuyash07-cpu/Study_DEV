@@ -3,18 +3,19 @@
 How it's built and why: [ARCHITECTURE.md](ARCHITECTURE.md) · decisions: [DECISIONS.md](DECISIONS.md).
 
 ## Current state
-- **Works:** magic-link login; Dashboard (`/`: KPIs, streak, 26-week study heatmap, track progress, today snapshot, recent completions); Today (`/today`: auto-assigned plan, timer, manual minutes, regenerate); Tracks + TrackDetail (progress, estimates, est. finish); Week (saved days + forecast); Revision (starred topics); Settings (schedule editor, JSON export).
-- **Not done:** no error tracking, no CI, no Vercel project linked yet (only the `vercel.json` SPA rewrite).
+- **Works:** email + password login; Dashboard (`/`: KPIs, streak, 26-week study heatmap, track progress, today snapshot, recent completions); Today (`/today`: auto-assigned plan, timer, manual minutes, regenerate); Tracks + TrackDetail (progress, estimates, est. finish); Week (saved days + forecast); Revision (starred topics); Settings (schedule editor, JSON export).
+- **Not done:** no error tracking, no CI.
 
 ## Run locally
 1. `npm install`
-2. Copy `.env.example` → `.env.local` and fill it in (Supabase URL + anon key for the browser; service-role key + `IMPORT_USER_EMAIL` for the import script only).
-3. Log in once via the app so your user exists, then `npm run import` to load `seed/*.json` (idempotent, safe to re-run).
-4. `npm run dev` → http://localhost:3000 (port is fixed to match Supabase's default auth Site URL).
+2. Copy `.env.example` → `.env.local` and fill it in (Supabase URL + anon key for the browser; service-role key + `IMPORT_USER_EMAIL` for the local scripts only).
+3. `npm run set-password` (run it in your own terminal, input is hidden) to create the user or set its password, then `npm run import` to load `seed/*.json` (idempotent, safe to re-run).
+4. `npm run dev` → http://localhost:3000.
 
 ## Deploy
-- Target: Vercel static hosting (`npm run build` → `dist/`). Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel env; **never** the service-role key.
-- Add the deployed URL to Supabase Auth → URL configuration, or magic links will redirect to localhost.
+- Target: Vercel static hosting (`npm run build` → `dist/`), auto-deploys from `main` on GitHub. **Never** put the service-role key in Vercel.
+- Set `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` in Vercel → Settings → Environment Variables, then **redeploy**: Vite bakes them in at build time, and `.env.local` is gitignored so Vercel never sees it.
+- Supabase Auth → Sign In / Providers: keep Email enabled, turn **off** "Allow new users to sign up" (the app has no sign-up form; this stops strangers creating accounts via the API).
 - Migrations live in `supabase/migrations/` and are applied to the remote project (no local Docker stack). Rollback: run the matching file in `supabase/rollback/` by hand.
 - Roll back a frontend deploy by promoting the previous Vercel deployment.
 

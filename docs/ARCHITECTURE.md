@@ -9,7 +9,7 @@ Browser (Vite + React SPA, Vercel static hosting)
    │  supabase-js (anon/publishable key + user JWT)
    ▼
 Supabase
-   ├─ Auth: email magic link, one user
+   ├─ Auth: email + password, one user (no sign-up UI)
    ├─ Postgres: 7 tables, RLS user_id = auth.uid() on all
    ├─ RPC save_day_plan (atomic plan create / regenerate)
    ├─ Trigger topics_done_sync (topic done ⇄ today's plan item)
@@ -24,6 +24,7 @@ There is no custom backend. All business logic that must be atomic lives in Post
 |---|---|
 | `seed/*.json` | Syllabus per track (modules → topics, module `estMinutes`) |
 | `scripts/import-seed.ts` | Idempotent import: tracks/modules/topics only, default schedule if empty |
+| `scripts/set-password.ts` | Sets (or creates) the login password for `IMPORT_USER_EMAIL` via the admin API |
 | `supabase/migrations/` | Schema, RLS, RPC, trigger, view |
 | `supabase/rollback/` | Down scripts per migration (run by hand) |
 | `src/lib/plan.ts` | Pure logic: `assignDay`, `previewDays`, `keptByBlock`, `topicEst`, `remainingEstimate`, `estCompletion`, `trackSummary` |
