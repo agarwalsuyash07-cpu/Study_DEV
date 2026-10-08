@@ -1,7 +1,7 @@
 # Architecture
 
 ## What and why
-A single-user study tracker for 7 tracks (5 semester courses, DSA, Applied AI). A weekly schedule of time blocks drives an auto-generated daily task list; ticking topics done (anywhere) moves the plan forward. Each track shows % done, hours spent, hours left and an estimated finish date. Visual language follows takeUforward (Planly / A2Z sheet), laid out for a laptop.
+A single-user study tracker for 6 tracks (5 semester courses + DSA; Applied AI is paused, its seed kept in `seed/applied-ai.json`). A weekly schedule of time blocks drives an auto-generated daily task list; ticking topics done (anywhere) moves the plan forward. Each track shows % done, hours spent, hours left and an estimated finish date. Visual language follows takeUforward (Planly / A2Z sheet), laid out for a laptop.
 
 ## System
 ```
@@ -23,7 +23,7 @@ There is no custom backend. All business logic that must be atomic lives in Post
 | Path | What |
 |---|---|
 | `seed/*.json` | Syllabus per track (modules → topics, module `estMinutes`) |
-| `scripts/import-seed.ts` | Idempotent import: upserts tracks/modules/topics, deletes ones dropped from the seed unless they have progress, default schedule if empty |
+| `scripts/import-seed.ts` | Idempotent import of the tracks in `TRACK_FILES`: upserts tracks/modules/topics, deletes ones dropped from the seed unless they have progress (a removed track also loses its schedule blocks), default schedule if empty |
 | `scripts/set-password.ts` | Sets (or creates) the login password for `IMPORT_USER_EMAIL` via the admin API |
 | `supabase/migrations/` | Schema, RLS, RPC, trigger, view |
 | `supabase/rollback/` | Down scripts per migration (run by hand) |

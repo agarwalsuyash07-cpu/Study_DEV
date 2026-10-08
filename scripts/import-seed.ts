@@ -5,7 +5,8 @@ import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import type { Database, TablesInsert } from '../src/lib/database.types'
 
-const TRACK_FILES = ['prob-stats', 'dbms', 'cn', 'micro-econ', 'ops-research', 'dsa', 'applied-ai']
+// applied-ai paused: seed/applied-ai.json is kept; add it back here to restore the track.
+const TRACK_FILES = ['prob-stats', 'dbms', 'cn', 'micro-econ', 'ops-research', 'dsa']
 
 const env = z
   .object({
@@ -73,7 +74,6 @@ function defaultSchedule(userId: string): TablesInsert<'schedule_blocks'>[] {
     [4, 'dsa', null, 75],
     [4, 'micro-econ', null, 120],
     [5, 'dbms', null, 90],
-    [5, 'applied-ai', null, 90],
     [5, 'cn', null, 120],
     [6, null, 'PYQs (weakest subject)', 180],
     [0, null, 'Weekly review', 30],
@@ -165,6 +165,26 @@ async function main() {
     const emptyModules = orphanModules.filter((id) => !inUse.has(id))
     if (emptyModules.length) ok(await db.from('modules').delete().in('id', emptyModules), 'delete orphan modules')
     console.log(`Removed ${emptyModules.length} empty modules no longer in the seed.`)
+  }
+
+  // A track dropped from TRACK_FILES goes once it has no modules left, with its schedule blocks
+  // (the FK would otherwise null them into unlabelled blocks).
+  const seedTrackIds = new Set(trackRows.map((t) => t.id))
+  const dbTracks = await db.from('tracks').select('id').eq('user_id', userId)
+  ok(dbTracks, 'select tracks')
+  const orphanTracks = (dbTracks.data ?? []).map((t) => t.id).filter((id) => !seedTrackIds.has(id))
+  if (orphanTracks.length) {
+    const left = await db.from('modules').select('track_id').in('track_id', orphanTracks)
+    ok(left, 'select orphan track modules')
+    const inUse = new Set((left.data ?? []).map((m) => m.track_id))
+    const emptyTracks = orphanTracks.filter((id) => !inUse.has(id))
+    if (emptyTracks.length) {
+      ok(await db.from('schedule_blocks').delete().in('track_id', emptyTracks), 'delete orphan track blocks')
+      ok(await db.from('tracks').delete().in('id', emptyTracks), 'delete orphan tracks')
+    }
+    console.log(`Removed tracks no longer in the seed: ${emptyTracks.join(', ') || 'none'}.`)
+    const kept = orphanTracks.filter((id) => inUse.has(id))
+    if (kept.length) console.warn(`Kept tracks (not in seed but still have topics with progress): ${kept.join(', ')}`)
   }
 
   const blocks = await db
