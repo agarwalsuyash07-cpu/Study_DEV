@@ -1,0 +1,701 @@
+{
+  "id": "dsa",
+  "name": "DSA — Striver A2Z (Java)",
+  "type": "roadmap",
+  "note": "Sub-step level from Striver A2Z, recalled from memory, not verified against the live sheet. Individual problems not listed. Verify names/order on takeuforward.org.",
+  "modules": [
+    {
+      "id": "dsa-m1",
+      "order": 1,
+      "name": "Step 1: Learn the Basics",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m1-t1",
+          "order": 1,
+          "title": "Things to know in Java (I/O, data types, conditionals, loops, functions)",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m1-t2",
+          "order": 2,
+          "title": "Build-up logical thinking (patterns)",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m1-t3",
+          "order": 3,
+          "title": "Java Collections Framework (in place of C++ STL)",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m1-t4",
+          "order": 4,
+          "title": "Basic maths",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m1-t5",
+          "order": 5,
+          "title": "Basic recursion",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m1-t6",
+          "order": 6,
+          "title": "Basic hashing",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m2",
+      "order": 2,
+      "name": "Step 2: Sorting Techniques",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m2-t1",
+          "order": 1,
+          "title": "Sorting I (selection, bubble, insertion)",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m2-t2",
+          "order": 2,
+          "title": "Sorting II (merge, quick, recursive bubble/insertion)",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m3",
+      "order": 3,
+      "name": "Step 3: Arrays",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m3-t1",
+          "order": 1,
+          "title": "Easy",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m3-t2",
+          "order": 2,
+          "title": "Medium",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m3-t3",
+          "order": 3,
+          "title": "Hard",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m4",
+      "order": 4,
+      "name": "Step 4: Binary Search",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m4-t1",
+          "order": 1,
+          "title": "BS on 1D arrays",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m4-t2",
+          "order": 2,
+          "title": "BS on answers",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m4-t3",
+          "order": 3,
+          "title": "BS on 2D arrays",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m5",
+      "order": 5,
+      "name": "Step 5: Strings (Basic & Medium)",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m5-t1",
+          "order": 1,
+          "title": "Basic and easy string problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m5-t2",
+          "order": 2,
+          "title": "Medium string problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m6",
+      "order": 6,
+      "name": "Step 6: Linked List",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m6-t1",
+          "order": 1,
+          "title": "Learn 1D LL",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m6-t2",
+          "order": 2,
+          "title": "Learn doubly LL",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m6-t3",
+          "order": 3,
+          "title": "Medium problems of LL",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m6-t4",
+          "order": 4,
+          "title": "Medium problems of DLL",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m6-t5",
+          "order": 5,
+          "title": "Hard problems of LL",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m7",
+      "order": 7,
+      "name": "Step 7: Recursion",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m7-t1",
+          "order": 1,
+          "title": "Get a strong hold",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m7-t2",
+          "order": 2,
+          "title": "Subsequences pattern",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m7-t3",
+          "order": 3,
+          "title": "Trying out all combos / hard",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m8",
+      "order": 8,
+      "name": "Step 8: Bit Manipulation",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m8-t1",
+          "order": 1,
+          "title": "Learn bit manipulation",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m8-t2",
+          "order": 2,
+          "title": "Interview problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m8-t3",
+          "order": 3,
+          "title": "Advanced maths",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m9",
+      "order": 9,
+      "name": "Step 9: Stack & Queues",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m9-t1",
+          "order": 1,
+          "title": "Learning",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m9-t2",
+          "order": 2,
+          "title": "Prefix, infix, postfix conversion",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m9-t3",
+          "order": 3,
+          "title": "Monotonic stack/queue problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m9-t4",
+          "order": 4,
+          "title": "Implementation problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m10",
+      "order": 10,
+      "name": "Step 10: Sliding Window & Two Pointer",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m10-t1",
+          "order": 1,
+          "title": "Medium problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m10-t2",
+          "order": 2,
+          "title": "Hard problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m11",
+      "order": 11,
+      "name": "Step 11: Heaps",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m11-t1",
+          "order": 1,
+          "title": "Learning",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m11-t2",
+          "order": 2,
+          "title": "Medium problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m11-t3",
+          "order": 3,
+          "title": "Hard problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m12",
+      "order": 12,
+      "name": "Step 12: Greedy",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m12-t1",
+          "order": 1,
+          "title": "Easy problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m12-t2",
+          "order": 2,
+          "title": "Medium/Hard problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m13",
+      "order": 13,
+      "name": "Step 13: Binary Trees",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m13-t1",
+          "order": 1,
+          "title": "Traversals",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m13-t2",
+          "order": 2,
+          "title": "Medium problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m13-t3",
+          "order": 3,
+          "title": "Hard problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m14",
+      "order": 14,
+      "name": "Step 14: Binary Search Trees",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m14-t1",
+          "order": 1,
+          "title": "Concepts",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m14-t2",
+          "order": 2,
+          "title": "Practice problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m15",
+      "order": 15,
+      "name": "Step 15: Graphs",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m15-t1",
+          "order": 1,
+          "title": "Learning",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m15-t2",
+          "order": 2,
+          "title": "Problems on BFS/DFS",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m15-t3",
+          "order": 3,
+          "title": "Topo sort and problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m15-t4",
+          "order": 4,
+          "title": "Shortest path algorithms",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m15-t5",
+          "order": 5,
+          "title": "MST / Disjoint Set",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m15-t6",
+          "order": 6,
+          "title": "Other algorithms",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m16",
+      "order": 16,
+      "name": "Step 16: Dynamic Programming",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m16-t1",
+          "order": 1,
+          "title": "Introduction",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m16-t2",
+          "order": 2,
+          "title": "1D DP",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m16-t3",
+          "order": 3,
+          "title": "2D/3D DP and DP on grids",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m16-t4",
+          "order": 4,
+          "title": "DP on subsequences",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m16-t5",
+          "order": 5,
+          "title": "DP on strings",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m16-t6",
+          "order": 6,
+          "title": "DP on stocks",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m16-t7",
+          "order": 7,
+          "title": "DP on LIS",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m16-t8",
+          "order": 8,
+          "title": "MCM DP / partition DP",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m16-t9",
+          "order": 9,
+          "title": "DP on squares",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m17",
+      "order": 17,
+      "name": "Step 17: Tries",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m17-t1",
+          "order": 1,
+          "title": "Theory",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m17-t2",
+          "order": 2,
+          "title": "Problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dsa-m18",
+      "order": 18,
+      "name": "Step 18: Strings (Hard)",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m18-t1",
+          "order": 1,
+          "title": "Hard string problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    }
+  ]
+}

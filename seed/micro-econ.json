@@ -1,0 +1,413 @@
+{
+  "id": "micro-econ",
+  "name": "Microeconomics",
+  "type": "semester",
+  "courseCode": null,
+  "modules": [
+    {
+      "id": "micro-econ-m1",
+      "order": 1,
+      "name": "Microeconomic Principles",
+      "co": "CO1",
+      "estMinutes": 240,
+      "topics": [
+        {
+          "id": "micro-econ-m1-t1",
+          "order": 1,
+          "title": "intro to economics",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m1-t2",
+          "order": 2,
+          "title": "definitions (wealth, welfare)",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m1-t3",
+          "order": 3,
+          "title": "scarcity & growth",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m1-t4",
+          "order": 4,
+          "title": "central problems of an economy",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m1-t5",
+          "order": 5,
+          "title": "ten principles of economics",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m1-t6",
+          "order": 6,
+          "title": "positive vs normative",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m1-t7",
+          "order": 7,
+          "title": "production possibility frontier",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "micro-econ-m2",
+      "order": 2,
+      "name": "Consumer Behavior",
+      "co": "CO2",
+      "estMinutes": 270,
+      "topics": [
+        {
+          "id": "micro-econ-m2-t1",
+          "order": 1,
+          "title": "cardinal vs ordinal utility",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m2-t2",
+          "order": 2,
+          "title": "law of diminishing marginal utility",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m2-t3",
+          "order": 3,
+          "title": "consumer equilibrium",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m2-t4",
+          "order": 4,
+          "title": "indifference curve analysis",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m2-t5",
+          "order": 5,
+          "title": "demand analysis",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m2-t6",
+          "order": 6,
+          "title": "law of supply",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m2-t7",
+          "order": 7,
+          "title": "market equilibrium",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m2-t8",
+          "order": 8,
+          "title": "elasticity of demand & supply",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "micro-econ-m3",
+      "order": 3,
+      "name": "Production Function",
+      "co": "CO3",
+      "estMinutes": 300,
+      "topics": [
+        {
+          "id": "micro-econ-m3-t1",
+          "order": 1,
+          "title": "production function",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m3-t2",
+          "order": 2,
+          "title": "law of variable proportions, returns to scale",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m3-t3",
+          "order": 3,
+          "title": "scale of production",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m3-t4",
+          "order": 4,
+          "title": "economies/diseconomies of scale",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m3-t5",
+          "order": 5,
+          "title": "Cobb-Douglas & CES",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m3-t6",
+          "order": 6,
+          "title": "producer equilibrium",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m3-t7",
+          "order": 7,
+          "title": "iso-quant",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m3-t8",
+          "order": 8,
+          "title": "iso-cost",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "micro-econ-m4",
+      "order": 4,
+      "name": "Cost & Revenue Function",
+      "co": "CO4",
+      "estMinutes": 360,
+      "topics": [
+        {
+          "id": "micro-econ-m4-t1",
+          "order": 1,
+          "title": "cost functions",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m4-t2",
+          "order": 2,
+          "title": "short-run & long-run cost",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m4-t3",
+          "order": 3,
+          "title": "traditional theory of costs",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m4-t4",
+          "order": 4,
+          "title": "revenue functions",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m4-t5",
+          "order": 5,
+          "title": "perfect & imperfect markets",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m4-t6",
+          "order": 6,
+          "title": "modern theory of costs",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m4-t7",
+          "order": 7,
+          "title": "break-even analysis",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m4-t8",
+          "order": 8,
+          "title": "cost minimization",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m4-t9",
+          "order": 9,
+          "title": "types of cost",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "micro-econ-m5",
+      "order": 5,
+      "name": "Market Structure",
+      "co": "CO5",
+      "estMinutes": 300,
+      "topics": [
+        {
+          "id": "micro-econ-m5-t1",
+          "order": 1,
+          "title": "market characteristics",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m5-t2",
+          "order": 2,
+          "title": "perfect competition",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m5-t3",
+          "order": 3,
+          "title": "firm & industry equilibrium",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m5-t4",
+          "order": 4,
+          "title": "game theory, Nash equilibrium",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m5-t5",
+          "order": 5,
+          "title": "monopoly",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m5-t6",
+          "order": 6,
+          "title": "monopolistic competition",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m5-t7",
+          "order": 7,
+          "title": "duopoly",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "micro-econ-m5-t8",
+          "order": 8,
+          "title": "oligopoly",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    }
+  ]
+}

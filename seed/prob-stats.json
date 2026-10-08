@@ -1,0 +1,440 @@
+{
+  "id": "prob-stats",
+  "name": "Probability & Statistics",
+  "type": "semester",
+  "courseCode": null,
+  "modules": [
+    {
+      "id": "prob-stats-m1",
+      "order": 1,
+      "name": "Probability & Random Variables",
+      "co": "CO1",
+      "estMinutes": 360,
+      "topics": [
+        {
+          "id": "prob-stats-m1-t1",
+          "order": 1,
+          "title": "axioms, probability spaces",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m1-t2",
+          "order": 2,
+          "title": "conditional probability, Bayes",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m1-t3",
+          "order": 3,
+          "title": "discrete/continuous RVs",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m1-t4",
+          "order": 4,
+          "title": "PMF, PDF",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m1-t5",
+          "order": 5,
+          "title": "joint, marginal, conditional distributions",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m1-t6",
+          "order": 6,
+          "title": "expectation & variance",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m1-t7",
+          "order": 7,
+          "title": "moments, variance, covariance",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m1-t8",
+          "order": 8,
+          "title": "correlation & independence",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m1-t9",
+          "order": 9,
+          "title": "functions of 1-D RVs",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "prob-stats-m2",
+      "order": 2,
+      "name": "Probability Distributions",
+      "co": "CO2",
+      "estMinutes": 390,
+      "topics": [
+        {
+          "id": "prob-stats-m2-t1",
+          "order": 1,
+          "title": "Bernoulli & Binomial",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m2-t2",
+          "order": 2,
+          "title": "Poisson & Geometric",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m2-t3",
+          "order": 3,
+          "title": "Negative Binomial & Uniform",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m2-t4",
+          "order": 4,
+          "title": "Normal",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m2-t5",
+          "order": 5,
+          "title": "Exponential & Gamma",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m2-t6",
+          "order": 6,
+          "title": "Weibull",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m2-t7",
+          "order": 7,
+          "title": "Central Limit Theorem",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m2-t8",
+          "order": 8,
+          "title": "sampling distributions t, F, Chi-square (concept only)",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "prob-stats-m3",
+      "order": 3,
+      "name": "Testing of Hypothesis",
+      "co": "CO3",
+      "estMinutes": 450,
+      "topics": [
+        {
+          "id": "prob-stats-m3-t1",
+          "order": 1,
+          "title": "formulating hypotheses, simple vs composite",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m3-t2",
+          "order": 2,
+          "title": "Type I/II errors",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m3-t3",
+          "order": 3,
+          "title": "Z test means",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m3-t4",
+          "order": 4,
+          "title": "Z test proportions",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m3-t5",
+          "order": 5,
+          "title": "t test means",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m3-t6",
+          "order": 6,
+          "title": "F-test variance",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m3-t7",
+          "order": 7,
+          "title": "Chi-square goodness of fit",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m3-t8",
+          "order": 8,
+          "title": "Chi-square independence of attributes",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m3-t9",
+          "order": 9,
+          "title": "confidence intervals for each test",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "prob-stats-m4",
+      "order": 4,
+      "name": "Correlation & Regression",
+      "co": "CO4",
+      "estMinutes": 420,
+      "topics": [
+        {
+          "id": "prob-stats-m4-t1",
+          "order": 1,
+          "title": "correlation coefficient, Pearson",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m4-t2",
+          "order": 2,
+          "title": "Spearman rank",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m4-t3",
+          "order": 3,
+          "title": "partial correlation",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m4-t4",
+          "order": 4,
+          "title": "multiple correlation",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m4-t5",
+          "order": 5,
+          "title": "simple linear regression model & assumptions",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m4-t6",
+          "order": 6,
+          "title": "SLR estimation & coefficient interpretation",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m4-t7",
+          "order": 7,
+          "title": "multiple linear regression model & assumptions",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m4-t8",
+          "order": 8,
+          "title": "MLR estimation & interpretation",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m4-t9",
+          "order": 9,
+          "title": "model diagnostics & validation",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "prob-stats-m5",
+      "order": 5,
+      "name": "ANOVA & Design of Experiments",
+      "co": "CO5",
+      "estMinutes": 300,
+      "topics": [
+        {
+          "id": "prob-stats-m5-t1",
+          "order": 1,
+          "title": "intro to ANOVA",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m5-t2",
+          "order": 2,
+          "title": "one-way ANOVA",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m5-t3",
+          "order": 3,
+          "title": "two-way ANOVA",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m5-t4",
+          "order": 4,
+          "title": "CRD",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m5-t5",
+          "order": 5,
+          "title": "RBD",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m5-t6",
+          "order": 6,
+          "title": "LSD (Latin square design)",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m5-t7",
+          "order": 7,
+          "title": "problems on CRD, RBD, LSD",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "prob-stats-m5-t8",
+          "order": 8,
+          "title": "revision",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    }
+  ]
+}

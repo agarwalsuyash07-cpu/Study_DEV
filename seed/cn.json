@@ -1,0 +1,431 @@
+{
+  "id": "cn",
+  "name": "Computer Networks",
+  "type": "semester",
+  "courseCode": "BACSE203",
+  "modules": [
+    {
+      "id": "cn-m1",
+      "order": 1,
+      "name": "Networking Foundations",
+      "co": "CO1",
+      "estMinutes": 210,
+      "topics": [
+        {
+          "id": "cn-m1-t1",
+          "order": 1,
+          "title": "layering, protocols, topology",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m1-t2",
+          "order": 2,
+          "title": "encapsulation, mux/demux",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m1-t3",
+          "order": 3,
+          "title": "OSI & TCP/IP models",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m1-t4",
+          "order": 4,
+          "title": "physical layer basics, internet architecture",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m1-t5",
+          "order": 5,
+          "title": "sockets API",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m1-t6",
+          "order": 6,
+          "title": "throughput, bandwidth, delay, latency + example problems",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m1-t7",
+          "order": 7,
+          "title": "high-speed networks",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "cn-m2",
+      "order": 2,
+      "name": "Direct Links",
+      "co": "CO2",
+      "estMinutes": 435,
+      "topics": [
+        {
+          "id": "cn-m2-t1",
+          "order": 1,
+          "title": "encoding",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m2-t2",
+          "order": 2,
+          "title": "framing PPP, HDLC, Ethernet 802.3",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m2-t3",
+          "order": 3,
+          "title": "Internet checksum, CRC",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m2-t4",
+          "order": 4,
+          "title": "Hamming code",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m2-t5",
+          "order": 5,
+          "title": "stop-and-wait",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m2-t6",
+          "order": 6,
+          "title": "sliding window",
+          "bloom": "Analyze",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m2-t7",
+          "order": 7,
+          "title": "multiple-access protocols",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m2-t8",
+          "order": 8,
+          "title": "802.11 Wi-Fi, Bluetooth 802.15.1",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m2-t9",
+          "order": 9,
+          "title": "access & cellular networks",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "cn-m3",
+      "order": 3,
+      "name": "Internetworking",
+      "co": "CO3",
+      "estMinutes": 405,
+      "topics": [
+        {
+          "id": "cn-m3-t1",
+          "order": 1,
+          "title": "datagrams, virtual circuits, VLANs",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m3-t2",
+          "order": 2,
+          "title": "IP service model, global addresses",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m3-t3",
+          "order": 3,
+          "title": "IP forwarding, classful, subnetting, classless",
+          "bloom": "Analyze",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m3-t4",
+          "order": 4,
+          "title": "ARP, DHCP",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m3-t5",
+          "order": 5,
+          "title": "ICMP, NAT",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m3-t6",
+          "order": 6,
+          "title": "routing — graph, RIP distance vector, OSPF link state, metrics",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m3-t7",
+          "order": 7,
+          "title": "implementation, performance, Packet Tracer",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m3-t8",
+          "order": 8,
+          "title": "routing areas, BGP",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m3-t9",
+          "order": 9,
+          "title": "IPv6",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m3-t10",
+          "order": 10,
+          "title": "multicast, DVMRP",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "cn-m4",
+      "order": 4,
+      "name": "End-to-End Protocols",
+      "co": "CO4",
+      "estMinutes": 330,
+      "topics": [
+        {
+          "id": "cn-m4-t1",
+          "order": 1,
+          "title": "UDP, TCP",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m4-t2",
+          "order": 2,
+          "title": "segment format, connection setup/teardown",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m4-t3",
+          "order": 3,
+          "title": "sliding window, triggering transmission",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m4-t4",
+          "order": 4,
+          "title": "adaptive retransmission, record boundaries",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m4-t5",
+          "order": 5,
+          "title": "TCP extensions, SCTP",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m4-t6",
+          "order": 6,
+          "title": "RPC, QoS",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m4-t7",
+          "order": 7,
+          "title": "resource allocation, FIFO, fair queuing",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m4-t8",
+          "order": 8,
+          "title": "TCP congestion control, advanced congestion control",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "cn-m5",
+      "order": 5,
+      "name": "End-to-End Data",
+      "co": "CO5",
+      "estMinutes": 300,
+      "topics": [
+        {
+          "id": "cn-m5-t1",
+          "order": 1,
+          "title": "attacks, trust, threats",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m5-t2",
+          "order": 2,
+          "title": "IPsec",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m5-t3",
+          "order": 3,
+          "title": "firewalls",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m5-t4",
+          "order": 4,
+          "title": "email SMTP, MIME, POP3",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m5-t5",
+          "order": 5,
+          "title": "HTTP, FTP, Telnet",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m5-t6",
+          "order": 6,
+          "title": "DNS",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m5-t7",
+          "order": 7,
+          "title": "SNMP",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "cn-m5-t8",
+          "order": 8,
+          "title": "SDN intro",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    }
+  ]
+}

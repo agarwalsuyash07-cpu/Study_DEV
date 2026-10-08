@@ -1,0 +1,164 @@
+{
+  "id": "applied-ai",
+  "name": "Applied AI",
+  "type": "roadmap",
+  "note": "DRAFT. Module names come from your roadmap; topic breakdown is Claude's suggestion. Edit before importing.",
+  "modules": [
+    {
+      "id": "applied-ai-m1",
+      "order": 1,
+      "name": "LLM API Basics",
+      "estMinutes": 30,
+      "topics": [
+        {
+          "id": "applied-ai-m1-t1",
+          "order": 1,
+          "title": "Calling an LLM API",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "applied-ai-m1-t2",
+          "order": 2,
+          "title": "Tokens, context windows, cost",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "applied-ai-m2",
+      "order": 2,
+      "name": "Tool Calling",
+      "estMinutes": 30,
+      "topics": [
+        {
+          "id": "applied-ai-m2-t1",
+          "order": 1,
+          "title": "Function/tool calling basics",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "applied-ai-m2-t2",
+          "order": 2,
+          "title": "Multi-step tool loops",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "applied-ai-m3",
+      "order": 3,
+      "name": "MCP",
+      "estMinutes": 30,
+      "topics": [
+        {
+          "id": "applied-ai-m3-t1",
+          "order": 1,
+          "title": "MCP concepts (servers, tools, resources)",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "applied-ai-m3-t2",
+          "order": 2,
+          "title": "Build a simple MCP server",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "applied-ai-m4",
+      "order": 4,
+      "name": "RAG",
+      "estMinutes": 30,
+      "topics": [
+        {
+          "id": "applied-ai-m4-t1",
+          "order": 1,
+          "title": "Embeddings and vector search",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "applied-ai-m4-t2",
+          "order": 2,
+          "title": "Build a basic RAG pipeline",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "applied-ai-m5",
+      "order": 5,
+      "name": "Agents",
+      "estMinutes": 30,
+      "topics": [
+        {
+          "id": "applied-ai-m5-t1",
+          "order": 1,
+          "title": "Agentic patterns",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "applied-ai-m5-t2",
+          "order": 2,
+          "title": "Build a small agent",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "applied-ai-m6",
+      "order": 6,
+      "name": "Automation Platforms",
+      "estMinutes": 30,
+      "topics": [
+        {
+          "id": "applied-ai-m6-t1",
+          "order": 1,
+          "title": "n8n basics",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "applied-ai-m6-t2",
+          "order": 2,
+          "title": "Build one real workflow",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+import { useEffect, useState } from 'react'
+import ErrorBanner from '../components/ErrorBanner'
+import ProgressBar from '../components/ProgressBar'
+import { trackColor } from '../components/trackColor'
+import { PageHeader, Pill } from '../components/ui'
+import { blocksFor, loadPlansBetween, minutesByDay, type Catalog, type Item } from '../lib/data'
+import { todayIST, weekDates } from '../lib/date'
+import { fmtMin } from '../lib/format'
+import { previewDays, type PlanItem } from '../lib/plan'
+import { message, useCatalog } from '../lib/useCatalog'
+
+type Row = { key: string; blockId: number | null; topicId: string | null; label: string | null; done: boolean }
+type Day = { date: string; kind: 'past' | 'today' | 'future'; preview: boolean; rows: Row[] | null; studied: number }
+
+const fromSaved = (items: Item[]): Row[] =>
+  items.map((i) => ({ key: `s${i.id}`, blockId: i.block_id, topicId: i.topic_id, label: i.label, done: i.done_at !== null }))
+const fromPreview = (items: PlanItem[]): Row[] =>
+  items.map((i, n) => ({ key: `p${n}`, blockId: i.blockId, topicId: i.topicId, label: i.label, done: false }))
+
+function buildDays(cat: Catalog, dates: string[], today: string, plans: Map<string, Item[]>, studied: Map<string, number>): Day[] {
+  const upcoming = dates.filter((d) => d >= today)
+  // saved days reserve their topics so later previews don't repeat them
+  const previews = previewDays(
+    upcoming.map((d) => {
+      const saved = plans.get(d)
+      return saved ? { existingTopicIds: saved.flatMap((i) => (i.topic_id ? [i.topic_id] : [])) } : { blocks: blocksFor(cat, d) }
+    }),
+    cat.topics,
+  )
+  return dates.map((date) => {
+    const kind = date < today ? 'past' : date === today ? 'today' : 'future'
+    const saved = plans.get(date)
+    const preview = date >= today && !saved ? (previews[upcoming.indexOf(date)] ?? null) : null
+    return {
+      date,
+      kind,
+      preview: preview !== null,
+      rows: saved ? fromSaved(saved) : preview ? fromPreview(preview) : null,
+      studied: studied.get(date) ?? 0,
+    }
+  })
+}
+
+const fmtDay = (date: string, opts: Intl.DateTimeFormatOptions) =>
+  new Date(`${date}T00:00:00Z`).toLocaleDateString('en-IN', { timeZone: 'UTC', ...opts })
+
+export default function Week() {
+  const { cat, error, setError } = useCatalog()
+  const [today] = useState(todayIST)
+  const dates = weekDates(today)
+  const [plans, setPlans] = useState<Map<string, Item[]> | null>(null)
+  const [studied, setStudied] = useState<Map<string, number>>(new Map())
+
+  const from = dates[0]!
+  const to = dates[6]!
+  useEffect(() => {
+    let cancelled = false
+    Promise.all([loadPlansBetween(from, to), minutesByDay(from, to)]).then(
+      ([p, s]) => {
+        if (cancelled) return
+        setPlans(p)
+        setStudied(s)
+      },
+      (e: unknown) => {
+        if (!cancelled) setError(message(e))
+      },
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [from, to, setError])
+
+  if (!cat || !plans) {
+    return (
+      <main>
+        <PageHeader title="This week" />
+        <div className="px-4 md:px-8">
+          <ErrorBanner error={error} onDismiss={() => setError(null)} />
+          {!error && <p className="text-muted">Loading week…</p>}
+        </div>
+      </main>
+    )
+  }
+
+  const days = buildDays(cat, dates, today, plans, studied)
+  const blockById = new Map(cat.blocks.map((b) => [b.id, b]))
+  const trackById = new Map(cat.tracks.map((t) => [t.id, t]))
+
+  return (
+    <main>
+      <PageHeader title="This week" />
+      <header className="px-4 pb-4 md:px-8">
+        <h2 className="pt-1 text-xl font-medium">Monday to Sunday</h2>
+        <p className="text-soft">
+          {fmtDay(from, { day: 'numeric', month: 'short' })} to {fmtDay(to, { day: 'numeric', month: 'short' })}
+        </p>
+      </header>
+      <ul className="grid items-start gap-4 px-4 pb-8 md:grid-cols-2 md:px-8 xl:grid-cols-4 min-[1700px]:grid-cols-7">
+        {error && (
+          <li className="col-span-full">
+            <ErrorBanner error={error} onDismiss={() => setError(null)} />
+          </li>
+        )}
+        {days.map((d) => {
+          const rows = d.rows ?? []
+          const done = rows.filter((r) => r.done).length
+          let planned = 0
+          let unestimated = 0
+          for (const r of rows) {
+            if (!r.topicId) planned += (r.blockId !== null ? blockById.get(r.blockId)?.minutes : 0) ?? 0
+            else {
+              const est = cat.topicById.get(r.topicId)?.est ?? null
+              if (est === null) unestimated++
+              else planned += est
+            }
+          }
+          const weekday = fmtDay(d.date, { weekday: 'long' })
+          return (
+            <li key={d.date}>
+              <div className={`flex flex-col overflow-hidden rounded-[14px] border bg-card ${d.kind === 'today' ? 'border-accent/50' : 'border-line'}`}>
+                <div className="px-3 py-3">
+                  <div className="mb-2 flex items-baseline gap-2">
+                    <span className={`font-medium ${d.kind === 'past' ? 'text-muted' : ''}`}>{weekday}</span>
+                    <span className="text-sm text-muted">{fmtDay(d.date, { day: 'numeric', month: 'short' })}</span>
+                    {d.kind === 'today' && <Pill tone="accent">Today</Pill>}
+                    {d.preview && <Pill>Preview</Pill>}
+                    <span className="ml-auto text-sm text-muted tabular-nums">{d.rows ? `${done}/${rows.length}` : ''}</span>
+                  </div>
+                  {rows.length > 0 && <ProgressBar value={done / rows.length} label={`${weekday} progress`} />}
+                  <div className="mt-2 flex flex-wrap gap-x-4 text-xs text-muted tabular-nums">
+                    {d.rows === null ? (
+                      <span>{d.kind === 'past' ? 'No plan saved' : 'Nothing scheduled'}</span>
+                    ) : rows.length === 0 ? (
+                      <span>Nothing scheduled</span>
+                    ) : (
+                      <span>
+                        Planned {unestimated > 0 && planned === 0 ? '—' : fmtMin(planned)}
+                        {unestimated > 0 && <span className="text-warn"> +{unestimated} unestimated</span>}
+                      </span>
+                    )}
+                    {d.kind !== 'future' && <span>Studied {fmtMin(d.studied)}</span>}
+                  </div>
+                </div>
+                {rows.length > 0 && (
+                  <ul className="divide-y divide-line border-t border-line">
+                    {rows.map((r) => {
+                      const topic = r.topicId ? cat.topicById.get(r.topicId) : undefined
+                      const track = topic ? trackById.get(topic.trackId) : undefined
+                      return (
+                        <li key={r.key} className="flex items-start gap-3 px-3 py-2.5">
+                          <span
+                            aria-hidden="true"
+                            className={`mt-1.5 size-2 shrink-0 rounded-full ${r.done ? 'bg-done' : 'border border-muted/60'}`}
+                            style={!r.done && track ? { borderColor: trackColor(track.sort_order) } : undefined}
+                          />
+                          <span className="sr-only">{r.done ? 'Done:' : 'Not done:'}</span>
+                          <span className="min-w-0 flex-1">
+                            <span className={r.done ? 'text-muted line-through decoration-muted/70' : 'text-soft'}>
+                              {topic?.title ?? r.label ?? 'Removed topic'}
+                            </span>
+                            {track && <span className="block text-xs text-muted">{track.name}</span>}
+                          </span>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+    </main>
+  )
+}

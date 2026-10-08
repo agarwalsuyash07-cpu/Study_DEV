@@ -1,0 +1,258 @@
+import { supabase } from './supabase'
+import type { Tables } from './database.types'
+import { addDays, todayIST, weekdayOf } from './date'
+import { assignDay, keptByBlock, topicEst, type PlanBlock, type PlanItem, type PlanTopic } from './plan'
+
+export type Track = Tables<'tracks'>
+export type Module = Tables<'modules'>
+export type Block = Tables<'schedule_blocks'>
+export type Item = Tables<'day_plan_items'>
+export type Topic = PlanTopic & {
+  title: string
+  moduleId: string
+  moduleName: string
+  bloom: string | null
+  revision: boolean
+  doneAt: string | null
+  spentMin: number
+}
+export type Catalog = {
+  tracks: Track[]
+  modules: Module[]
+  topics: Topic[]
+  topicById: Map<string, Topic>
+  blocks: Block[]
+}
+
+function rows<T>(res: { data: T[] | null; error: { message: string } | null }, what: string): T[] {
+  if (res.error) throw new Error(`${what}: ${res.error.message}`)
+  return res.data ?? []
+}
+function ok(res: { error: { message: string } | null }, what: string): void {
+  if (res.error) throw new Error(`${what}: ${res.error.message}`)
+}
+
+// ponytail: plain selects cap at the API's 1000-row limit; fine for ~300 topics, paginate if the syllabus grows past that.
+export async function loadCatalog(): Promise<Catalog> {
+  const [t, m, tp, b, s] = await Promise.all([
+    supabase.from('tracks').select('*').order('sort_order'),
+    supabase.from('modules').select('*').order('sort_order'),
+    supabase.from('topics').select('*').order('sort_order'),
+    supabase.from('schedule_blocks').select('*').order('weekday').order('sort_order'),
+    supabase.from('topic_spent').select('*'),
+  ])
+  const tracks = rows(t, 'load tracks')
+  const modules = rows(m, 'load modules')
+  const topicRows = rows(tp, 'load topics')
+  const blocks = rows(b, 'load schedule')
+  const spent = new Map(rows(s, 'load time spent').map((r) => [r.topic_id, r.minutes ?? 0]))
+
+  const moduleById = new Map(modules.map((x) => [x.id, x]))
+  const countByModule = new Map<string, number>()
+  for (const x of topicRows) countByModule.set(x.module_id, (countByModule.get(x.module_id) ?? 0) + 1)
+
+  const topics: Topic[] = []
+  for (const x of topicRows) {
+    const mod = moduleById.get(x.module_id)
+    if (!mod) throw new Error(`topic ${x.id} references missing module ${x.module_id}`)
+    topics.push({
+      id: x.id,
+      trackId: mod.track_id,
+      moduleOrder: mod.sort_order,
+      order: x.sort_order,
+      est: topicEst(mod.est_minutes, countByModule.get(mod.id) ?? 0),
+      done: x.done_at !== null,
+      title: x.title,
+      moduleId: mod.id,
+      moduleName: mod.name,
+      bloom: x.bloom,
+      revision: x.revision,
+      doneAt: x.done_at,
+      spentMin: spent.get(x.id) ?? 0,
+    })
+  }
+  topics.sort((a, b) => a.moduleOrder - b.moduleOrder || a.order - b.order)
+  return { tracks, modules, topics, topicById: new Map(topics.map((x) => [x.id, x])), blocks }
+}
+
+const toPlanBlock = (b: Block): PlanBlock => ({
+  id: b.id,
+  trackId: b.track_id,
+  label: b.label,
+  minutes: b.minutes,
+  sortOrder: b.sort_order,
+})
+
+export function blocksFor(cat: Catalog, date: string): PlanBlock[] {
+  const wd = weekdayOf(date)
+  return cat.blocks.filter((b) => b.weekday === wd).map(toPlanBlock)
+}
+
+export function weeklyMinutes(cat: Catalog, trackId: string): number {
+  return cat.blocks.reduce((sum, b) => (b.track_id === trackId ? sum + b.minutes : sum), 0)
+}
+
+const toRpcItems =(items: PlanItem[]) =>
+  items.map((i) => ({ block_id: i.blockId, topic_id: i.topicId, label: i.label, sort_order: i.sortOrder }))
+
+export async function loadItems(date: string): Promise<Item[]> {
+  return rows(await supabase.from('day_plan_items').select('*').eq('date', date).order('sort_order'), 'load plan')
+}
+
+/** Generates and freezes the plan on first open of `date`; afterwards just loads it. */
+export async function ensureDayPlan(cat: Catalog, date: string): Promise<Item[]> {
+  const existing = await supabase.from('day_plans').select('date').eq('date', date).maybeSingle()
+  if (existing.error) throw new Error(`load day plan: ${existing.error.message}`)
+  if (!existing.data) {
+    const items = assignDay(blocksFor(cat, date), cat.topics)
+    // false = another tab created it first; loading below picks that up
+    ok(await supabase.rpc('save_day_plan', { p_date: date, p_items: toRpcItems(items), p_replace: false }), 'save plan')
+  }
+  return loadItems(date)
+}
+
+/** Drops undone items for `date` and re-runs assignment around the done ones. */
+export async function regenerateDay(cat: Catalog, date: string, current: Item[]): Promise<Item[]> {
+  const kept = current.filter((i) => i.done_at !== null)
+  const exclude = new Set(kept.flatMap((i) => (i.topic_id ? [i.topic_id] : [])))
+  const keptMin = keptByBlock(
+    kept.map((i) => ({ blockId: i.block_id, topicId: i.topic_id, label: i.label })),
+    (id) => cat.topicById.get(id)?.est ?? null,
+  )
+  const offset = Math.max(-1, ...kept.map((i) => i.sort_order)) + 1
+  const items = assignDay(blocksFor(cat, date), cat.topics, { exclude, kept: keptMin }).map((i) => ({
+    ...i,
+    sortOrder: i.sortOrder + offset,
+  }))
+  ok(await supabase.rpc('save_day_plan', { p_date: date, p_items: toRpcItems(items), p_replace: true }), 'regenerate plan')
+  return loadItems(date)
+}
+
+/** Returns the new done_at. A DB trigger mirrors it onto today's plan item. */
+export async function setTopicDone(topicId: string, done: boolean): Promise<string | null> {
+  const doneAt = done ? new Date().toISOString() : null
+  ok(await supabase.from('topics').update({ done_at: doneAt }).eq('id', topicId), 'update topic')
+  return doneAt
+}
+
+export async function setItemDone(itemId: number, done: boolean): Promise<string | null> {
+  const doneAt = done ? new Date().toISOString() : null
+  ok(await supabase.from('day_plan_items').update({ done_at: doneAt }).eq('id', itemId), 'update item')
+  return doneAt
+}
+
+export async function setRevision(topicId: string, revision: boolean): Promise<void> {
+  ok(await supabase.from('topics').update({ revision }).eq('id', topicId), 'update star')
+}
+
+export async function setModuleEst(moduleId: string, estMinutes: number | null): Promise<void> {
+  if (estMinutes !== null && (!Number.isInteger(estMinutes) || estMinutes <= 0))
+    throw new Error('estimate must be a positive whole number of minutes')
+  ok(await supabase.from('modules').update({ est_minutes: estMinutes }).eq('id', moduleId), 'update estimate')
+}
+
+export async function addSession(topicId: string, startedAt: Date, endedAt: Date, minutes: number): Promise<void> {
+  if (!Number.isInteger(minutes) || minutes <= 0) throw new Error('minutes must be a positive whole number')
+  ok(
+    await supabase.from('sessions').insert({
+      topic_id: topicId,
+      started_at: startedAt.toISOString(),
+      ended_at: endedAt.toISOString(),
+      minutes,
+    }),
+    'save session',
+  )
+}
+
+export async function addManualMinutes(topicId: string, minutes: number): Promise<void> {
+  const end = new Date()
+  return addSession(topicId, new Date(end.getTime() - minutes * 60_000), end, minutes)
+}
+
+/** Minutes logged on an IST calendar day. */
+export async function minutesOn(date: string): Promise<number> {
+  const res = await supabase
+    .from('sessions')
+    .select('minutes')
+    .gte('ended_at', `${date}T00:00:00+05:30`)
+    .lt('ended_at', `${addDays(date, 1)}T00:00:00+05:30`)
+  return rows(res, 'load today sessions').reduce((sum, r) => sum + r.minutes, 0)
+}
+
+/** Saved plan items for a date range, keyed by date; dates without a saved plan are absent. */
+export async function loadPlansBetween(from: string, to: string): Promise<Map<string, Item[]>> {
+  const [plans, items] = await Promise.all([
+    supabase.from('day_plans').select('date').gte('date', from).lte('date', to),
+    supabase.from('day_plan_items').select('*').gte('date', from).lte('date', to).order('sort_order'),
+  ])
+  const out = new Map<string, Item[]>(rows(plans, 'load week plans').map((p) => [p.date, []]))
+  for (const i of rows(items, 'load week items')) out.get(i.date)?.push(i)
+  return out
+}
+
+/** Minutes studied per IST day, for sessions that ended in [from, to]. */
+export async function minutesByDay(from: string, to: string): Promise<Map<string, number>> {
+  const res = await supabase
+    .from('sessions')
+    .select('minutes, ended_at')
+    .gte('ended_at', `${from}T00:00:00+05:30`)
+    .lt('ended_at', `${addDays(to, 1)}T00:00:00+05:30`)
+  const out = new Map<string, number>()
+  for (const s of rows(res, 'load week sessions')) {
+    const day = todayIST(new Date(s.ended_at))
+    out.set(day, (out.get(day) ?? 0) + s.minutes)
+  }
+  return out
+}
+
+export async function addBlock(weekday: number, trackId: string | null, sortOrder: number): Promise<Block> {
+  const res = await supabase
+    .from('schedule_blocks')
+    .insert({ weekday, track_id: trackId, label: trackId ? null : 'Study block', minutes: 60, sort_order: sortOrder })
+    .select()
+    .single()
+  if (res.error) throw new Error(`add block: ${res.error.message}`)
+  return res.data
+}
+
+export async function updateBlock(
+  id: number,
+  patch: Partial<Pick<Block, 'track_id' | 'label' | 'minutes' | 'sort_order'>>,
+): Promise<void> {
+  if (patch.minutes !== undefined && (!Number.isInteger(patch.minutes) || patch.minutes < 1 || patch.minutes > 1440))
+    throw new Error('minutes must be a whole number between 1 and 1440')
+  ok(await supabase.from('schedule_blocks').update(patch).eq('id', id), 'update block')
+}
+
+export async function deleteBlock(id: number): Promise<void> {
+  ok(await supabase.from('schedule_blocks').delete().eq('id', id), 'remove block')
+}
+
+const EXPORT_TABLES = [
+  ['tracks', 'id'],
+  ['modules', 'id'],
+  ['topics', 'id'],
+  ['sessions', 'id'],
+  ['schedule_blocks', 'id'],
+  ['day_plans', 'date'],
+  ['day_plan_items', 'id'],
+] as const
+
+/** Every table, paged past the API row cap. */
+export async function exportAll(): Promise<Record<string, unknown[]>> {
+  const PAGE = 1000
+  const out: Record<string, unknown[]> = {}
+  for (const [table, orderBy] of EXPORT_TABLES) {
+    const all: unknown[] = []
+    for (let from = 0; ; from += PAGE) {
+      const page = rows(
+        await supabase.from(table).select('*').order(orderBy).range(from, from + PAGE - 1),
+        `export ${table}`,
+      )
+      all.push(...page)
+      if (page.length < PAGE) break
+    }
+    out[table] = all
+  }
+  return out
+}

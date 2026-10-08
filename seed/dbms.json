@@ -1,0 +1,440 @@
+{
+  "id": "dbms",
+  "name": "Database Systems",
+  "type": "semester",
+  "courseCode": null,
+  "modules": [
+    {
+      "id": "dbms-m1",
+      "order": 1,
+      "name": "Database Systems & Data Models",
+      "co": "CO1",
+      "estMinutes": 270,
+      "topics": [
+        {
+          "id": "dbms-m1-t1",
+          "order": 1,
+          "title": "intro, DB approach characteristics, DBMS advantages",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m1-t2",
+          "order": 2,
+          "title": "actors on the scene, DBMS classification",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m1-t3",
+          "order": 3,
+          "title": "data models, schemas/instances, three-schema architecture",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m1-t4",
+          "order": 4,
+          "title": "DB system environment",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m1-t5",
+          "order": 5,
+          "title": "relational, semi-structured, graph, vector, time-series, distributed, unstructured DBs",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m1-t6",
+          "order": 6,
+          "title": "relational model concepts — relation characteristics, domain/key/null constraints",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m1-t7",
+          "order": 7,
+          "title": "entity & referential integrity, foreign keys, constraint violations",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dbms-m2",
+      "order": 2,
+      "name": "ER Modeling & Relational DB Design",
+      "co": "CO5",
+      "estMinutes": 570,
+      "topics": [
+        {
+          "id": "dbms-m2-t1",
+          "order": 1,
+          "title": "ER attributes, relationship types/sets",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m2-t2",
+          "order": 2,
+          "title": "roles, structural constraints, weak entity, ER-to-relational mapping",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m2-t3",
+          "order": 3,
+          "title": "EER generalization, specialization, aggregation",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m2-t4",
+          "order": 4,
+          "title": "relational schema guidelines",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m2-t5",
+          "order": 5,
+          "title": "FDs — inference rules, equivalence, minimal cover",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m2-t6",
+          "order": 6,
+          "title": "FD axioms",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m2-t7",
+          "order": 7,
+          "title": "1NF/2NF/3NF",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m2-t8",
+          "order": 8,
+          "title": "BCNF",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m2-t9",
+          "order": 9,
+          "title": "MVD & 4NF",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m2-t10",
+          "order": 10,
+          "title": "join dependency & 5NF",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dbms-m3",
+      "order": 3,
+      "name": "Physical DB Design & Query Processing",
+      "co": "CO2",
+      "estMinutes": 330,
+      "topics": [
+        {
+          "id": "dbms-m3-t1",
+          "order": 1,
+          "title": "file operations",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m3-t2",
+          "order": 2,
+          "title": "unordered/ordered record files",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m3-t3",
+          "order": 3,
+          "title": "static & dynamic hashing",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m3-t4",
+          "order": 4,
+          "title": "single/multi-level indexing",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m3-t5",
+          "order": 5,
+          "title": "dynamic multilevel indexing, B+ tree",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m3-t6",
+          "order": 6,
+          "title": "LSM trees & variants",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m3-t7",
+          "order": 7,
+          "title": "relational algebra, SQL-to-RA translation",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m3-t8",
+          "order": 8,
+          "title": "tuple relational calculus",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m3-t9",
+          "order": 9,
+          "title": "query trees, heuristic optimization",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dbms-m4",
+      "order": 4,
+      "name": "Transactions, Concurrency Control & Recovery",
+      "co": "CO3",
+      "estMinutes": 435,
+      "topics": [
+        {
+          "id": "dbms-m4-t1",
+          "order": 1,
+          "title": "ACID, transaction states",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m4-t2",
+          "order": 2,
+          "title": "serial & serializable schedules",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m4-t3",
+          "order": 3,
+          "title": "recoverability & conflict serializability",
+          "bloom": "Analyze",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m4-t4",
+          "order": 4,
+          "title": "need for concurrency control",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m4-t5",
+          "order": 5,
+          "title": "two-phase locking",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m4-t6",
+          "order": 6,
+          "title": "2PL serializability, deadlock & starvation",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m4-t7",
+          "order": 7,
+          "title": "timestamp ordering algorithm",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m4-t8",
+          "order": 8,
+          "title": "multiple granularity locking",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m4-t9",
+          "order": 9,
+          "title": "recovery algorithm categories",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m4-t10",
+          "order": 10,
+          "title": "deferred & immediate update recovery",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
+    {
+      "id": "dbms-m5",
+      "order": 5,
+      "name": "Distributed & NoSQL DBs",
+      "co": "CO4",
+      "estMinutes": 330,
+      "topics": [
+        {
+          "id": "dbms-m5-t1",
+          "order": 1,
+          "title": "distributed DB architectures, fragmentation, replication, allocation",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m5-t2",
+          "order": 2,
+          "title": "distributed transactions, concurrency, recovery",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m5-t3",
+          "order": 3,
+          "title": "distributed query processing & optimization",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m5-t4",
+          "order": 4,
+          "title": "NoSQL characteristics",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m5-t5",
+          "order": 5,
+          "title": "CAP theorem, ACID vs BASE",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m5-t6",
+          "order": 6,
+          "title": "NoSQL modeling — aggregate models, distribution models, MapReduce",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dbms-m5-t7",
+          "order": 7,
+          "title": "key-value, document, column, graph DBs",
+          "bloom": "Apply",
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    }
+  ]
+}
