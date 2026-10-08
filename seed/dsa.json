@@ -2,8 +2,61 @@
   "id": "dsa",
   "name": "DSA — Striver A2Z (Java)",
   "type": "roadmap",
-  "note": "Sub-step level from Striver A2Z, recalled from memory, not verified against the live sheet. Individual problems not listed. Verify names/order on takeuforward.org.",
+  "note": "Start with Step 0 (Java syntax only, ~1 week, BroCode), then follow Striver A2Z in order. Daily loop: watch topic video once, close it, code alone in Java, stuck 25-30 min then read hint/solution, re-solve cold next day, then at +3d and +7d. Sub-steps recalled from memory, not verified against the live sheet; verify names/order on takeuforward.org.",
   "modules": [
+    {
+      "id": "dsa-m0",
+      "order": 0,
+      "name": "Step 0: Java Basics (BroCode, syntax only)",
+      "estMinutes": null,
+      "topics": [
+        {
+          "id": "dsa-m0-t1",
+          "order": 1,
+          "title": "Java syntax: variables, types, conditionals, loops, methods",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m0-t2",
+          "order": 2,
+          "title": "Arrays and 2D arrays in Java",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m0-t3",
+          "order": 3,
+          "title": "Strings and StringBuilder in Java",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m0-t4",
+          "order": 4,
+          "title": "Classes and objects (minimal, for Node classes later)",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        },
+        {
+          "id": "dsa-m0-t5",
+          "order": 5,
+          "title": "Big-O basics: O(1), O(log n), O(n), O(n log n), O(n^2)",
+          "bloom": null,
+          "done": false,
+          "timeSpentMin": 0,
+          "revision": false
+        }
+      ]
+    },
     {
       "id": "dsa-m1",
       "order": 1,
