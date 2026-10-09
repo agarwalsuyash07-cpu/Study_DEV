@@ -47,3 +47,53 @@ describe('catalog store', () => {
     expect(store.peekCatalog()).toBe(seen[1])
   })
 })
+
+describe('catalog store races', () => {
+  // a fetch we can resolve by hand, to interleave edits with it
+  async function withDeferredFetch(run: (resolveFetch: () => void) => Promise<void>) {
+    const { loadCatalog } = await import('./data')
+    let release!: () => void
+    vi.mocked(loadCatalog).mockImplementationOnce(
+      () =>
+        new Promise((res) => {
+          release = () => res({ tracks: [], modules: [], topics: [], topicById: new Map(), blocks: [], revisions: new Map(), settings: {}, stale: true } as never)
+        }),
+    )
+    await run(() => release())
+  }
+
+  it('a refetch that started before a local edit does not overwrite it', async () => {
+    await store.getCatalog()
+    await withDeferredFetch(async (resolveFetch) => {
+      const pending = store.getCatalog({ force: true })
+      store.updateCatalog((c) => ({ ...c, blocks: [{ id: 1 } as never] }))
+      resolveFetch()
+      await pending
+    })
+    expect(store.peekCatalog()?.blocks).toHaveLength(1)
+    // and it stays stale, so the next read refetches
+    expect(store.isStale()).toBe(true)
+  })
+
+  it('force waits for a fetch that starts after any in-flight one', async () => {
+    await withDeferredFetch(async (resolveFetch) => {
+      const first = store.getCatalog()
+      const forced = store.getCatalog({ force: true })
+      resolveFetch()
+      await first
+      await forced
+    })
+    expect(fetches).toBe(1)
+    expect(store.peekCatalog()).not.toHaveProperty('stale')
+  })
+
+  it('a fetch in flight at sign-out never repopulates the cache', async () => {
+    await withDeferredFetch(async (resolveFetch) => {
+      const pending = store.getCatalog()
+      store.resetCatalogStore()
+      resolveFetch()
+      await pending
+    })
+    expect(store.peekCatalog()).toBeNull()
+  })
+})

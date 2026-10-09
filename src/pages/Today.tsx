@@ -48,7 +48,7 @@ export default function Today() {
   const [saving, setSaving] = useState(false)
   const [ignoreBudget, setIgnoreBudget] = useState(false)
   const dragFrom = useRef<{ group: string; index: number } | null>(null)
-  const { cat, setCat, error, setError, actions, drawer } = useCatalog({
+  const { cat, error, setError, actions, drawer } = useCatalog({
     autoLoad: false,
     // mirrors the DB trigger: the item on the completion day follows the topic
     onDoneChanged: (topicId, doneAt) =>
@@ -60,10 +60,10 @@ export default function Today() {
   useEffect(() => {
     let cancelled = false
     ;(async () => {
+      // getCatalog publishes into the shared cache, which this page reads via useCatalog
       const c = await getCatalog()
       const [its, past] = await Promise.all([ensureDayPlan(c, date), loadPastUndone(date)])
       if (cancelled) return
-      setCat(c)
       setItems(its)
       setPastUndone(past)
     })().catch((e: unknown) => {
@@ -72,7 +72,7 @@ export default function Today() {
     return () => {
       cancelled = true
     }
-  }, [date, setCat, setError])
+  }, [date, setError])
 
   // app left open past midnight IST rolls over to the new day
   useEffect(() => {

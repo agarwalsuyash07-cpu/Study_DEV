@@ -50,7 +50,12 @@ export function useCatalog({ autoLoad = true, ...hooks }: Hooks & { autoLoad?: b
     getCatalog().catch(fail)
     // coming back to the tab after a while picks up edits made elsewhere
     const onVisible = () => {
-      if (document.visibilityState === 'visible' && isStale()) getCatalog().catch(fail)
+      if (document.visibilityState !== 'visible' || !isStale()) return
+      getCatalog().catch((e: unknown) => {
+        // good cached data is already on screen: a failed background refresh (e.g. offline) is not worth a banner
+        if (peekCatalog()) console.warn('background catalog refresh failed', e)
+        else fail(e)
+      })
     }
     document.addEventListener('visibilitychange', onVisible)
     return () => {
