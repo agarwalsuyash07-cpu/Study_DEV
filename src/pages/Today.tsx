@@ -303,7 +303,7 @@ export default function Today() {
         }
       />
 
-      <div className="grid items-start gap-6 px-4 pb-8 md:px-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 px-4 pb-8 md:px-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <aside className="flex flex-col gap-4 lg:sticky lg:top-20 lg:order-2">
           {visible.length > 0 && <ProgressCard done={doneCount} total={visible.length} label="Today's progress" />}
           {/* always shown, so the column is useful even on a rest day */}
@@ -409,7 +409,7 @@ export default function Today() {
             </p>
           )}
 
-          <div className="grid items-start gap-6 2xl:grid-cols-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 2xl:grid-cols-2">
             {groups.map((g) => {
               const track = g.block?.track_id ? trackById.get(g.block.track_id) : undefined
               const name = track?.name ?? g.block?.label ?? 'Added'

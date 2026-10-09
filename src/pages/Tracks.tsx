@@ -43,7 +43,7 @@ export default function Tracks() {
         {!cat && !error && <p className="text-muted">Loading tracks…</p>}
         {cat && (
           <>
-            <div className="grid items-center gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
+            <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
               <ProgressCard done={overallDone} total={overallTotal} label="Overall progress, excluding checklist tracks" />
               <StatGrid
                 cols="grid-cols-2 sm:grid-cols-4"

@@ -223,7 +223,7 @@ function BudgetField({ id, value, fallback, onSave }: { id: string; value: numbe
     if (n !== value) void onSave(n)
   }
   return (
-    <div className="flex items-center gap-2 px-3 pb-2 text-xs text-soft">
+    <div className="flex flex-wrap items-center gap-2 px-3 pb-2 text-xs text-soft">
       <label htmlFor={id}>Time budget</label>
       <input
         id={id}
@@ -455,7 +455,7 @@ export default function Settings() {
         </p>
         {!cat && !error && <p className="text-muted">Loading schedule…</p>}
         {cat && (
-          <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {DAYS.map(([weekday, dayName]) => {
               const blocks = cat.blocks.filter((b) => b.weekday === weekday).sort((a, b) => a.sort_order - b.sort_order)
               const total = blocks.reduce((s, b) => (b.track_id === null ? s : s + b.topics), 0)

@@ -208,7 +208,7 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           <Card
             title="Study activity"
             action={
@@ -309,9 +309,9 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           <Card title="Track progress" action={<Link to="/tracks" className="text-xs text-accent">All tracks →</Link>}>
-            <ul className="grid gap-x-8 gap-y-5 md:grid-cols-2">
+            <ul className="grid grid-cols-[minmax(0,1fr)] gap-x-8 gap-y-5 md:grid-cols-2">
               {cat.tracks.map((track) => {
                 const ts = cat.topics.filter((t) => t.trackId === track.id)
                 const n = ts.filter((t) => t.done).length

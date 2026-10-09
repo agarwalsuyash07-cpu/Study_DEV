@@ -170,7 +170,7 @@ export default function Week() {
         )}
 
         {/* equal-height cards per row keep the gaps even */}
-        <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 min-[1700px]:grid-cols-7">
+        <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 xl:grid-cols-4 min-[1700px]:grid-cols-7">
           {shown.map((d) => {
             const saved = d.rows.filter((r) => !r.preview)
             const done = saved.filter((r) => r.done).length
