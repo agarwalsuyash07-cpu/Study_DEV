@@ -1,62 +1,66 @@
 # Architecture
 
 ## What and why
-A single-user study tracker for 6 tracks (5 semester courses + DSA; Applied AI is paused, its seed kept in `seed/applied-ai.json`). A weekly schedule of blocks (each = a track and how many topics) drives an auto-generated daily task list; ticking topics done (anywhere) moves the plan forward. Each track shows % done and topics left. There is deliberately no time tracking: no timers, estimates, hours or finish dates. Visual language follows takeUforward (Planly / A2Z sheet), laid out for a laptop.
+A single-user study tracker for 7 tracks (5 semester courses, DSA as a checklist track, Applied AI filled via CSV). A weekly schedule of blocks (a track + how many topics + minutes) drives an auto-generated daily plan, capped by a daily time budget. Missed topics carry over, items can be deferred or added by hand, completed topics come back for spaced revision (1/3/7/21-day gaps), and per-track pace is measured against exam dates. Visual language follows takeUforward (dark, DM Sans), laptop-first with a mobile tab bar; installable as a PWA.
 
 ## System
 ```
-Browser (Vite + React SPA, Vercel static hosting)
-   │  supabase-js (anon/publishable key + user JWT)
+Browser (Vite + React 19 SPA, Vercel static hosting, PWA manifest)
+   │  supabase-js (anon key + user JWT)
    ▼
 Supabase
-   ├─ Auth: email + password, one user (no sign-up UI)
-   ├─ Postgres: 6 tables, RLS user_id = auth.uid() on all
-   ├─ RPC save_day_plan (atomic plan create / regenerate)
-   └─ Trigger topics_done_sync (topic done ⇄ today's plan item)
+   ├─ Auth: email + password, one user (sign-ups off)
+   ├─ Postgres: 10 tables, RLS own-row on all; anon has no grants
+   ├─ RPCs: save_day_plan, add_plan_item, defer_plan_item, import_topics (SECURITY INVOKER, ownership-checked)
+   └─ Trigger topics_done_sync (topic done ⇄ plan item on the completion day)
 
-scripts/import-seed.ts (local, service-role key) ── upserts seed/*.json ──▶ Postgres
+scripts/import-seed.ts, backup.ts, set-password.ts (local, service-role key)
 ```
-There is no custom backend. All business logic that must be atomic lives in Postgres (RPC, trigger); planning logic is pure TypeScript in the client.
+No custom backend. Atomic writes live in Postgres RPCs; planning, pace, streak and revision logic is pure TypeScript in `src/lib/`, unit-tested.
 
 ## Directory map
 | Path | What |
 |---|---|
 | `seed/*.json` | Syllabus per track (modules → topics) |
-| `scripts/import-seed.ts` | Idempotent import of the tracks in `TRACK_FILES`: upserts tracks/modules/topics, deletes ones dropped from the seed unless they have progress (a removed track also loses its schedule blocks), default schedule if empty |
-| `scripts/set-password.ts` | Sets (or creates) the login password for `IMPORT_USER_EMAIL` via the admin API |
-| `supabase/migrations/` | Schema, RLS, RPC, trigger |
-| `supabase/rollback/` | Down scripts per migration (run by hand) |
-| `src/lib/plan.ts` | Pure logic: `assignDay`, `previewDays`, `keptByBlock` |
-| `src/lib/date.ts` | IST "today", weekday (0 = Sunday), Mon–Sun week |
-| `src/lib/stats.ts` | Pure dashboard math: `streaks`, `heatmapWeeks`, `heatLevel` |
-| `src/lib/links.ts` | Track id → external URL (DSA → takeuforward.org/dashboard); linked titles open in a new tab |
-| `src/lib/data.ts` | All Supabase reads/writes |
-| `src/lib/useCatalog.ts` | Catalog state + shared topic actions (done, star) |
-| `src/components/` | `Layout` (sidebar), `TopicRow`, `ui.tsx` primitives, `TrackStats`, `ProgressBar` |
-| `src/pages/` | Dashboard (`/`), Today (`/today`), Tracks, TrackDetail, Week, Revision, Settings, Login |
+| `scripts/` | `import-seed` (prunes only `origin='seed'` rows), `backup` (all tables → `backups/`), `set-password`, `make-icons` (PWA PNGs) |
+| `supabase/migrations/`, `supabase/rollback/` | Schema, RLS, RPCs; a down script per migration |
+| `src/lib/plan.ts` | `assignDay` (counts + time budget), `planRegeneration` (diff), `overdueItems`, `reorderGroup`, `previewDays` |
+| `src/lib/pace.ts` | Per-track pace vs exam date; overall on-track status |
+| `src/lib/stats.ts` | The one "completed on day" selector, streak rule, heatmap |
+| `src/lib/revision.ts` | Spaced-revision scheduling |
+| `src/lib/review.ts` | Weekly summary, weakest track |
+| `src/lib/csv.ts`, `backup.ts`, `markdown.tsx`, `search.ts` | CSV import parsing, JSON import validation (zod), safe Markdown (no innerHTML), search ranking |
+| `src/lib/data.ts` | Every Supabase read/write |
+| `src/lib/catalogStore.ts` | Shared catalog cache (stale-while-revalidate, 60s; race-safe) |
+| `src/lib/useCatalog.ts` | Catalog + shared topic actions (tick with Undo, confidence, review, drawer) |
+| `src/lib/toast.ts` + `components/Toaster.tsx` | Undo/info toasts |
+| `src/components/` | `Layout`, `TopicRow`, `TopicDrawer`, `PlanControls` (menu/add/subject), `SearchPalette`, `WeeklyReview`, `CsvImport`, `ui.tsx` primitives |
+| `src/pages/` | Dashboard (`/`), Today, Tracks, TrackDetail, Week, Revision, Settings, Login |
 
 ## Files that matter most
-1. `src/lib/plan.ts`: the auto-assign algorithm (fully unit-tested).
-2. `supabase/migrations/20261008000000_init.sql`: schema, RLS, `save_day_plan`, done-sync trigger.
-3. `src/lib/data.ts`: every query; `ensureDayPlan` and `regenerateDay` wire plan.ts to the RPC.
-4. `src/lib/useCatalog.ts`: shared state shape every page builds on.
-5. `scripts/import-seed.ts`: the only writer of syllabus data.
-6. `src/pages/Today.tsx`: daily flow, regenerate.
-7. `src/pages/Dashboard.tsx`: home page; read-only progress overview (KPIs, 26-week topics-done heatmap, track bars, recent completions).
+1. `src/lib/plan.ts` — what goes on each day.
+2. `src/lib/useCatalog.ts` + `catalogStore.ts` — shared state; every tick goes through here.
+3. `src/lib/data.ts` — all queries and RPC calls.
+4. `supabase/migrations/20261013000000_carry_over.sql` — `save_day_plan` / add / defer semantics.
+5. `supabase/migrations/20261022000000_harden_access.sql` — grants and ownership policies.
+6. `src/pages/Today.tsx` — the daily flow.
 
 ## Data model
-- `tracks` 1─* `modules` 1─* `topics` (seed IDs are the primary keys, text).
-- `topics.done_at`, `topics.revision` hold progress.
-- `schedule_blocks` (weekday, track or checklist label, `topics` count 1–20) define the week.
-- `day_plans` (one per date, frozen once generated) 1─* `day_plan_items` (topic or checklist label).
-- Every row has `user_id`; RLS restricts all access to the owner.
+- `tracks` 1─* `modules` 1─* `topics` (text PKs from the seed; `origin` = seed | app).
+- `topics`: `done_at`, `revision` (starred), `confidence`, `last_reviewed_at`, `est_minutes`, `notes`, `links` (http(s) only, DB-checked), `practice_done`.
+- `revisions` (1 per topic): `due_date`, `interval_step`.
+- `schedule_blocks`: weekday, track or checklist label, `topics`, `minutes`.
+- `day_plans` (one per date; `generated_at` null = holds only added/deferred items) 1─* `day_plan_items` (`manual`, `deferred_to`, `track_id` for PYQ subject).
+- `user_settings` (streak thresholds, daily budgets), `weekly_reviews` (reflection + summary snapshot).
+- `sessions` + view `topic_spent`: legacy, unused, kept (no data deleted).
 
 ## Key decisions
 See [DECISIONS.md](DECISIONS.md).
 
 ## Rough edges / ponytail ceilings
-- Plain selects rely on the API's 1000-row cap being enough for topics/blocks (~300); Export paginates. Paginate catalog loads if the syllabus grows past ~1000 topics.
-- Dashboard heatmap/streak count topics by their current `done_at`; un-ticking a topic removes it from history (no separate activity log).
-- Week preview assumes earlier-planned topics get done; it is a forecast, not a promise.
-- Topic text IDs are global primary keys, so the schema is single-user by design; multi-user would need composite keys.
-- No error tracking (Sentry) or structured logging: personal app, errors surface in the UI banner.
+- Catalog selects rely on the 1000-row API cap (~200 topics now); plan history is paged.
+- Search is a linear scan per keystroke; fine to a few thousand docs.
+- JSON import isn't one transaction (idempotent upserts, safe to re-run).
+- Drag reorder is mouse-only; touch uses the menu / keyboard.
+- Carry-over looks back 30 days; checklist items don't carry over.
+- No error tracking (Sentry): personal app, errors surface in the banner/toasts.
