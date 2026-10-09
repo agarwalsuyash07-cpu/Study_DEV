@@ -90,6 +90,7 @@ export type Database = {
       modules: {
         Row: {
           co: string | null
+          est_minutes: number | null
           id: string
           name: string
           sort_order: number
@@ -98,6 +99,7 @@ export type Database = {
         }
         Insert: {
           co?: string | null
+          est_minutes?: number | null
           id: string
           name: string
           sort_order: number
@@ -106,6 +108,7 @@ export type Database = {
         }
         Update: {
           co?: string | null
+          est_minutes?: number | null
           id?: string
           name?: string
           sort_order?: number
@@ -127,6 +130,7 @@ export type Database = {
           id: number
           label: string | null
           topics: number
+          minutes: number
           sort_order: number
           track_id: string | null
           user_id: string
@@ -136,6 +140,7 @@ export type Database = {
           id?: never
           label?: string | null
           topics?: number
+          minutes?: number
           sort_order: number
           track_id?: string | null
           user_id?: string
@@ -145,6 +150,7 @@ export type Database = {
           id?: never
           label?: string | null
           topics?: number
+          minutes?: number
           sort_order?: number
           track_id?: string | null
           user_id?: string

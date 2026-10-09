@@ -43,6 +43,9 @@ export async function loadCatalog(): Promise<Catalog> {
   const modules = rows(m, 'load modules')
   const topicRows = rows(tp, 'load topics')
   const blocks = rows(b, 'load schedule')
+  // a missing count means the DB is behind the code; fail loudly instead of rendering NaN as "Not scheduled"
+  const uncounted = blocks.find((x) => !Number.isInteger(x.topics))
+  if (uncounted) throw new Error(`schedule block ${uncounted.id} has no topic count: apply the latest supabase/migrations`)
 
   const moduleById = new Map(modules.map((x) => [x.id, x]))
 
