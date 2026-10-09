@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import ErrorBanner from '../components/ErrorBanner'
-import { addBlock, deleteBlock, exportAll, MAX_BLOCK_TOPICS, saveSettings, setExamDate, updateBlock, type Block, type Track } from '../lib/data'
+import { addBlock, deleteBlock, exportAll, MAX_BLOCK_TOPICS, saveSettings, setCountInOverall, setExamDate, updateBlock, type Block, type Track } from '../lib/data'
 import { todayIST } from '../lib/date'
 import { ExamDateField, PageHeader } from '../components/ui'
 import { supabase } from '../lib/supabase'
@@ -411,14 +411,32 @@ export default function Settings() {
       {cat && (
         <section aria-labelledby="exams" className="mt-8 px-4 md:px-8">
           <h2 id="exams" className="text-base font-medium">
-            Exam dates
+            Tracks
           </h2>
-          <p className="mb-3 text-soft">Used for days left, topics needed per day and the on-track banner.</p>
-          <ul className="max-w-xl divide-y divide-line rounded-[14px] border border-line bg-card">
+          <p className="mb-3 text-soft">
+            Exam dates drive days left, topics needed per day and the on-track banner. Untick checklist-style tracks (like DSA) to keep them out
+            of the overall %.
+          </p>
+          <ul className="max-w-2xl divide-y divide-line rounded-[14px] border border-line bg-card">
             {cat.tracks.map((t) => (
-              <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
-                <label htmlFor={`exam-${t.id}`} className="min-w-0 flex-1 truncate">
+              <li key={t.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2">
+                <label htmlFor={`exam-${t.id}`} className="min-w-0 flex-[1_1_12rem] truncate">
                   {t.name}
+                </label>
+                <label className="flex min-h-10 items-center gap-2 text-xs text-soft">
+                  <input
+                    type="checkbox"
+                    checked={t.count_in_overall}
+                    onChange={(e) => {
+                      const v = e.target.checked
+                      void guard(async () => {
+                        await setCountInOverall(t.id, v)
+                        setCat((c) => (c ? { ...c, tracks: c.tracks.map((x) => (x.id === t.id ? { ...x, count_in_overall: v } : x)) } : c))
+                      })()
+                    }}
+                    className="size-4 accent-[var(--color-accent)]"
+                  />
+                  Count in overall %
                 </label>
                 <ExamDateField
                   id={`exam-${t.id}`}

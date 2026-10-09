@@ -27,6 +27,10 @@ export default function Tracks() {
         }
       })
     : []
+  // the progress card leaves out tracks excluded from the overall % (e.g. DSA); the stat grid counts everything
+  const counted = rows.filter((r) => r.track.count_in_overall)
+  const overallDone = counted.reduce((n, r) => n + r.s.doneCount, 0)
+  const overallTotal = counted.reduce((n, r) => n + r.s.total, 0)
   const done = rows.reduce((n, r) => n + r.s.doneCount, 0)
   const total = rows.reduce((n, r) => n + r.s.total, 0)
   const th = 'px-4 py-3 font-normal'
@@ -40,7 +44,7 @@ export default function Tracks() {
         {cat && (
           <>
             <div className="grid items-center gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
-              <ProgressCard done={done} total={total} label="All tracks progress" />
+              <ProgressCard done={overallDone} total={overallTotal} label="Overall progress, excluding checklist tracks" />
               <StatGrid
                 cols="grid-cols-2 sm:grid-cols-4"
                 items={[

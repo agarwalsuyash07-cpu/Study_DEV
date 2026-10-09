@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 import ErrorBanner from '../components/ErrorBanner'
 import TopicRow, { type TopicActions } from '../components/TopicRow'
+import CsvImport from '../components/CsvImport'
 import TrackStats from '../components/TrackStats'
 import { Chevron, ExamDateField, MiniProgress, PageHeader, Pill, ProgressCard } from '../components/ui'
-import { paceFor, setExamDate, weeklyTopics, type Module, type Topic } from '../lib/data'
+import { loadCatalog, paceFor, setExamDate, weeklyTopics, type Module, type Topic } from '../lib/data'
 import { todayIST } from '../lib/date'
 import { message, useCatalog } from '../lib/useCatalog'
 
@@ -85,6 +86,12 @@ export default function TrackDetail() {
         <aside className="flex flex-col gap-4 lg:sticky lg:top-20 lg:order-2">
           {track.course_code && <p className="text-soft">{track.course_code}</p>}
           <ProgressCard done={doneCount} total={topics.length} label={`${track.name} progress`} />
+          <CsvImport
+            track={track}
+            modules={modules}
+            onError={(e) => setError(message(e))}
+            onImported={async () => setCat(await loadCatalog())}
+          />
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-[14px] border border-line bg-card px-3 py-2">
             <label htmlFor="exam-date" className="text-soft">
               Exam date
@@ -112,6 +119,12 @@ export default function TrackDetail() {
         </aside>
         <div className="flex min-w-0 flex-col gap-4 lg:order-1">
           <ErrorBanner error={error} onDismiss={() => setError(null)} />
+          {modules.length === 0 && (
+            <p className="text-soft">
+              No topics yet. Import a CSV with a header row <code className="rounded bg-raised px-1">module,title,bloom,est_minutes</code> (bloom
+              and est_minutes optional).
+            </p>
+          )}
           <div className="border-t border-line">
             {modules.map((m) => (
               <ModuleSection

@@ -1,5 +1,6 @@
 import { useState, type LiHTMLAttributes, type ReactNode } from 'react'
-import { PRACTICE_LEVELS, type Topic, type TopicPatch } from '../lib/data'
+import { PRACTICE_LEVELS } from '../lib/bloom'
+import type { Topic, TopicPatch } from '../lib/data'
 import type { Confidence } from '../lib/revision'
 import { trackLink } from '../lib/links'
 import { fmtMinutes, Pill } from './ui'

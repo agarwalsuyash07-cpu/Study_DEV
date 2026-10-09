@@ -4,7 +4,7 @@ import ErrorBanner from '../components/ErrorBanner'
 import ProgressBar from '../components/ProgressBar'
 import { trackColor } from '../components/trackColor'
 import { PageHeader, RevisionDueChip } from '../components/ui'
-import { checklistOf, loadPlansBetween, paceFor, revisionsDue, toDayItem, weeklyItems, weeklyTopics, type Item } from '../lib/data'
+import { checklistOf, loadPlansBetween, overallTopics, paceFor, revisionsDue, toDayItem, weeklyItems, weeklyTopics, type Item } from '../lib/data'
 import { todayIST, weekDates } from '../lib/date'
 import { trackLink } from '../lib/links'
 import { overallStatus, paceLabel } from '../lib/pace'
@@ -108,7 +108,12 @@ export default function Dashboard() {
     )
   }
 
-  const total = cat.topics.length
+  // overall % leaves out checklist-style tracks (Settings > Tracks); "Topics done" still counts everything
+  const counted = overallTopics(cat)
+  const total = counted.length
+  const countedDone = counted.filter((t) => t.done).length
+  // short names: "DSA — follow plan on…" → "DSA"
+  const excluded = cat.tracks.filter((t) => !t.count_in_overall).map((t) => t.name.split(/\s[—-]\s/)[0])
   const done = cat.topics.filter((t) => t.done)
 
   const doneByDay = completionsByDay(cat.topics, checklistOf(plans))
@@ -189,9 +194,9 @@ export default function Dashboard() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Kpi
             label="Overall progress"
-            value={`${total ? Math.round((done.length / total) * 100) : 0}%`}
-            sub={`${done.length} of ${total} topics`}
-            visual={<Ring value={total ? done.length / total : 0} />}
+            value={`${total ? Math.round((countedDone / total) * 100) : 0}%`}
+            sub={`${countedDone} of ${total} topics${excluded.length ? ` · excl. ${excluded.join(', ')}` : ''}`}
+            visual={<Ring value={total ? countedDone / total : 0} />}
           />
           <Kpi label="Topics done" value={done.length} sub={`${heatTotal} in the last ${WEEKS} weeks`} />
           <Kpi

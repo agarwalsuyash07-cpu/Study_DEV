@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { BLOOM_LEVELS, PRACTICE_LEVELS, type Topic, type TopicPatch, type Track } from '../lib/data'
+import { BLOOM_LEVELS, PRACTICE_LEVELS } from '../lib/bloom'
+import type { Topic, TopicPatch, Track } from '../lib/data'
 import { Markdown, safeUrl } from '../lib/markdown'
 import type { ReviewState } from '../lib/revision'
 import ConfidencePicker from './ConfidencePicker'

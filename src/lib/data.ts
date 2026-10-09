@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import type { Tables, TablesUpdate } from './database.types'
 import { addDays, weekdayOf } from './date'
+import type { TopicCsvRow } from './csv'
 import { safeUrl } from './markdown'
 import { trackPace, type Pace } from './pace'
 import { isDue, type Confidence, type ReviewState } from './revision'
@@ -377,9 +378,6 @@ const budgetOf = (cat: Catalog, date: string) => ({
   estimate: (id: string) => cat.topicById.get(id)?.estMinutes ?? DEFAULT_TOPIC_MINUTES,
 })
 
-export const BLOOM_LEVELS = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'] as const
-/** Bloom levels that get a "practice problems" checkbox. */
-export const PRACTICE_LEVELS: readonly string[] = ['Apply', 'Analyze']
 
 export type TopicPatch = Partial<Pick<Topic, 'notes' | 'links' | 'bloom' | 'practiceDone' | 'estOverride'>>
 
@@ -397,4 +395,21 @@ export async function updateTopic(topicId: string, patch: TopicPatch): Promise<v
   if (patch.practiceDone !== undefined) row.practice_done = patch.practiceDone
   if (patch.estOverride !== undefined) row.est_minutes = patch.estOverride
   ok(await supabase.from('topics').update(row).eq('id', topicId), 'update topic')
+}
+
+/** Imports parsed CSV rows into a track in one transaction; returns how many topics were new. */
+export async function importTopics(trackId: string, rows: TopicCsvRow[]): Promise<number> {
+  const res = await supabase.rpc('import_topics', { p_track_id: trackId, p_rows: rows })
+  if (res.error) throw new Error(`import topics: ${res.error.message}`)
+  return res.data
+}
+
+export async function setCountInOverall(trackId: string, count: boolean): Promise<void> {
+  ok(await supabase.from('tracks').update({ count_in_overall: count }).eq('id', trackId), 'update track')
+}
+
+/** Topics that count toward the overall % (checklist-style tracks like DSA can be left out). */
+export function overallTopics(cat: Catalog): Topic[] {
+  const counted = new Set(cat.tracks.filter((t) => t.count_in_overall).map((t) => t.id))
+  return cat.topics.filter((t) => counted.has(t.trackId))
 }

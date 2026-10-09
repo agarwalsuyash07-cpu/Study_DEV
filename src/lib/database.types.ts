@@ -96,6 +96,7 @@ export type Database = {
       modules: {
         Row: {
           co: string | null
+          origin: string
           est_minutes: number | null
           id: string
           name: string
@@ -105,6 +106,7 @@ export type Database = {
         }
         Insert: {
           co?: string | null
+          origin?: string
           est_minutes?: number | null
           id: string
           name: string
@@ -114,6 +116,7 @@ export type Database = {
         }
         Update: {
           co?: string | null
+          origin?: string
           est_minutes?: number | null
           id?: string
           name?: string
@@ -203,6 +206,7 @@ export type Database = {
           last_reviewed_at: string | null
           links: string[]
           notes: string | null
+          origin: string
           practice_done: boolean
           done_at: string | null
           est_minutes: number | null
@@ -219,6 +223,7 @@ export type Database = {
           last_reviewed_at?: string | null
           links?: string[]
           notes?: string | null
+          origin?: string
           practice_done?: boolean
           done_at?: string | null
           est_minutes?: number | null
@@ -235,6 +240,7 @@ export type Database = {
           last_reviewed_at?: string | null
           links?: string[]
           notes?: string | null
+          origin?: string
           practice_done?: boolean
           done_at?: string | null
           est_minutes?: number | null
@@ -257,7 +263,9 @@ export type Database = {
       }
       tracks: {
         Row: {
+          count_in_overall: boolean
           course_code: string | null
+          origin: string
           exam_date: string | null
           id: string
           name: string
@@ -266,7 +274,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          count_in_overall?: boolean
           course_code?: string | null
+          origin?: string
           exam_date?: string | null
           id: string
           name: string
@@ -275,7 +285,9 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          count_in_overall?: boolean
           course_code?: string | null
+          origin?: string
           exam_date?: string | null
           id?: string
           name?: string
@@ -317,6 +329,10 @@ export type Database = {
       add_plan_item: {
         Args: { p_date: string; p_topic_id: string | null; p_label: string | null }
         Returns: number | null
+      }
+      import_topics: {
+        Args: { p_track_id: string; p_rows: Json }
+        Returns: number
       }
       defer_plan_item: {
         Args: { p_item_id: number; p_to: string }

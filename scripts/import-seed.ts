@@ -1,4 +1,5 @@
-// Idempotent seed import: upserts tracks/modules/topics, prunes ones dropped from the seed that have no progress. Never touches done/starred topics, plans or the schedule.
+// Idempotent seed import: upserts tracks/modules/topics, prunes seed-origin ones dropped from the seed that have no progress.
+// Rows created in the app (origin = 'app': CSV imports, Applied AI) are never pruned. Never touches done/starred topics, plans or the schedule.
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { createClient } from '@supabase/supabase-js'
@@ -123,13 +124,13 @@ async function main() {
     ),
   )
 
-  ok(await db.from('tracks').upsert(trackRows, { onConflict: 'id' }), 'upsert tracks')
-  ok(await db.from('modules').upsert(moduleRows, { onConflict: 'id' }), 'upsert modules')
-  ok(await db.from('topics').upsert(topicRows, { onConflict: 'id' }), 'upsert topics')
+  ok(await db.from('tracks').upsert(trackRows.map((r) => ({ ...r, origin: 'seed' })), { onConflict: 'id' }), 'upsert tracks')
+  ok(await db.from('modules').upsert(moduleRows.map((r) => ({ ...r, origin: 'seed' })), { onConflict: 'id' }), 'upsert modules')
+  ok(await db.from('topics').upsert(topicRows.map((r) => ({ ...r, origin: 'seed' })), { onConflict: 'id' }), 'upsert topics')
 
   // Topics/modules dropped from the seed are deleted, unless they carry progress (done or starred).
   const seedTopicIds = new Set(topicRows.map((t) => t.id))
-  const dbTopics = await db.from('topics').select('id, done_at, revision').eq('user_id', userId)
+  const dbTopics = await db.from('topics').select('id, done_at, revision').eq('user_id', userId).eq('origin', 'seed')
   ok(dbTopics, 'select topics')
   const orphans = (dbTopics.data ?? []).filter((t) => !seedTopicIds.has(t.id))
   if (orphans.length) {
@@ -141,7 +142,7 @@ async function main() {
   }
 
   const seedModuleIds = new Set(moduleRows.map((m) => m.id))
-  const dbModules = await db.from('modules').select('id').eq('user_id', userId)
+  const dbModules = await db.from('modules').select('id').eq('user_id', userId).eq('origin', 'seed')
   ok(dbModules, 'select modules')
   const orphanModules = (dbModules.data ?? []).map((m) => m.id).filter((id) => !seedModuleIds.has(id))
   if (orphanModules.length) {
@@ -156,7 +157,7 @@ async function main() {
   // A track dropped from TRACK_FILES goes once it has no modules left, with its schedule blocks
   // (the FK would otherwise null them into unlabelled blocks).
   const seedTrackIds = new Set(trackRows.map((t) => t.id))
-  const dbTracks = await db.from('tracks').select('id').eq('user_id', userId)
+  const dbTracks = await db.from('tracks').select('id').eq('user_id', userId).eq('origin', 'seed')
   ok(dbTracks, 'select tracks')
   const orphanTracks = (dbTracks.data ?? []).map((t) => t.id).filter((id) => !seedTrackIds.has(id))
   if (orphanTracks.length) {
