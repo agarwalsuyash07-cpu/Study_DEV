@@ -12,7 +12,8 @@
     "check": "npm run lint && npm test && npm run build",
     "import": "tsx --env-file=.env.local scripts/import-seed.ts",
     "set-password": "tsx --env-file=.env.local scripts/set-password.ts",
-    "backup": "tsx --env-file=.env.local scripts/backup.ts"
+    "backup": "tsx --env-file=.env.local scripts/backup.ts",
+    "update-schedule": "tsx --env-file=.env.local scripts/update-schedule.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",

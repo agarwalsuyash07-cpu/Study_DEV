@@ -133,8 +133,28 @@ const toPlanBlock = (b: Block): PlanBlock => ({
   sortOrder: b.sort_order,
 })
 
+/**
+ * Resolves the effective schedule weekday for `date`, accounting for special date overrides:
+ * - Oct 17, 18, 19: holidays (null, no blocks)
+ * - Oct 24 (Sat): Monday schedule (weekday 1)
+ * - Oct 31 (Sat): Wednesday schedule (weekday 3)
+ */
+export function effectiveWeekday(date: string): number | null {
+  if (date === '2026-10-17' || date === '2026-10-18' || date === '2026-10-19') {
+    return null
+  }
+  if (date === '2026-10-24') {
+    return 1 // Monday
+  }
+  if (date === '2026-10-31') {
+    return 3 // Wednesday
+  }
+  return weekdayOf(date)
+}
+
 export function blocksFor(cat: Catalog, date: string): PlanBlock[] {
-  const wd = weekdayOf(date)
+  const wd = effectiveWeekday(date)
+  if (wd === null) return []
   return cat.blocks.filter((b) => b.weekday === wd).map(toPlanBlock)
 }
 
@@ -388,7 +408,8 @@ export const revisionsDue = (cat: Catalog, today: string): number =>
 
 /** Minutes budgeted for `date`: the weekday's saved budget, else the sum of that day's block minutes. */
 export function budgetFor(cat: Catalog, date: string): number {
-  const wd = weekdayOf(date)
+  const wd = effectiveWeekday(date)
+  if (wd === null) return 0
   const saved = cat.settings.daily_budget?.[wd]
   if (saved !== null && saved !== undefined) return saved
   return cat.blocks.reduce((n, b) => (b.weekday === wd ? n + b.minutes : n), 0)

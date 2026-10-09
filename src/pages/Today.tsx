@@ -9,6 +9,7 @@ import ProgressBar from '../components/ProgressBar'
 import { ConfirmDialog, fmtMinutes, MiniProgress, PageHeader, Pill, ProgressCard, RevisionDueChip, StatGrid } from '../components/ui'
 import {
   addPlanItem,
+  blocksFor,
   budgetFor,
   deferItem,
   ensureDayPlan,
@@ -180,7 +181,7 @@ export default function Today() {
   const doneCount = visible.filter(isDone).length
   const allDone = visible.length > 0 && doneCount === visible.length
   const trackById = new Map(cat.tracks.map((t) => [t.id, t]))
-  const hasBlocksToday = cat.blocks.some((b) => b.weekday === weekdayOf(date))
+  const hasBlocksToday = blocksFor(cat, date).length > 0
   const onToday = new Set(items.flatMap((i) => (i.topic_id ? [i.topic_id] : [])))
   const overdue = overdueItems(
     pastUndone.map((i) => toDayItem(cat, i)),
