@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { completionsByDay, heatLevel, heatmapWeeks, streaks, topicsCompletedOn } from './stats'
+import { activeDays, completionsByDay, heatLevel, heatmapWeeks, streaks, topicsCompletedOn } from './stats'
 
 describe('streaks', () => {
   it('counts back from today', () => {
@@ -64,5 +64,59 @@ describe('completed-on selector', () => {
     expect(byDay.get('2026-10-09')).toBe(3)
     expect(byDay.get('2026-10-08')).toBe(1)
     expect(byDay.get('2026-10-04')).toBe(1)
+  })
+})
+
+describe('streak rule', () => {
+  const rule = { planPct: 50, minNoPlan: 3 }
+
+  it('needs half the day\'s plan (at least one) when there was a plan', () => {
+    const done = new Map([
+      ['2026-10-05', 1], // plan 7 → needs 3.5
+      ['2026-10-06', 4], // plan 7 → ok
+      ['2026-10-07', 1], // plan 1 → needs max(1, 0.5) = 1
+      ['2026-10-08', 2], // plan 4 → exactly half
+    ])
+    const plans = new Map([
+      ['2026-10-05', 7],
+      ['2026-10-06', 7],
+      ['2026-10-07', 1],
+      ['2026-10-08', 4],
+    ])
+    expect([...activeDays(done, plans, rule)].sort()).toEqual(['2026-10-06', '2026-10-07', '2026-10-08'])
+  })
+
+  it('needs minNoPlan topics on a day without a plan (or an empty one)', () => {
+    const done = new Map([
+      ['2026-10-01', 2],
+      ['2026-10-02', 3],
+      ['2026-10-03', 3],
+    ])
+    const plans = new Map([['2026-10-03', 0]])
+    expect([...activeDays(done, plans, rule)].sort()).toEqual(['2026-10-02', '2026-10-03'])
+  })
+
+  it('one ticked topic no longer keeps a 7-item day alive', () => {
+    const done = new Map([
+      ['2026-10-07', 5],
+      ['2026-10-08', 1],
+    ])
+    const plans = new Map([
+      ['2026-10-07', 7],
+      ['2026-10-08', 7],
+    ])
+    expect(streaks(activeDays(done, plans, rule), '2026-10-09')).toEqual({ current: 0, best: 1 })
+  })
+
+  it('respects a custom threshold', () => {
+    const done = new Map([['2026-10-08', 3]])
+    const plans = new Map([['2026-10-08', 4]])
+    expect(activeDays(done, plans, { planPct: 100, minNoPlan: 3 }).size).toBe(0)
+    expect(activeDays(done, plans, { planPct: 75, minNoPlan: 3 }).size).toBe(1)
+  })
+
+  it('recomputes best streak from history', () => {
+    const done = new Map(['2026-09-01', '2026-09-02', '2026-09-03', '2026-10-08'].map((d) => [d, 3]))
+    expect(streaks(activeDays(done, new Map(), rule), '2026-10-09')).toEqual({ current: 1, best: 3 })
   })
 })

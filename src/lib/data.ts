@@ -16,12 +16,17 @@ export type Topic = PlanTopic & {
   revision: boolean
   doneAt: string | null
 }
+export type Settings = Omit<Tables<'user_settings'>, 'user_id' | 'updated_at'>
+/** Mirrors the column defaults in user_settings; used until the first save creates the row. */
+export const DEFAULT_SETTINGS: Settings = { streak_plan_pct: 50, streak_min_no_plan: 3 }
+
 export type Catalog = {
   tracks: Track[]
   modules: Module[]
   topics: Topic[]
   topicById: Map<string, Topic>
   blocks: Block[]
+  settings: Settings
 }
 
 function rows<T>(res: { data: T[] | null; error: { message: string } | null }, what: string): T[] {
@@ -34,12 +39,16 @@ function ok(res: { error: { message: string } | null }, what: string): void {
 
 // ponytail: plain selects cap at the API's 1000-row limit; fine for ~300 topics, paginate if the syllabus grows past that.
 export async function loadCatalog(): Promise<Catalog> {
-  const [t, m, tp, b] = await Promise.all([
+  const [t, m, tp, b, s] = await Promise.all([
     supabase.from('tracks').select('*').order('sort_order'),
     supabase.from('modules').select('*').order('sort_order'),
     supabase.from('topics').select('*').order('sort_order'),
     supabase.from('schedule_blocks').select('*').order('weekday').order('sort_order'),
+    supabase.from('user_settings').select('*').maybeSingle(),
   ])
+  if (s.error) throw new Error(`load settings: ${s.error.message}`)
+  const { user_id: _u, updated_at: _at, ...saved } = s.data ?? { user_id: '', updated_at: '', ...DEFAULT_SETTINGS }
+  const settings: Settings = { ...DEFAULT_SETTINGS, ...saved }
   const tracks = rows(t, 'load tracks')
   const modules = rows(m, 'load modules')
   const topicRows = rows(tp, 'load topics')
@@ -69,7 +78,7 @@ export async function loadCatalog(): Promise<Catalog> {
     })
   }
   topics.sort((a, b) => a.moduleOrder - b.moduleOrder || a.order - b.order)
-  return { tracks, modules, topics, topicById: new Map(topics.map((x) => [x.id, x])), blocks }
+  return { tracks, modules, topics, topicById: new Map(topics.map((x) => [x.id, x])), blocks, settings }
 }
 
 const toPlanBlock = (b: Block): PlanBlock => ({
@@ -283,3 +292,8 @@ export function weeklyItems(cat: Catalog): number {
 /** Checklist (free-text) items of saved plans, in the shape completionsByDay() takes. */
 export const checklistOf = (plans: Map<string, Item[]>) =>
   [...plans.values()].flat().flatMap((i) => (i.topic_id === null && i.deferred_to === null ? [{ date: i.date, done: i.done_at !== null }] : []))
+
+/** Saves preference changes, creating the settings row on first save. */
+export async function saveSettings(patch: Partial<Settings>): Promise<void> {
+  ok(await supabase.from('user_settings').upsert({ ...patch, updated_at: new Date().toISOString() }), 'save settings')
+}

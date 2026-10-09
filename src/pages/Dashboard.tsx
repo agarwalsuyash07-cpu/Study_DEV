@@ -8,10 +8,11 @@ import { checklistOf, loadPlansBetween, paceFor, toDayItem, weeklyItems, weeklyT
 import { todayIST, weekDates } from '../lib/date'
 import { trackLink } from '../lib/links'
 import { overallStatus, paceLabel } from '../lib/pace'
-import { completionsByDay, heatLevel, heatmapWeeks, streaks, topicsCompletedOn } from '../lib/stats'
+import { activeDays, completionsByDay, heatLevel, heatmapWeeks, streaks, topicsCompletedOn } from '../lib/stats'
 import { message, useCatalog } from '../lib/useCatalog'
 
 const WEEKS = 26
+const HISTORY_START = '2000-01-01'
 const HEAT = ['bg-track', 'bg-accent/25', 'bg-accent/50', 'bg-accent/75', 'bg-accent']
 const DAY_LABELS = ['Mon', '', 'Wed', '', 'Fri', '', '']
 
@@ -80,7 +81,9 @@ export default function Dashboard() {
   useEffect(() => {
     let cancelled = false
     // reads saved plans only, never ensureDayPlan: viewing the dashboard shouldn't freeze today's plan
-    loadPlansBetween(from, today).then(
+    // all history, so best streak is recomputed from every saved day
+    // ponytail: unbounded but paged; ~2k rows a year
+    loadPlansBetween(HISTORY_START, today).then(
       (p) => {
         if (!cancelled) setPlans(p)
       },
@@ -91,7 +94,7 @@ export default function Dashboard() {
     return () => {
       cancelled = true
     }
-  }, [from, today, setError])
+  }, [today, setError])
 
   if (!cat || !plans) {
     return (
@@ -109,7 +112,9 @@ export default function Dashboard() {
   const done = cat.topics.filter((t) => t.done)
 
   const doneByDay = completionsByDay(cat.topics, checklistOf(plans))
-  const streak = streaks(new Set(doneByDay.keys()), today)
+  const planSize = new Map([...plans].map(([d, its]) => [d, its.filter((i) => i.deferred_to === null).length]))
+  const rule = { planPct: cat.settings.streak_plan_pct, minNoPlan: cat.settings.streak_min_no_plan }
+  const streak = streaks(activeDays(doneByDay, planSize, rule), today)
 
   const weekDone = weekDates(today).reduce((n, d) => n + (doneByDay.get(d) ?? 0), 0)
   const weekGoal = weeklyItems(cat)
@@ -184,7 +189,11 @@ export default function Dashboard() {
             visual={<Ring value={total ? done.length / total : 0} />}
           />
           <Kpi label="Topics done" value={done.length} sub={`${heatTotal} in the last ${WEEKS} weeks`} />
-          <Kpi label="Current streak" value={days(streak.current)} sub={`Best: ${days(streak.best)}`} />
+          <Kpi
+            label="Current streak"
+            value={days(streak.current)}
+            sub={`Best: ${days(streak.best)} · day counts at ${rule.planPct}% of plan`}
+          />
           <Kpi
             label="This week"
             value={topics(weekDone)}

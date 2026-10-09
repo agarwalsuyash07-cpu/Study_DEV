@@ -243,6 +243,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          streak_min_no_plan: number
+          streak_plan_pct: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          streak_min_no_plan?: number
+          streak_plan_pct?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          streak_min_no_plan?: number
+          streak_plan_pct?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

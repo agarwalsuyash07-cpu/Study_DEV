@@ -5,7 +5,7 @@ const tables: Record<string, unknown[]> = {}
 vi.mock('./supabase', () => {
   const query = (table: string) => {
     const result = { data: tables[table] ?? [], error: null }
-    const chain = { select: () => chain, order: () => chain, then: (f: (r: typeof result) => unknown) => Promise.resolve(result).then(f) }
+    const chain = { select: () => chain, order: () => chain, maybeSingle: () => ({ data: null, error: null }), then: (f: (r: typeof result) => unknown) => Promise.resolve(result).then(f) }
     return chain
   }
   return { supabase: { from: query } }

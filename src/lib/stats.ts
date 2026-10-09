@@ -23,6 +23,19 @@ export function completionsByDay(
   return out
 }
 
+export type StreakRule = { planPct: number; minNoPlan: number }
+
+/** Days that count for the streak: done ≥ max(1, planPct% of that day's plan), or ≥ minNoPlan when it had no (or an empty) plan. */
+export function activeDays(doneByDay: ReadonlyMap<string, number>, planSize: ReadonlyMap<string, number>, rule: StreakRule): Set<string> {
+  const out = new Set<string>()
+  for (const [day, done] of doneByDay) {
+    const plan = planSize.get(day) ?? 0
+    const need = plan > 0 ? Math.max(1, (plan * rule.planPct) / 100) : rule.minNoPlan
+    if (done >= need) out.add(day)
+  }
+  return out
+}
+
 /** Consecutive active days ending today (or yesterday, so an unstarted today doesn't zero it) + the longest run. */
 export function streaks(active: ReadonlySet<string>, today: string): { current: number; best: number } {
   let current = 0

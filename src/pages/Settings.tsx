@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import ErrorBanner from '../components/ErrorBanner'
-import { addBlock, deleteBlock, exportAll, MAX_BLOCK_TOPICS, setExamDate, updateBlock, type Block, type Track } from '../lib/data'
+import { addBlock, deleteBlock, exportAll, MAX_BLOCK_TOPICS, saveSettings, setExamDate, updateBlock, type Block, type Track } from '../lib/data'
 import { todayIST } from '../lib/date'
 import { ExamDateField, PageHeader } from '../components/ui'
 import { supabase } from '../lib/supabase'
@@ -154,6 +154,58 @@ function BlockRow({
   )
 }
 
+/** Whole-number field that saves on blur/Enter and snaps back if out of range. */
+function NumberSetting({
+  id,
+  label,
+  suffix,
+  min,
+  max,
+  value,
+  onSave,
+}: {
+  id: string
+  label: string
+  suffix?: string
+  min: number
+  max: number
+  value: number
+  onSave: (n: number) => Promise<void>
+}) {
+  const [text, setText] = useState(String(value))
+  function commit() {
+    const n = Number(text)
+    if (!Number.isInteger(n) || n < min || n > max) {
+      setText(String(value))
+      return
+    }
+    if (n !== value) void onSave(n)
+  }
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <label htmlFor={id} className="text-soft">
+        {label}
+      </label>
+      <span className="flex items-center gap-1.5">
+        <input
+          id={id}
+          type="number"
+          inputMode="numeric"
+          min={min}
+          max={max}
+          required
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+          className={`${inputCls} w-20 tabular-nums`}
+        />
+        {suffix && <span className="w-3 text-sm text-muted">{suffix}</span>}
+      </span>
+    </div>
+  )
+}
+
 export default function Settings() {
   const { cat, setCat, error, setError } = useCatalog()
   const [exporting, setExporting] = useState(false)
@@ -271,6 +323,41 @@ export default function Settings() {
           </div>
         )}
       </section>
+
+      {cat && (
+        <section aria-labelledby="streak" className="mt-8 px-4 md:px-8">
+          <h2 id="streak" className="text-base font-medium">
+            Streak rule
+          </h2>
+          <p className="mb-3 text-soft">A day keeps the streak alive when you finish enough of it.</p>
+          <div className="flex max-w-xl flex-col gap-2 rounded-[14px] border border-line bg-card px-3 py-3">
+            <NumberSetting
+              id="streak-pct"
+              label="Share of the day's plan"
+              suffix="%"
+              min={1}
+              max={100}
+              value={cat.settings.streak_plan_pct}
+              onSave={guard(async (n: number) => {
+                await saveSettings({ streak_plan_pct: n })
+                setCat((c) => (c ? { ...c, settings: { ...c.settings, streak_plan_pct: n } } : c))
+              })}
+            />
+            <NumberSetting
+              id="streak-min"
+              label="Topics on a day with no plan"
+              min={1}
+              max={50}
+              value={cat.settings.streak_min_no_plan}
+              onSave={guard(async (n: number) => {
+                await saveSettings({ streak_min_no_plan: n })
+                setCat((c) => (c ? { ...c, settings: { ...c.settings, streak_min_no_plan: n } } : c))
+              })}
+            />
+            <p className="text-xs text-muted">At least one item always counts on a planned day.</p>
+          </div>
+        </section>
+      )}
 
       {cat && (
         <section aria-labelledby="exams" className="mt-8 px-4 md:px-8">
