@@ -29,3 +29,15 @@
 **2026-10-09: Time tracking removed.** No timers, logged minutes, module estimates, hours spent/left or estimated finish dates. Progress is counted in topics only. Schedule blocks now hold a topic count (1–20, default 2) and `assignDay` gives each block that many undone topics; regenerate subtracts the done topics already kept in the block. Dashboard heatmap, streak and "this week" use topics done per day (from `topics.done_at`). Migration `20261011000000_remove_time.sql` drops `sessions`, the `topic_spent` view and `modules.est_minutes`, and converts block minutes to `round(minutes / 60)` topics (min 1); its down script restores the structure but not the data. Rejected: one topic per block (less control without adding blocks); keeping the dead columns (schema lies about what the app does).
 
 **2026-10-09: `remove_time` was never applied; replaced by an additive migration.** The live DB still had `schedule_blocks.minutes` and no `topics`, while the hand-edited `database.types.ts` claimed `topics` existed, so `tsc` passed and every count read as `undefined` → `NaN` → "Not scheduled" / "—" / an empty Settings input. `20261012000000_block_topics.sql` adds `topics` (filled as `round(minutes/60)`, 1–20) and keeps `minutes` (now the per-block time budget, default 60); `sessions` and `modules.est_minutes` are kept. `loadCatalog` now throws if a block has no integer count, so schema drift fails loudly. Rejected: applying `remove_time` (drops data that later items need, violates the additive-only rule).
+
+**2026-10-09: Carry-over by marking, not moving.** Deferring copies the item to its new day (`manual`) and marks the original `deferred_to`, so history stays honest (a missed Thursday stays missed). Regenerate keeps done, manual and deferred items, enforced in `save_day_plan`. A day can exist ungenerated (`generated_at` null) when something was deferred into it. Rejected: deleting/moving rows (loses history).
+
+**2026-10-09: Spaced revision as gaps between passed reviews (1, 3, 7, 21 days).** One `revisions` row per topic; confidence 1 halves the gaps; Again resets. Rejected: fixed offsets from the completion date (breaks when reviews are late).
+
+**2026-10-09: oxlint instead of ESLint.** typescript-eslint doesn't support TypeScript 7 (no JS compiler API). oxlint has no TS peer dependency and covers TS + react-hooks rules; `tsc` still does type checking.
+
+**2026-10-09: Shared catalog cache, no TanStack Query.** A ~70-line store (stale-while-revalidate, version + generation counters for races) covers one user and four tables. Swap to TanStack Query if queries multiply.
+
+**2026-10-09: anon has no grants at all.** RLS already hid every row, but TRUNCATE ignores RLS and least privilege is cheaper than reasoning about it. Writes must also own the rows they reference, because FK checks skip RLS.
+
+**2026-10-09: `origin` column (seed | app).** `npm run import` prunes only seed rows, so CSV-imported topics and in-app tracks survive re-imports.
