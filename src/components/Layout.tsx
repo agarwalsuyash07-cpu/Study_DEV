@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router'
+import Toaster from './Toaster'
 
 const TABS = [
   { to: '/', label: 'Dashboard', icon: 'M3 3h6v8H3zM11 3h6v5h-6zM11 10h6v7h-6zM3 13h6v4H3z' },
@@ -47,6 +48,7 @@ export default function Layout() {
       <div className="min-w-0 flex-1 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
         <Outlet />
       </div>
+      <Toaster />
 
       {/* narrow windows fall back to a bottom bar */}
       <nav aria-label="Main" className="fixed inset-x-0 bottom-0 border-t border-line bg-bg/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">

@@ -14,7 +14,7 @@ import {
   loadPastUndone,
   previewRegeneration,
   saveRegeneration,
-  setItemDone,
+  setItemDoneAt,
   setItemOrder,
   toDayItem,
   type Block,
@@ -22,7 +22,8 @@ import {
 } from '../lib/data'
 import { addDays, todayIST, weekdayOf } from '../lib/date'
 import { overdueItems, reorderGroup } from '../lib/plan'
-import { topicsCompletedOn } from '../lib/stats'
+import { doneDay, topicsCompletedOn } from '../lib/stats'
+import { showToast } from '../lib/toast'
 import { message, useCatalog } from '../lib/useCatalog'
 
 const dayLabel = (date: string) =>
@@ -41,9 +42,11 @@ export default function Today() {
   const dragFrom = useRef<{ group: string; index: number } | null>(null)
   const { cat, setCat, error, setError, actions } = useCatalog({
     autoLoad: false,
-    // mirrors the DB trigger for today's items
+    // mirrors the DB trigger: the item on the completion day follows the topic
     onDoneChanged: (topicId, doneAt) =>
-      setItems((its) => its.map((i) => (i.topic_id === topicId && i.deferred_to === null ? { ...i, done_at: doneAt } : i))),
+      setItems((its) =>
+        its.map((i) => (i.topic_id === topicId && i.deferred_to === null && (doneAt === null || doneDay(doneAt) === i.date) ? { ...i, done_at: doneAt } : i)),
+      ),
   })
 
   useEffect(() => {
@@ -84,8 +87,14 @@ export default function Today() {
   }
 
   async function toggleItem(item: Item) {
-    const doneAt = await setItemDone(item.id, item.done_at === null)
-    setItems((its) => its.map((i) => (i.id === item.id ? { ...i, done_at: doneAt } : i)))
+    const prev = item.done_at
+    const apply = async (doneAt: string | null) => {
+      await setItemDoneAt(item.id, doneAt)
+      setItems((its) => its.map((i) => (i.id === item.id ? { ...i, done_at: doneAt } : i)))
+    }
+    const next = prev === null ? new Date().toISOString() : null
+    await apply(next)
+    showToast({ message: `${next ? 'Done' : 'Not done'}: ${item.label ?? ''}`, actions: [{ label: 'Undo', run: () => apply(prev) }] })
   }
 
   async function defer(itemId: number, to: string) {

@@ -1,24 +1,26 @@
 import { useEffect, useState } from 'react'
 import ErrorBanner from '../components/ErrorBanner'
 import ProgressBar from '../components/ProgressBar'
+import { Check } from '../components/TopicRow'
 import { trackColor } from '../components/trackColor'
 import { PageHeader, Pill } from '../components/ui'
-import { blocksFor, loadPlansBetween, type Catalog, type Item } from '../lib/data'
+import { blocksFor, doneAtFor, loadPlansBetween, setItemDoneAt, type Catalog, type Item } from '../lib/data'
 import { todayIST, weekDates } from '../lib/date'
 import { previewDays, type PlanItem } from '../lib/plan'
 import { topicsCompletedOn } from '../lib/stats'
+import { showToast } from '../lib/toast'
 import { message, useCatalog } from '../lib/useCatalog'
 
-type Row = { key: string; blockId: number | null; topicId: string | null; label: string | null; done: boolean }
+type Row = { key: string; itemId: number | null; blockId: number | null; topicId: string | null; label: string | null; done: boolean }
 type Day = { date: string; kind: 'past' | 'today' | 'future'; preview: boolean; rows: Row[] | null }
 
 // deferred originals live on in their new day, so they don't count here
 const fromSaved = (items: Item[]): Row[] =>
   items
     .filter((i) => i.deferred_to === null)
-    .map((i) => ({ key: `s${i.id}`, blockId: i.block_id, topicId: i.topic_id, label: i.label, done: i.done_at !== null }))
+    .map((i) => ({ key: `s${i.id}`, itemId: i.id, blockId: i.block_id, topicId: i.topic_id, label: i.label, done: i.done_at !== null }))
 const fromPreview = (items: PlanItem[]): Row[] =>
-  items.map((i, n) => ({ key: `p${n}`, blockId: i.blockId, topicId: i.topicId, label: i.label, done: false }))
+  items.map((i, n) => ({ key: `p${n}`, itemId: null, blockId: i.blockId, topicId: i.topicId, label: i.label, done: false }))
 
 function buildDays(cat: Catalog, dates: string[], today: string, plans: Map<string, Item[]>): Day[] {
   const upcoming = dates.filter((d) => d >= today)
@@ -47,13 +49,33 @@ const fmtDay = (date: string, opts: Intl.DateTimeFormatOptions) =>
   new Date(`${date}T00:00:00Z`).toLocaleDateString('en-IN', { timeZone: 'UTC', ...opts })
 
 export default function Week() {
-  const { cat, error, setError } = useCatalog()
+  // reload plans after any tick: the DB trigger decides which day's item changed
+  const { cat, error, setError, actions } = useCatalog({ onDoneChanged: () => void reloadPlans() })
   const [today] = useState(todayIST)
   const dates = weekDates(today)
   const [plans, setPlans] = useState<Map<string, Item[]> | null>(null)
 
   const from = dates[0]!
   const to = dates[6]!
+
+  function reloadPlans() {
+    return loadPlansBetween(from, to).then(setPlans, (e: unknown) => setError(message(e)))
+  }
+
+  async function toggleRow(row: Row, date: string) {
+    const topic = row.topicId ? cat?.topicById.get(row.topicId) : undefined
+    if (topic) return actions.onSetDoneAt(topic, row.done ? null : doneAtFor(date, today))
+    if (row.itemId === null) return
+    const itemId = row.itemId
+    const prev = plans?.get(date)?.find((i) => i.id === itemId)?.done_at ?? null
+    const apply = async (doneAt: string | null) => {
+      await setItemDoneAt(itemId, doneAt)
+      await reloadPlans()
+    }
+    await apply(row.done ? null : doneAtFor(date, today))
+    showToast({ message: `${row.done ? 'Not done' : 'Done'}: ${row.label ?? ''}`, actions: [{ label: 'Undo', run: () => apply(prev) }] })
+  }
+
   useEffect(() => {
     let cancelled = false
     loadPlansBetween(from, to).then(
@@ -132,12 +154,25 @@ export default function Week() {
                       const track = topic ? trackById.get(topic.trackId) : undefined
                       return (
                         <li key={r.key} className="flex items-start gap-3 px-3 py-2.5">
-                          <span
-                            aria-hidden="true"
-                            className={`mt-1.5 size-2 shrink-0 rounded-full ${r.done ? 'bg-done' : 'border border-muted/60'}`}
-                            style={!r.done && track ? { borderColor: trackColor(track.sort_order) } : undefined}
-                          />
-                          <span className="sr-only">{r.done ? 'Done:' : 'Not done:'}</span>
+                          {r.itemId !== null && d.kind !== 'future' ? (
+                            // saved past/today rows can be ticked: past days are backfilled at noon IST
+                            <span className="-my-1">
+                              <Check
+                                checked={r.done}
+                                label={`Mark "${topic?.title ?? r.label ?? ''}" done on ${weekday}`}
+                                onClick={() => void toggleRow(r, d.date).catch((e: unknown) => setError(message(e)))}
+                              />
+                            </span>
+                          ) : (
+                            <>
+                              <span
+                                aria-hidden="true"
+                                className={`mt-1.5 size-2 shrink-0 rounded-full ${r.done ? 'bg-done' : 'border border-muted/60'}`}
+                                style={!r.done && track ? { borderColor: trackColor(track.sort_order) } : undefined}
+                              />
+                              <span className="sr-only">{r.done ? 'Done:' : 'Not done:'}</span>
+                            </>
+                          )}
                           <span className="min-w-0 flex-1">
                             <span className={r.done ? 'text-muted line-through decoration-muted/70' : 'text-soft'}>
                               {topic?.title ?? r.label ?? 'Removed topic'}

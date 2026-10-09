@@ -5,6 +5,8 @@ import { Pill } from './ui'
 
 export type TopicActions = {
   onToggleDone: (topic: Topic, done: boolean) => Promise<void>
+  /** Explicit completion time (backfill); null = not done. */
+  onSetDoneAt: (topic: Topic, doneAt: string | null) => Promise<void>
   onToggleStar: (topic: Topic) => Promise<void>
   onError: (e: unknown) => void
 }

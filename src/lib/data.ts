@@ -179,18 +179,18 @@ export async function loadPastUndone(today: string): Promise<Item[]> {
   )
 }
 
-/** Returns the new done_at. A DB trigger mirrors it onto today's plan item. */
-export async function setTopicDone(topicId: string, done: boolean): Promise<string | null> {
-  const doneAt = done ? new Date().toISOString() : null
+/** Sets a topic's completion time (null = not done). A DB trigger mirrors it onto the plan item of that day. */
+export async function setTopicDoneAt(topicId: string, doneAt: string | null): Promise<void> {
   ok(await supabase.from('topics').update({ done_at: doneAt }).eq('id', topicId), 'update topic')
-  return doneAt
 }
 
-export async function setItemDone(itemId: number, done: boolean): Promise<string | null> {
-  const doneAt = done ? new Date().toISOString() : null
+export async function setItemDoneAt(itemId: number, doneAt: string | null): Promise<void> {
   ok(await supabase.from('day_plan_items').update({ done_at: doneAt }).eq('id', itemId), 'update item')
-  return doneAt
 }
+
+/** Completion time for "done on `date`": now if that's today, else noon IST that day (backfill). */
+export const doneAtFor = (date: string, today: string): string =>
+  date === today ? new Date().toISOString() : new Date(`${date}T12:00:00+05:30`).toISOString()
 
 export async function setRevision(topicId: string, revision: boolean): Promise<void> {
   ok(await supabase.from('topics').update({ revision }).eq('id', topicId), 'update star')
