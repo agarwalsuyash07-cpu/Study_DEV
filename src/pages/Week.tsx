@@ -119,7 +119,7 @@ export default function Week() {
   if (!cat || !plans) {
     return (
       <main>
-        <PageHeader title="This week" />
+        <PageHeader title="This week" docTitle="Week" />
         <div className="px-4 md:px-8">
           <ErrorBanner error={error} onDismiss={() => setError(null)} />
           {!error && <p className="text-muted">Loading week…</p>}
@@ -141,7 +141,7 @@ export default function Week() {
 
   return (
     <main>
-      <PageHeader title="This week" />
+      <PageHeader title="This week" docTitle="Week" />
       <header className="px-4 pb-4 md:px-8">
         <h2 className="pt-1 text-xl font-medium">Monday to Sunday</h2>
         <p className="text-soft">
@@ -214,7 +214,7 @@ export default function Week() {
                       const title = topic?.title ?? r.label ?? 'Removed topic'
                       const tickable = r.item !== null && d.kind !== 'future'
                       return (
-                        <li key={r.key} className={`flex items-start gap-3 px-3 py-2 ${r.preview ? 'opacity-70' : ''}`}>
+                        <li key={r.key} className={`flex items-start gap-3 px-3 py-2`}>
                           {tickable ? (
                             <span className="-my-1">
                               <Check checked={r.done} label={`Mark "${title}" done on ${weekday}`} onClick={() => run(() => toggleRow(r, d.date))} />
@@ -234,7 +234,7 @@ export default function Week() {
                               <button
                                 type="button"
                                 onClick={() => actions.onOpen(topic)}
-                                className={`text-left hover:underline ${r.done ? 'text-muted line-through decoration-muted/70' : 'text-soft'}`}
+                                className={`text-left hover:underline ${r.done ? 'text-muted line-through decoration-muted/70' : r.preview ? 'text-muted' : 'text-soft'}`}
                               >
                                 {title}
                               </button>

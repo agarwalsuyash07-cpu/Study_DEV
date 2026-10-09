@@ -4,6 +4,7 @@ import ErrorBanner from '../components/ErrorBanner'
 import TopicRow, { type TopicActions } from '../components/TopicRow'
 import CsvImport from '../components/CsvImport'
 import TrackStats from '../components/TrackStats'
+import { shortTrackName } from '../components/trackColor'
 import { Chevron, ExamDateField, MiniProgress, PageHeader, Pill, ProgressCard } from '../components/ui'
 import { loadCatalog, paceFor, setExamDate, weeklyTopics, type Module, type Topic } from '../lib/data'
 import { todayIST } from '../lib/date'
@@ -103,7 +104,7 @@ export default function TrackDetail() {
 
   return (
     <main>
-      <PageHeader title={track.name} back={back} />
+      <PageHeader title={track.name} docTitle={shortTrackName(track.name)} back={back} />
       <div className="grid items-start gap-6 px-4 pb-8 md:px-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <aside className="flex flex-col gap-4 lg:sticky lg:top-20 lg:order-2">
           {track.course_code && <p className="text-soft">{track.course_code}</p>}

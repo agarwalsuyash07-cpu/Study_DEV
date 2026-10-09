@@ -1,10 +1,13 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
 
-const input = 'rounded-[10px] border border-line bg-raised px-3 py-2.5 outline-none focus:border-accent'
+const input = 'rounded-[10px] border border-line bg-raised px-3 py-2.5 focus-visible:border-accent'
 
 // No sign-up form: single-user app; the password is set with `npm run set-password`.
 export default function Login() {
+  useEffect(() => {
+    document.title = 'Sign in · Study Tracker'
+  }, [])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)

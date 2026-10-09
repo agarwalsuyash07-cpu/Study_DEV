@@ -4,7 +4,22 @@ import ProgressBar from './ProgressBar'
 import { openSearch } from './SearchPalette'
 
 /** Sticky top bar, takeUforward style: optional back arrow + 16px title. */
-export function PageHeader({ title, back, action }: { title: string; back?: { to: string; label: string }; action?: ReactNode }) {
+export function PageHeader({
+  title,
+  docTitle,
+  back,
+  action,
+}: {
+  title: string
+  /** Browser tab title when it should differ from the visible one (e.g. "Today" for a dated heading). */
+  docTitle?: string
+  back?: { to: string; label: string }
+  action?: ReactNode
+}) {
+  const tab = `${docTitle ?? title} · Study Tracker`
+  useEffect(() => {
+    document.title = tab
+  }, [tab])
   return (
     <div className="sticky top-0 z-10 flex h-14 items-center gap-3 bg-bg/95 px-4 backdrop-blur md:h-16 md:px-8">
       {back && (

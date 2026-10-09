@@ -71,8 +71,11 @@ export default function Layout() {
               <NavLink
                 to={t.to}
                 end={t.to === '/'}
-                className={({ isActive }) => `flex h-14 items-center justify-center text-xs ${isActive ? 'font-medium text-accent' : 'text-soft'}`}
+                className={({ isActive }) =>
+                  `flex h-14 flex-col items-center justify-center gap-0.5 text-[10px] leading-none ${isActive ? 'font-medium text-accent' : 'text-soft'}`
+                }
               >
+                <Icon d={t.icon} />
                 {t.label}
               </NavLink>
             </li>

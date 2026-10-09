@@ -96,7 +96,8 @@ export default function SearchPalette() {
       <h2 id={ids.label} className="sr-only">
         Search topics, modules and tracks
       </h2>
-      <div className="flex items-center gap-2 border-b border-line px-3">
+      {/* the ring sits on the whole bar while the input has focus */}
+      <div className="flex items-center gap-2 border-b border-line px-3 focus-within:ring-2 focus-within:ring-accent focus-within:ring-inset">
         <svg viewBox="0 0 20 20" className="size-4 shrink-0 text-muted" aria-hidden="true">
           <path d="M9 15a6 6 0 100-12 6 6 0 000 12zM17 17l-3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
         </svg>

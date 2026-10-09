@@ -461,7 +461,7 @@ export default function Settings() {
               const total = blocks.reduce((s, b) => (b.track_id === null ? s : s + b.topics), 0)
               const minutes = blocks.reduce((s, b) => s + b.minutes, 0)
               return (
-                <section key={weekday} aria-label={dayName} className="overflow-hidden rounded-[14px] border border-line bg-card">
+                <section key={weekday} aria-label={dayName} className="rounded-[14px] border border-line bg-card">
                   <div className="flex items-baseline justify-between px-3 pt-3 pb-1">
                     <h3 className="font-medium">{dayName}</h3>
                     <span className="text-xs text-soft tabular-nums">
@@ -523,7 +523,7 @@ export default function Settings() {
                       const created = await addBlock(weekday, cat.tracks[0]?.id ?? null, maxOrder + 1)
                       setBlocks((bs) => [...bs, created])
                     })}
-                    className="min-h-11 w-full border-t border-line px-3 text-left text-xs font-medium text-accent"
+                    className="min-h-11 w-full rounded-b-[14px] border-t border-line px-3 text-left text-xs font-medium text-accent"
                   >
                     Add block to {dayName}
                   </button>

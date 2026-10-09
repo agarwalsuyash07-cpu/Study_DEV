@@ -11,7 +11,7 @@ import { fmtMinutes } from './ui'
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', year: 'numeric' })
 const fmtDay = (date: string) => new Date(`${date}T00:00:00Z`).toLocaleDateString('en-IN', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short' })
 
-const field = 'rounded-lg border border-line bg-raised px-2.5 py-2 outline-none focus-visible:border-accent'
+const field = 'rounded-lg border border-line bg-raised px-2.5 py-2 focus-visible:border-accent'
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 /** Side panel (full screen on phones) with everything about one topic. Every field saves itself. */

@@ -289,6 +289,7 @@ export default function Today() {
     <main>
       <PageHeader
         title={dayLabel(date)}
+        docTitle="Today"
         action={
           hasBlocksToday && (
             <button
@@ -304,21 +305,19 @@ export default function Today() {
 
       <div className="grid items-start gap-6 px-4 pb-8 md:px-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <aside className="flex flex-col gap-4 lg:sticky lg:top-20 lg:order-2">
-          {visible.length > 0 && (
-            <>
-              <ProgressCard done={doneCount} total={visible.length} label="Today's progress" />
-              <StatGrid
-                items={[
-                  { icon: 'list', value: visible.length, label: visible.length === 1 ? 'Item' : 'Items' },
-                  { icon: 'check', value: doneCount, label: 'Done' },
-                  { icon: 'flag', value: overdue.length, label: 'Overdue', tone: overdue.length ? 'warn' : undefined },
-                  { icon: 'list', value: deferredCount, label: 'Deferred' },
-                  { icon: 'check', value: alsoDone.length, label: 'Also done' },
-                ]}
-              />
-            </>
-          )}
-          {visible.length > 0 && (
+          {visible.length > 0 && <ProgressCard done={doneCount} total={visible.length} label="Today's progress" />}
+          {/* always shown, so the column is useful even on a rest day */}
+          <StatGrid
+            items={[
+              { icon: 'list', value: visible.length, label: visible.length === 1 ? 'Item' : 'Items' },
+              { icon: 'check', value: doneCount, label: 'Done' },
+              { icon: 'flag', value: overdue.length, label: 'Overdue', tone: overdue.length ? 'warn' : undefined },
+              { icon: 'flag', value: revisionsDue(cat, date), label: 'Revision due', tone: revisionsDue(cat, date) ? 'warn' : undefined },
+              { icon: 'list', value: deferredCount, label: 'Deferred' },
+              { icon: 'check', value: alsoDone.length, label: 'Also done' },
+            ]}
+          />
+          {(visible.length > 0 || budget > 0) && (
             <div className={`rounded-[14px] border px-3 py-3 ${overBy > 0 ? 'border-warn/40 bg-warn/10' : 'border-line bg-card'}`}>
               <div className="mb-2 flex items-end justify-between">
                 <span className="text-xl font-semibold tabular-nums">{fmtMinutes(leftMinutes)}</span>

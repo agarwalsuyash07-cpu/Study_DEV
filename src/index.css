@@ -11,7 +11,8 @@
   --color-text: #fcfcfd;
   --color-soft: #c1c4cc;
   --color-muted: #8d929c;
-  --color-check: #646b78;
+  /* 4.7:1+ on every surface (WCAG AA even if used for text) */
+  --color-check: #7a8190;
   --color-accent: #327cf6;
   --color-done: #22c55e;
   --color-warn: #f5a524;
