@@ -144,7 +144,7 @@ export function reorderGroup<T extends { id: number; sortOrder: number }>(
 
 /** Simulates consecutive days without saving. Saved days return null but still reserve their topics. */
 export function previewDays(
-  days: readonly ({ existingTopicIds: readonly string[] } | { blocks: readonly PlanBlock[] })[],
+  days: readonly ({ existingTopicIds: readonly string[] } | { blocks: readonly PlanBlock[]; held?: readonly string[] })[],
   topics: readonly PlanTopic[],
 ): (PlanItem[] | null)[] {
   const exclude = new Set<string>()
@@ -153,6 +153,8 @@ export function previewDays(
       for (const id of d.existingTopicIds) exclude.add(id)
       return null
     }
+    // not generated yet, but already holding deferred/added topics
+    for (const id of d.held ?? []) exclude.add(id)
     const items = assignDay(d.blocks, topics, { exclude })
     for (const i of items) if (i.topicId) exclude.add(i.topicId)
     return items

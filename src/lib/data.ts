@@ -5,6 +5,8 @@ import type { TopicCsvRow } from './csv'
 import { safeUrl } from './markdown'
 import { trackPace, type Pace } from './pace'
 import { isDue, type Confidence, type ReviewState } from './revision'
+import type { WeekSummary } from './review'
+import { activeDays, completionsByDay, streaks } from './stats'
 import { assignDay, planRegeneration, type DayItem, type PlanBlock, type PlanItem, type PlanTopic } from './plan'
 
 export type Track = Tables<'tracks'>
@@ -413,3 +415,42 @@ export function overallTopics(cat: Catalog): Topic[] {
   const counted = new Set(cat.tracks.filter((t) => t.count_in_overall).map((t) => t.id))
   return cat.topics.filter((t) => counted.has(t.trackId))
 }
+
+/** Days in the range whose plan has been generated (a day can exist ungenerated, holding only deferred/added items). */
+export async function loadGeneratedDays(from: string, to: string): Promise<Set<string>> {
+  const res = await supabase.from('day_plans').select('date').gte('date', from).lte('date', to).not('generated_at', 'is', null)
+  return new Set(rows(res, 'load generated days').map((d) => d.date))
+}
+
+/** Subject for a checklist item such as "PYQs (weakest subject)"; null = use the suggestion. */
+export async function setItemTrack(itemId: number, trackId: string | null): Promise<void> {
+  ok(await supabase.from('day_plan_items').update({ track_id: trackId }).eq('id', itemId), 'update item subject')
+}
+
+/** Checklist labels that get a subject picker. */
+export const needsSubject = (label: string | null) => label !== null && /weakest|pyq/i.test(label)
+
+export async function loadWeeklyReview(weekStart: string): Promise<string> {
+  const res = await supabase.from('weekly_reviews').select('reflection').eq('week_start', weekStart).maybeSingle()
+  if (res.error) throw new Error(`load weekly review: ${res.error.message}`)
+  return res.data?.reflection ?? ''
+}
+
+/** Saves the reflection with a snapshot of the week's numbers. */
+export async function saveWeeklyReview(weekStart: string, reflection: string, summary: WeekSummary): Promise<void> {
+  ok(
+    await supabase.from('weekly_reviews').upsert({ week_start: weekStart, reflection, summary, updated_at: new Date().toISOString() }),
+    'save weekly review',
+  )
+}
+
+/** Current/best streak under the user's rule, from all saved plans + completions. */
+export function streakFor(cat: Catalog, plans: Map<string, Item[]>, today: string): { current: number; best: number } {
+  const doneByDay = completionsByDay(cat.topics, checklistOf(plans))
+  const planSize = new Map([...plans].map(([d, its]) => [d, its.filter((i) => i.deferred_to === null).length]))
+  const rule = { planPct: cat.settings.streak_plan_pct, minNoPlan: cat.settings.streak_min_no_plan }
+  return streaks(activeDays(doneByDay, planSize, rule), today)
+}
+
+/** Start of "all history" for streaks and reviews. */
+export const HISTORY_START = '2000-01-01'

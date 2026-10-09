@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import { Link } from 'react-router'
 import ErrorBanner from '../components/ErrorBanner'
-import { AddItem, ItemMenu } from '../components/PlanControls'
+import { AddItem, ItemMenu, SubjectPicker } from '../components/PlanControls'
+import WeeklyReview from '../components/WeeklyReview'
 import TopicRow, { Check } from '../components/TopicRow'
 import { trackColor } from '../components/trackColor'
 import ProgressBar from '../components/ProgressBar'
@@ -14,17 +15,20 @@ import {
   loadCatalog,
   loadItems,
   loadPastUndone,
+  needsSubject,
   previewRegeneration,
   revisionsDue,
   saveRegeneration,
   setItemDoneAt,
   setItemOrder,
+  setItemTrack,
   toDayItem,
   type Block,
   type Item,
 } from '../lib/data'
 import { addDays, todayIST, weekdayOf } from '../lib/date'
 import { overdueItems, reorderGroup } from '../lib/plan'
+import { weakestTrack } from '../lib/review'
 import { doneDay, topicsCompletedOn } from '../lib/stats'
 import { showToast } from '../lib/toast'
 import { message, useCatalog } from '../lib/useCatalog'
@@ -193,6 +197,10 @@ export default function Today() {
     .map((t) => ({ id: t.id, text: `${t.title} · ${trackById.get(t.trackId)?.name ?? ''}` }))
   const titleOf = (i: { topicId: string | null; label: string | null }) =>
     i.topicId ? (cat.topicById.get(i.topicId)?.title ?? 'Removed topic') : (i.label ?? 'Study block')
+  const weakest = weakestTrack(
+    cat.tracks.map((t) => ({ id: t.id, counted: t.count_in_overall })),
+    cat.topics,
+  )
   const nothingChanges = regen !== null && regen.removed.length === 0 && regen.added.length === 0
   const budget = budgetFor(cat, date)
   const minutesOf = (i: Item) => (i.topic_id ? (cat.topicById.get(i.topic_id)?.estMinutes ?? 0) : 0)
@@ -255,7 +263,23 @@ export default function Today() {
         <span className="py-0.5">
           <Check checked={i.done_at !== null} label={`Mark "${i.label ?? ''}" done`} onClick={() => run(() => toggleItem(i))} />
         </span>
-        <span className={`min-w-0 flex-1 ${i.done_at ? 'text-muted line-through decoration-muted/70' : 'text-soft'}`}>{i.label}</span>
+        <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+          <span className={i.done_at ? 'text-muted line-through decoration-muted/70' : 'text-soft'}>{i.label}</span>
+          {needsSubject(i.label) && (
+            <SubjectPicker
+              label={i.label ?? ''}
+              value={i.track_id}
+              tracks={cat!.tracks.filter((t) => t.count_in_overall)}
+              suggested={weakest}
+              onChange={(trackId) =>
+                run(async () => {
+                  await setItemTrack(i.id, trackId)
+                  setItems((its) => its.map((x) => (x.id === i.id ? { ...x, track_id: trackId } : x)))
+                })
+              }
+            />
+          )}
+        </span>
         <span className="-my-1.5 -mr-1">{menu}</span>
       </li>
     )
@@ -425,6 +449,9 @@ export default function Today() {
           )}
 
           <AddItem options={addOptions} onAdd={add} />
+
+          {/* Sunday: the weekly review lives next to the "Weekly review" checklist item */}
+          {weekdayOf(date) === 0 && <WeeklyReview cat={cat} today={date} onError={actions.onError} />}
         </div>
       </div>
 

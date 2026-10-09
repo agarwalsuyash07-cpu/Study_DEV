@@ -152,3 +152,18 @@ describe('assignDay time budget', () => {
     expect(assignDay([block(1, 'cn', 3)], ts)).toHaveLength(3)
   })
 })
+
+describe('previewDays with held items', () => {
+  it('previews an ungenerated day around its held topics and reserves them for later days', () => {
+    const ts = [topic('cn'), topic('cn'), topic('cn')]
+    const [a, b, c] = ts
+    const days = previewDays(
+      [
+        { blocks: [block(1, 'cn', 1)], held: [a!.id] },
+        { blocks: [block(2, 'cn', 1)] },
+      ],
+      ts,
+    )
+    expect(days.map((d) => d?.map((i) => i.topicId))).toEqual([[b!.id], [c!.id]])
+  })
+})

@@ -25,6 +25,7 @@ export type Database = {
           label: string | null
           sort_order: number
           topic_id: string | null
+          track_id: string | null
           user_id: string
         }
         Insert: {
@@ -37,6 +38,7 @@ export type Database = {
           label?: string | null
           sort_order: number
           topic_id?: string | null
+          track_id?: string | null
           user_id?: string
         }
         Update: {
@@ -49,6 +51,7 @@ export type Database = {
           label?: string | null
           sort_order?: number
           topic_id?: string | null
+          track_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -294,6 +297,30 @@ export type Database = {
           sort_order?: number
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_reviews: {
+        Row: {
+          reflection: string
+          summary: Json
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          reflection?: string
+          summary?: Json
+          updated_at?: string
+          user_id?: string
+          week_start: string
+        }
+        Update: {
+          reflection?: string
+          summary?: Json
+          updated_at?: string
+          user_id?: string
+          week_start?: string
         }
         Relationships: []
       }

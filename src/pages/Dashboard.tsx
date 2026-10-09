@@ -2,17 +2,16 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import ErrorBanner from '../components/ErrorBanner'
 import ProgressBar from '../components/ProgressBar'
-import { trackColor } from '../components/trackColor'
+import { shortTrackName, trackColor } from '../components/trackColor'
 import { PageHeader, RevisionDueChip } from '../components/ui'
-import { checklistOf, loadPlansBetween, overallTopics, paceFor, revisionsDue, toDayItem, weeklyItems, weeklyTopics, type Item } from '../lib/data'
+import { checklistOf, HISTORY_START, loadPlansBetween, overallTopics, paceFor, revisionsDue, streakFor, toDayItem, weeklyItems, weeklyTopics, type Item } from '../lib/data'
 import { todayIST, weekDates } from '../lib/date'
 import { trackLink } from '../lib/links'
 import { overallStatus, paceLabel } from '../lib/pace'
-import { activeDays, completionsByDay, heatLevel, heatmapWeeks, streaks, topicsCompletedOn } from '../lib/stats'
+import { completionsByDay, heatLevel, heatmapWeeks, topicsCompletedOn } from '../lib/stats'
 import { message, useCatalog } from '../lib/useCatalog'
 
 const WEEKS = 26
-const HISTORY_START = '2000-01-01'
 const HEAT = ['bg-track', 'bg-accent/25', 'bg-accent/50', 'bg-accent/75', 'bg-accent']
 const DAY_LABELS = ['Mon', '', 'Wed', '', 'Fri', '', '']
 
@@ -112,14 +111,11 @@ export default function Dashboard() {
   const counted = overallTopics(cat)
   const total = counted.length
   const countedDone = counted.filter((t) => t.done).length
-  // short names: "DSA — follow plan on…" → "DSA"
-  const excluded = cat.tracks.filter((t) => !t.count_in_overall).map((t) => t.name.split(/\s[—-]\s/)[0])
+  const excluded = cat.tracks.filter((t) => !t.count_in_overall).map((t) => shortTrackName(t.name))
   const done = cat.topics.filter((t) => t.done)
 
   const doneByDay = completionsByDay(cat.topics, checklistOf(plans))
-  const planSize = new Map([...plans].map(([d, its]) => [d, its.filter((i) => i.deferred_to === null).length]))
-  const rule = { planPct: cat.settings.streak_plan_pct, minNoPlan: cat.settings.streak_min_no_plan }
-  const streak = streaks(activeDays(doneByDay, planSize, rule), today)
+  const streak = streakFor(cat, plans, today)
 
   const weekDone = weekDates(today).reduce((n, d) => n + (doneByDay.get(d) ?? 0), 0)
   const weekGoal = weeklyItems(cat)
@@ -202,7 +198,7 @@ export default function Dashboard() {
           <Kpi
             label="Current streak"
             value={days(streak.current)}
-            sub={`Best: ${days(streak.best)} · day counts at ${rule.planPct}% of plan`}
+            sub={`Best: ${days(streak.best)} · day counts at ${cat.settings.streak_plan_pct}% of plan`}
           />
           <Kpi
             label="This week"

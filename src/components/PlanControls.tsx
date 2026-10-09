@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { shortTrackName } from './trackColor'
 
 const menuBtn = 'w-full rounded-md px-3 py-2 text-left text-soft hover:bg-card hover:text-text disabled:opacity-40 disabled:hover:bg-transparent'
 
@@ -162,5 +163,37 @@ export function AddItem({
       </div>
       <p className="px-1 text-xs text-muted">Pick a topic from the list, or type anything as a free-text task.</p>
     </form>
+  )
+}
+
+/** Track picker for checklist items like "PYQs (weakest subject)"; empty = the suggested weakest track. */
+export function SubjectPicker({
+  label,
+  value,
+  tracks,
+  suggested,
+  onChange,
+}: {
+  label: string
+  value: string | null
+  tracks: { id: string; name: string }[]
+  suggested: string | null
+  onChange: (trackId: string | null) => void
+}) {
+  const suggestedName = tracks.find((t) => t.id === suggested)?.name
+  return (
+    <select
+      aria-label={`Subject for "${label}"`}
+      value={value ?? ''}
+      onChange={(e) => onChange(e.target.value || null)}
+      className="min-h-10 max-w-[12rem] min-w-0 rounded-lg border border-line bg-raised px-2 text-xs text-soft"
+    >
+      <option value="">{suggestedName ? `Weakest: ${shortTrackName(suggestedName)}` : 'Pick a subject'}</option>
+      {tracks.map((t) => (
+        <option key={t.id} value={t.id}>
+          {shortTrackName(t.name)}
+        </option>
+      ))}
+    </select>
   )
 }
