@@ -1,23 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import ErrorBanner from '../components/ErrorBanner'
 import TopicRow, { Check } from '../components/TopicRow'
 import { trackColor } from '../components/trackColor'
 import { MiniProgress, PageHeader, ProgressCard, StatGrid } from '../components/ui'
-import {
-  addSession,
-  ensureDayPlan,
-  loadCatalog,
-  minutesOn,
-  regenerateDay,
-  setItemDone,
-  type Block,
-  type Item,
-} from '../lib/data'
+import { ensureDayPlan, loadCatalog, regenerateDay, setItemDone, type Block, type Item } from '../lib/data'
 import { todayIST, weekdayOf } from '../lib/date'
-import { fmtClock, fmtMin } from '../lib/format'
 import { message, useCatalog } from '../lib/useCatalog'
-import { useTimer, type ActiveTimer } from '../lib/useTimer'
 
 const dayLabel = (date: string) =>
   new Date(`${date}T00:00:00Z`).toLocaleDateString('en-IN', { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long' })
@@ -27,25 +16,22 @@ type Group = { block: Block | null; items: Item[] }
 export default function Today() {
   const [date, setDate] = useState(todayIST)
   const [items, setItems] = useState<Item[]>([])
-  const [spentToday, setSpentToday] = useState(0)
   const [regenerating, setRegenerating] = useState(false)
-  const { cat, setCat, error, setError, actions, logMinutes } = useCatalog({
+  const { cat, setCat, error, setError, actions } = useCatalog({
     autoLoad: false,
     // mirrors the DB trigger for today's items
     onDoneChanged: (topicId, doneAt) =>
       setItems((its) => its.map((i) => (i.topic_id === topicId ? { ...i, done_at: doneAt } : i))),
-    onMinutesLogged: (_topicId, minutes) => setSpentToday((s) => s + minutes),
   })
 
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       const c = await loadCatalog()
-      const [its, spent] = await Promise.all([ensureDayPlan(c, date), minutesOn(date)])
+      const its = await ensureDayPlan(c, date)
       if (cancelled) return
       setCat(c)
       setItems(its)
-      setSpentToday(spent)
     })().catch((e: unknown) => {
       if (!cancelled) setError(message(e))
     })
@@ -62,15 +48,6 @@ export default function Today() {
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])
-
-  const saveTimer = useCallback(
-    async (t: ActiveTimer, endedAt: Date, minutes: number) => {
-      await addSession(t.topicId, new Date(t.startedAt), endedAt, minutes)
-      logMinutes(t.topicId, minutes)
-    },
-    [logMinutes],
-  )
-  const timer = useTimer(saveTimer)
 
   async function toggleItem(item: Item) {
     try {
@@ -120,20 +97,8 @@ export default function Today() {
 
   const isDone = (i: Item) => (i.topic_id ? (cat.topicById.get(i.topic_id)?.done ?? false) : i.done_at !== null)
   const doneCount = items.filter(isDone).length
-  let estMin = 0
-  let unestimated = 0
-  for (const g of groups)
-    for (const i of g.items) {
-      if (!i.topic_id) estMin += g.block?.minutes ?? 0
-      else {
-        const est = cat.topicById.get(i.topic_id)?.est ?? null
-        if (est === null) unestimated++
-        else estMin += est
-      }
-    }
   const allDone = items.length > 0 && doneCount === items.length
   const trackById = new Map(cat.tracks.map((t) => [t.id, t]))
-  const offPlanTimer = timer.active && !items.some((i) => i.topic_id === timer.active?.topicId) ? timer.active : null
   const hasBlocksToday = cat.blocks.some((b) => b.weekday === weekdayOf(date))
 
   return (
@@ -161,12 +126,8 @@ export default function Today() {
               <ProgressCard done={doneCount} total={items.length} label="Today's progress" />
               <StatGrid
                 items={[
-                  { icon: 'hourglass', value: estMin === 0 && unestimated > 0 ? '—' : fmtMin(estMin), label: 'Estimated' },
-                  { icon: 'clock', value: fmtMin(spentToday), label: 'Studied' },
                   { icon: 'list', value: items.length, label: items.length === 1 ? 'Item' : 'Items' },
-                  ...(unestimated > 0
-                    ? [{ icon: 'flag' as const, value: unestimated, label: 'Unestimated', tone: 'warn' as const }]
-                    : [{ icon: 'check' as const, value: doneCount, label: 'Done' }]),
+                  { icon: 'check', value: doneCount, label: 'Done' },
                 ]}
               />
             </>
@@ -189,22 +150,6 @@ export default function Today() {
         <div className="flex min-w-0 flex-col gap-6 lg:order-1">
           <ErrorBanner error={error} onDismiss={() => setError(null)} />
 
-          {offPlanTimer && (
-            <div className="flex items-center gap-3 rounded-[10px] border border-accent/40 bg-accent/10 px-3 py-2.5 text-accent">
-              <span className="flex-1 truncate">
-                Timer running: {cat.topicById.get(offPlanTimer.topicId)?.title ?? 'a removed topic'}
-              </span>
-              <span className="tabular-nums">{fmtClock(timer.elapsedSec)}</span>
-              <button
-                type="button"
-                className="font-medium underline"
-                onClick={() => void timer.stop().catch((e: unknown) => setError(message(e)))}
-              >
-                Stop
-              </button>
-            </div>
-          )}
-
           {items.length === 0 && (
             <p className="text-soft">
               {hasBlocksToday ? 'Every track scheduled today is complete. ' : 'Nothing is scheduled today. '}
@@ -226,28 +171,12 @@ export default function Today() {
                       <span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ background: trackColor(track.sort_order) }} />
                     )}
                     <h3 className="min-w-0 flex-1 truncate font-medium">{name}</h3>
-                    {g.block && <span className="text-xs text-muted tabular-nums">{fmtMin(g.block.minutes)}</span>}
                     <MiniProgress done={done} total={g.items.length} label={`${name} progress`} />
                   </div>
                   <ul className="divide-y divide-line overflow-hidden rounded-[14px] border border-line bg-card">
                     {g.items.map((i) => {
                       const topic = i.topic_id ? cat.topicById.get(i.topic_id) : undefined
-                      if (topic) {
-                        const running = timer.active?.topicId === topic.id
-                        return (
-                          <TopicRow
-                            key={i.id}
-                            topic={topic}
-                            actions={actions}
-                            timer={{
-                              running,
-                              elapsedSec: running ? timer.elapsedSec : 0,
-                              onStart: () => timer.start(topic.id),
-                              onStop: timer.stop,
-                            }}
-                          />
-                        )
-                      }
+                      if (topic) return <TopicRow key={i.id} topic={topic} actions={actions} />
                       return (
                         <li key={i.id} className="flex items-center gap-3 px-3 py-3">
                           <Check checked={i.done_at !== null} label={`Mark "${i.label ?? ''}" done`} onClick={() => void toggleItem(i)} />

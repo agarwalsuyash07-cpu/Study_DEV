@@ -9,7 +9,6 @@
       "order": 1,
       "name": "Microeconomic Principles",
       "co": "CO1",
-      "estMinutes": 240,
       "topics": [
         {
           "id": "micro-econ-m1-t1",
@@ -17,7 +16,6 @@
           "title": "intro to economics",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -26,7 +24,6 @@
           "title": "definitions (wealth, welfare)",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -35,7 +32,6 @@
           "title": "scarcity & growth",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -44,7 +40,6 @@
           "title": "central problems of an economy",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -53,7 +48,6 @@
           "title": "ten principles of economics",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -62,7 +56,6 @@
           "title": "positive vs normative",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -71,7 +64,6 @@
           "title": "production possibility frontier",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -81,7 +73,6 @@
       "order": 2,
       "name": "Consumer Behavior",
       "co": "CO2",
-      "estMinutes": 270,
       "topics": [
         {
           "id": "micro-econ-m2-t1",
@@ -89,7 +80,6 @@
           "title": "cardinal vs ordinal utility",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -98,7 +88,6 @@
           "title": "law of diminishing marginal utility",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -107,7 +96,6 @@
           "title": "consumer equilibrium",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -116,7 +104,6 @@
           "title": "indifference curve analysis",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -125,7 +112,6 @@
           "title": "demand analysis",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -134,7 +120,6 @@
           "title": "law of supply",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -143,7 +128,6 @@
           "title": "market equilibrium",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -152,7 +136,6 @@
           "title": "elasticity of demand & supply",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -162,7 +145,6 @@
       "order": 3,
       "name": "Production Function",
       "co": "CO3",
-      "estMinutes": 300,
       "topics": [
         {
           "id": "micro-econ-m3-t1",
@@ -170,7 +152,6 @@
           "title": "production function",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -179,7 +160,6 @@
           "title": "law of variable proportions, returns to scale",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -188,7 +168,6 @@
           "title": "scale of production",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -197,7 +176,6 @@
           "title": "economies/diseconomies of scale",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -206,7 +184,6 @@
           "title": "Cobb-Douglas & CES",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -215,7 +192,6 @@
           "title": "producer equilibrium",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -224,7 +200,6 @@
           "title": "iso-quant",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -233,7 +208,6 @@
           "title": "iso-cost",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -243,7 +217,6 @@
       "order": 4,
       "name": "Cost & Revenue Function",
       "co": "CO4",
-      "estMinutes": 360,
       "topics": [
         {
           "id": "micro-econ-m4-t1",
@@ -251,7 +224,6 @@
           "title": "cost functions",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -260,7 +232,6 @@
           "title": "short-run & long-run cost",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -269,7 +240,6 @@
           "title": "traditional theory of costs",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -278,7 +248,6 @@
           "title": "revenue functions",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -287,7 +256,6 @@
           "title": "perfect & imperfect markets",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -296,7 +264,6 @@
           "title": "modern theory of costs",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -305,7 +272,6 @@
           "title": "break-even analysis",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -314,7 +280,6 @@
           "title": "cost minimization",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -323,7 +288,6 @@
           "title": "types of cost",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -333,7 +297,6 @@
       "order": 5,
       "name": "Market Structure",
       "co": "CO5",
-      "estMinutes": 300,
       "topics": [
         {
           "id": "micro-econ-m5-t1",
@@ -341,7 +304,6 @@
           "title": "market characteristics",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -350,7 +312,6 @@
           "title": "perfect competition",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -359,7 +320,6 @@
           "title": "firm & industry equilibrium",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -368,7 +328,6 @@
           "title": "game theory, Nash equilibrium",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -377,7 +336,6 @@
           "title": "monopoly",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -386,7 +344,6 @@
           "title": "monopolistic competition",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -395,7 +352,6 @@
           "title": "duopoly",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -404,7 +360,6 @@
           "title": "oligopoly",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]

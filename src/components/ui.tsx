@@ -38,10 +38,8 @@ export function ProgressCard({ done, total, label }: { done: number; total: numb
 const ICONS = {
   book: 'M4 4.5A1.5 1.5 0 015.5 3H16v12H5.5A1.5 1.5 0 004 16.5v-12zM4 16.5A1.5 1.5 0 005.5 18H16',
   list: 'M7 5h9M7 10h9M7 15h9M3.5 5h.01M3.5 10h.01M3.5 15h.01',
-  clock: 'M10 18a8 8 0 100-16 8 8 0 000 16zM10 6v4l2.5 2.5',
   check: 'M10 18a8 8 0 100-16 8 8 0 000 16zM6.5 10.5l2.5 2.5 4.5-5',
   flag: 'M4 18V3m0 1h10l-2 3.5 2 3.5H4',
-  hourglass: 'M5 3h10M5 17h10M6 3c0 4 8 4 8 7s-8 3-8 7M14 3c0 4-8 4-8 7s8 3 8 7',
 }
 
 export type StatItem = { icon: keyof typeof ICONS; value: ReactNode; label: string; tone?: 'warn' }

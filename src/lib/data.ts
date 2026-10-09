@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 import type { Tables } from './database.types'
-import { addDays, todayIST, weekdayOf } from './date'
-import { assignDay, keptByBlock, topicEst, type PlanBlock, type PlanItem, type PlanTopic } from './plan'
+import { weekdayOf } from './date'
+import { assignDay, keptByBlock, type PlanBlock, type PlanItem, type PlanTopic } from './plan'
 
 export type Track = Tables<'tracks'>
 export type Module = Tables<'modules'>
@@ -14,7 +14,6 @@ export type Topic = PlanTopic & {
   bloom: string | null
   revision: boolean
   doneAt: string | null
-  spentMin: number
 }
 export type Catalog = {
   tracks: Track[]
@@ -34,22 +33,18 @@ function ok(res: { error: { message: string } | null }, what: string): void {
 
 // ponytail: plain selects cap at the API's 1000-row limit; fine for ~300 topics, paginate if the syllabus grows past that.
 export async function loadCatalog(): Promise<Catalog> {
-  const [t, m, tp, b, s] = await Promise.all([
+  const [t, m, tp, b] = await Promise.all([
     supabase.from('tracks').select('*').order('sort_order'),
     supabase.from('modules').select('*').order('sort_order'),
     supabase.from('topics').select('*').order('sort_order'),
     supabase.from('schedule_blocks').select('*').order('weekday').order('sort_order'),
-    supabase.from('topic_spent').select('*'),
   ])
   const tracks = rows(t, 'load tracks')
   const modules = rows(m, 'load modules')
   const topicRows = rows(tp, 'load topics')
   const blocks = rows(b, 'load schedule')
-  const spent = new Map(rows(s, 'load time spent').map((r) => [r.topic_id, r.minutes ?? 0]))
 
   const moduleById = new Map(modules.map((x) => [x.id, x]))
-  const countByModule = new Map<string, number>()
-  for (const x of topicRows) countByModule.set(x.module_id, (countByModule.get(x.module_id) ?? 0) + 1)
 
   const topics: Topic[] = []
   for (const x of topicRows) {
@@ -60,7 +55,6 @@ export async function loadCatalog(): Promise<Catalog> {
       trackId: mod.track_id,
       moduleOrder: mod.sort_order,
       order: x.sort_order,
-      est: topicEst(mod.est_minutes, countByModule.get(mod.id) ?? 0),
       done: x.done_at !== null,
       title: x.title,
       moduleId: mod.id,
@@ -68,7 +62,6 @@ export async function loadCatalog(): Promise<Catalog> {
       bloom: x.bloom,
       revision: x.revision,
       doneAt: x.done_at,
-      spentMin: spent.get(x.id) ?? 0,
     })
   }
   topics.sort((a, b) => a.moduleOrder - b.moduleOrder || a.order - b.order)
@@ -79,7 +72,7 @@ const toPlanBlock = (b: Block): PlanBlock => ({
   id: b.id,
   trackId: b.track_id,
   label: b.label,
-  minutes: b.minutes,
+  topics: b.topics,
   sortOrder: b.sort_order,
 })
 
@@ -88,8 +81,9 @@ export function blocksFor(cat: Catalog, date: string): PlanBlock[] {
   return cat.blocks.filter((b) => b.weekday === wd).map(toPlanBlock)
 }
 
-export function weeklyMinutes(cat: Catalog, trackId: string): number {
-  return cat.blocks.reduce((sum, b) => (b.track_id === trackId ? sum + b.minutes : sum), 0)
+/** Topics per week the schedule gives a track (all tracks when omitted). */
+export function weeklyTopics(cat: Catalog, trackId?: string): number {
+  return cat.blocks.reduce((sum, b) => (b.track_id !== null && (trackId === undefined || b.track_id === trackId) ? sum + b.topics : sum), 0)
 }
 
 const toRpcItems =(items: PlanItem[]) =>
@@ -115,12 +109,9 @@ export async function ensureDayPlan(cat: Catalog, date: string): Promise<Item[]>
 export async function regenerateDay(cat: Catalog, date: string, current: Item[]): Promise<Item[]> {
   const kept = current.filter((i) => i.done_at !== null)
   const exclude = new Set(kept.flatMap((i) => (i.topic_id ? [i.topic_id] : [])))
-  const keptMin = keptByBlock(
-    kept.map((i) => ({ blockId: i.block_id, topicId: i.topic_id, label: i.label })),
-    (id) => cat.topicById.get(id)?.est ?? null,
-  )
+  const keptCount = keptByBlock(kept.map((i) => ({ blockId: i.block_id, topicId: i.topic_id })))
   const offset = Math.max(-1, ...kept.map((i) => i.sort_order)) + 1
-  const items = assignDay(blocksFor(cat, date), cat.topics, { exclude, kept: keptMin }).map((i) => ({
+  const items = assignDay(blocksFor(cat, date), cat.topics, { exclude, kept: keptCount }).map((i) => ({
     ...i,
     sortOrder: i.sortOrder + offset,
   }))
@@ -145,40 +136,6 @@ export async function setRevision(topicId: string, revision: boolean): Promise<v
   ok(await supabase.from('topics').update({ revision }).eq('id', topicId), 'update star')
 }
 
-export async function setModuleEst(moduleId: string, estMinutes: number | null): Promise<void> {
-  if (estMinutes !== null && (!Number.isInteger(estMinutes) || estMinutes <= 0))
-    throw new Error('estimate must be a positive whole number of minutes')
-  ok(await supabase.from('modules').update({ est_minutes: estMinutes }).eq('id', moduleId), 'update estimate')
-}
-
-export async function addSession(topicId: string, startedAt: Date, endedAt: Date, minutes: number): Promise<void> {
-  if (!Number.isInteger(minutes) || minutes <= 0) throw new Error('minutes must be a positive whole number')
-  ok(
-    await supabase.from('sessions').insert({
-      topic_id: topicId,
-      started_at: startedAt.toISOString(),
-      ended_at: endedAt.toISOString(),
-      minutes,
-    }),
-    'save session',
-  )
-}
-
-export async function addManualMinutes(topicId: string, minutes: number): Promise<void> {
-  const end = new Date()
-  return addSession(topicId, new Date(end.getTime() - minutes * 60_000), end, minutes)
-}
-
-/** Minutes logged on an IST calendar day. */
-export async function minutesOn(date: string): Promise<number> {
-  const res = await supabase
-    .from('sessions')
-    .select('minutes')
-    .gte('ended_at', `${date}T00:00:00+05:30`)
-    .lt('ended_at', `${addDays(date, 1)}T00:00:00+05:30`)
-  return rows(res, 'load today sessions').reduce((sum, r) => sum + r.minutes, 0)
-}
-
 /** Saved plan items for a date range, keyed by date; dates without a saved plan are absent. */
 export async function loadPlansBetween(from: string, to: string): Promise<Map<string, Item[]>> {
   const [plans, items] = await Promise.all([
@@ -190,25 +147,13 @@ export async function loadPlansBetween(from: string, to: string): Promise<Map<st
   return out
 }
 
-/** Minutes studied per IST day, for sessions that ended in [from, to]. */
-export async function minutesByDay(from: string, to: string): Promise<Map<string, number>> {
-  const res = await supabase
-    .from('sessions')
-    .select('minutes, ended_at')
-    .gte('ended_at', `${from}T00:00:00+05:30`)
-    .lt('ended_at', `${addDays(to, 1)}T00:00:00+05:30`)
-  const out = new Map<string, number>()
-  for (const s of rows(res, 'load week sessions')) {
-    const day = todayIST(new Date(s.ended_at))
-    out.set(day, (out.get(day) ?? 0) + s.minutes)
-  }
-  return out
-}
+/** Mirrors the schedule_blocks_topics_check constraint. */
+export const MAX_BLOCK_TOPICS = 20
 
 export async function addBlock(weekday: number, trackId: string | null, sortOrder: number): Promise<Block> {
   const res = await supabase
     .from('schedule_blocks')
-    .insert({ weekday, track_id: trackId, label: trackId ? null : 'Study block', minutes: 60, sort_order: sortOrder })
+    .insert({ weekday, track_id: trackId, label: trackId ? null : 'Study block', sort_order: sortOrder })
     .select()
     .single()
   if (res.error) throw new Error(`add block: ${res.error.message}`)
@@ -217,10 +162,10 @@ export async function addBlock(weekday: number, trackId: string | null, sortOrde
 
 export async function updateBlock(
   id: number,
-  patch: Partial<Pick<Block, 'track_id' | 'label' | 'minutes' | 'sort_order'>>,
+  patch: Partial<Pick<Block, 'track_id' | 'label' | 'topics' | 'sort_order'>>,
 ): Promise<void> {
-  if (patch.minutes !== undefined && (!Number.isInteger(patch.minutes) || patch.minutes < 1 || patch.minutes > 1440))
-    throw new Error('minutes must be a whole number between 1 and 1440')
+  if (patch.topics !== undefined && (!Number.isInteger(patch.topics) || patch.topics < 1 || patch.topics > MAX_BLOCK_TOPICS))
+    throw new Error(`topics must be a whole number between 1 and ${MAX_BLOCK_TOPICS}`)
   ok(await supabase.from('schedule_blocks').update(patch).eq('id', id), 'update block')
 }
 
@@ -232,7 +177,6 @@ const EXPORT_TABLES = [
   ['tracks', 'id'],
   ['modules', 'id'],
   ['topics', 'id'],
-  ['sessions', 'id'],
   ['schedule_blocks', 'id'],
   ['day_plans', 'date'],
   ['day_plan_items', 'id'],

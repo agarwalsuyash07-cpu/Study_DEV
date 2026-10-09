@@ -3,7 +3,7 @@
 How it's built and why: [ARCHITECTURE.md](ARCHITECTURE.md) · decisions: [DECISIONS.md](DECISIONS.md).
 
 ## Current state
-- **Works:** email + password login; Dashboard (`/`: KPIs, streak, 26-week study heatmap, track progress, today snapshot, recent completions); Today (`/today`: auto-assigned plan, timer, manual minutes, regenerate); Tracks + TrackDetail (progress, estimates, est. finish); Week (saved days + forecast); Revision (starred topics); Settings (schedule editor, JSON export).
+- **Works:** email + password login; Dashboard (`/`: KPIs, streak, 26-week topics-done heatmap, track progress, today snapshot, recent completions); Today (`/today`: auto-assigned plan, regenerate); Tracks + TrackDetail (progress, topics left, topics/week); Week (saved days + forecast); Revision (starred topics); Settings (schedule editor: topics per block, JSON export). No time tracking anywhere, by design.
 - **Not done:** no error tracking, no CI.
 
 ## Run locally
@@ -20,7 +20,7 @@ How it's built and why: [ARCHITECTURE.md](ARCHITECTURE.md) · decisions: [DECISI
 - Roll back a frontend deploy by promoting the previous Vercel deployment.
 
 ## Tests and gates
-- `npm test`: vitest, pure logic (`plan`, `date`, `format`, `stats`).
+- `npm test`: vitest, pure logic (`plan`, `date`, `stats`).
 - `npm run build`: `tsc --noEmit` + Vite build. The >500 kB chunk warning is known and harmless at this size.
 
 ## Open threads

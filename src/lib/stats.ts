@@ -20,11 +20,7 @@ export function heatmapWeeks(today: string, count: number): string[][] {
   return Array.from({ length: count }, (_, i) => weekDates(addDays(today, -7 * (count - 1 - i))))
 }
 
-/** 0 = nothing, 4 = a long day. */
-export function heatLevel(minutes: number): 0 | 1 | 2 | 3 | 4 {
-  if (minutes <= 0) return 0
-  if (minutes < 45) return 1
-  if (minutes < 120) return 2
-  if (minutes < 240) return 3
-  return 4
+/** Topics done that day, capped at 4. */
+export function heatLevel(done: number): 0 | 1 | 2 | 3 | 4 {
+  return Math.min(4, Math.max(0, Math.floor(done))) as 0 | 1 | 2 | 3 | 4
 }

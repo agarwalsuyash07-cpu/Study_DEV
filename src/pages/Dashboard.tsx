@@ -4,9 +4,8 @@ import ErrorBanner from '../components/ErrorBanner'
 import ProgressBar from '../components/ProgressBar'
 import { trackColor } from '../components/trackColor'
 import { PageHeader } from '../components/ui'
-import { loadItems, minutesByDay, weeklyMinutes, type Item } from '../lib/data'
+import { loadItems, weeklyTopics, type Item } from '../lib/data'
 import { todayIST, weekDates } from '../lib/date'
-import { fmtMin } from '../lib/format'
 import { trackLink } from '../lib/links'
 import { heatLevel, heatmapWeeks, streaks } from '../lib/stats'
 import { message, useCatalog } from '../lib/useCatalog'
@@ -19,6 +18,7 @@ const fmtDate = (date: string, opts: Intl.DateTimeFormatOptions) =>
   new Date(`${date}T00:00:00Z`).toLocaleDateString('en-IN', { timeZone: 'UTC', ...opts })
 
 const days = (n: number) => `${n} ${n === 1 ? 'day' : 'days'}`
+const topics = (n: number) => `${n} ${n === 1 ? 'topic' : 'topics'}`
 
 function Ring({ value, size = 56, color = 'var(--color-accent)' }: { value: number; size?: number; color?: string }) {
   const r = (size - 6) / 2
@@ -74,17 +74,14 @@ export default function Dashboard() {
   const [today] = useState(todayIST)
   const weeks = heatmapWeeks(today, WEEKS)
   const from = weeks[0]![0]!
-  const [minutes, setMinutes] = useState<Map<string, number> | null>(null)
   const [items, setItems] = useState<Item[] | null>(null)
 
   useEffect(() => {
     let cancelled = false
     // loadItems, not ensureDayPlan: viewing the dashboard shouldn't freeze today's plan
-    Promise.all([minutesByDay(from, today), loadItems(today)]).then(
-      ([m, i]) => {
-        if (cancelled) return
-        setMinutes(m)
-        setItems(i)
+    loadItems(today).then(
+      (i) => {
+        if (!cancelled) setItems(i)
       },
       (e: unknown) => {
         if (!cancelled) setError(message(e))
@@ -93,9 +90,9 @@ export default function Dashboard() {
     return () => {
       cancelled = true
     }
-  }, [from, today, setError])
+  }, [today, setError])
 
-  if (!cat || !minutes || !items) {
+  if (!cat || !items) {
     return (
       <main>
         <PageHeader title="Dashboard" />
@@ -109,7 +106,6 @@ export default function Dashboard() {
 
   const total = cat.topics.length
   const done = cat.topics.filter((t) => t.done)
-  const spent = cat.topics.reduce((n, t) => n + t.spentMin, 0)
 
   const doneByDay = new Map<string, number>()
   for (const t of done) {
@@ -117,12 +113,11 @@ export default function Dashboard() {
     const d = todayIST(new Date(t.doneAt))
     doneByDay.set(d, (doneByDay.get(d) ?? 0) + 1)
   }
-  const active = new Set([...[...minutes].filter(([, m]) => m > 0).map(([d]) => d), ...doneByDay.keys()])
-  const streak = streaks(active, today)
+  const streak = streaks(new Set(doneByDay.keys()), today)
 
-  const weekMin = weekDates(today).reduce((n, d) => n + (minutes.get(d) ?? 0), 0)
-  const weekGoal = cat.blocks.reduce((n, b) => n + b.minutes, 0)
-  const heatTotal = [...minutes.values()].reduce((n, m) => n + m, 0)
+  const weekDone = weekDates(today).reduce((n, d) => n + (doneByDay.get(d) ?? 0), 0)
+  const weekGoal = weeklyTopics(cat)
+  const heatTotal = [...doneByDay].reduce((n, [d, c]) => (d >= from ? n + c : n), 0)
 
   const todayDone = items.filter((i) => i.done_at !== null).length
   const recent = done
@@ -147,13 +142,13 @@ export default function Dashboard() {
             sub={`${done.length} of ${total} topics`}
             visual={<Ring value={total ? done.length / total : 0} />}
           />
-          <Kpi label="Time studied" value={fmtMin(spent)} sub={`${fmtMin(heatTotal)} in the last ${WEEKS} weeks`} />
+          <Kpi label="Topics done" value={done.length} sub={`${heatTotal} in the last ${WEEKS} weeks`} />
           <Kpi label="Current streak" value={days(streak.current)} sub={`Best: ${days(streak.best)}`} />
           <Kpi
             label="This week"
-            value={fmtMin(weekMin)}
-            sub={weekGoal ? `of ${fmtMin(weekGoal)} scheduled` : 'No schedule set'}
-            visual={<Ring value={weekGoal ? weekMin / weekGoal : 0} color="var(--color-done)" />}
+            value={topics(weekDone)}
+            sub={weekGoal ? `of ${weekGoal} scheduled` : 'No schedule set'}
+            visual={<Ring value={weekGoal ? weekDone / weekGoal : 0} color="var(--color-done)" />}
           />
         </div>
 
@@ -187,15 +182,14 @@ export default function Dashboard() {
                     {Number(week[0]!.slice(8)) <= 7 ? fmtDate(week[0]!, { month: 'short' }) : ''}
                   </span>
                   {week.map((d) => {
-                    const m = minutes.get(d) ?? 0
                     const n = doneByDay.get(d) ?? 0
-                    const tip = `${fmtDate(d, { day: 'numeric', month: 'short' })}: ${fmtMin(m)} studied, ${n} topic${n === 1 ? '' : 's'} done`
+                    const tip = `${fmtDate(d, { day: 'numeric', month: 'short' })}: ${topics(n)} done`
                     return (
                       <span
                         key={d}
                         title={d > today ? undefined : tip}
                         aria-label={d > today ? undefined : tip}
-                        className={`aspect-square w-full rounded-[3px] ${d > today ? '' : HEAT[heatLevel(m)]} ${d === today ? 'ring-1 ring-soft' : ''}`}
+                        className={`aspect-square w-full rounded-[3px] ${d > today ? '' : HEAT[heatLevel(n)]} ${d === today ? 'ring-1 ring-soft' : ''}`}
                       />
                     )
                   })}
@@ -220,7 +214,7 @@ export default function Dashboard() {
                   <span className="text-xl font-semibold tabular-nums">
                     {todayDone}/{items.length}
                   </span>
-                  <span className="text-xs text-muted">{fmtMin(minutes.get(today) ?? 0)} studied</span>
+                  <span className="text-xs text-muted">{items.length - todayDone} left</span>
                 </div>
                 <ProgressBar value={todayDone / items.length} label="Today's plan progress" color="var(--color-done)" />
                 <ul className="mt-4 flex flex-col gap-2">
@@ -264,7 +258,7 @@ export default function Dashboard() {
                 const ts = cat.topics.filter((t) => t.trackId === track.id)
                 const n = ts.filter((t) => t.done).length
                 const color = trackColor(track.sort_order)
-                const weekly = weeklyMinutes(cat, track.id)
+                const weekly = weeklyTopics(cat, track.id)
                 return (
                   <li key={track.id}>
                     <Link to={`/tracks/${track.id}`} className="group block">
@@ -276,7 +270,7 @@ export default function Dashboard() {
                         </span>
                       </div>
                       <ProgressBar value={ts.length ? n / ts.length : 0} color={color} label={`${track.name} progress`} />
-                      <p className="mt-1 text-[11px] text-muted">{weekly ? `${fmtMin(weekly)} / week` : 'Not scheduled'}</p>
+                      <p className="mt-1 text-[11px] text-muted">{weekly ? `${topics(weekly)} / week` : 'Not scheduled'}</p>
                     </Link>
                   </li>
                 )

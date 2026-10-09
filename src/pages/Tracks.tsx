@@ -1,30 +1,20 @@
 import { Link, useNavigate } from 'react-router'
 import ErrorBanner from '../components/ErrorBanner'
 import ProgressBar from '../components/ProgressBar'
-import { finishLabel, leftLabel } from '../components/TrackStats'
 import { trackColor } from '../components/trackColor'
-import { PageHeader, Pill, ProgressCard, StatGrid } from '../components/ui'
-import { weeklyMinutes } from '../lib/data'
-import { todayIST } from '../lib/date'
-import { fmtMin } from '../lib/format'
-import { trackSummary } from '../lib/plan'
+import { PageHeader, ProgressCard, StatGrid } from '../components/ui'
+import { weeklyTopics } from '../lib/data'
 import { useCatalog } from '../lib/useCatalog'
 
 export default function Tracks() {
   const { cat, error, setError } = useCatalog()
   const navigate = useNavigate()
-  const today = todayIST()
 
   const rows = cat
-    ? cat.tracks.map((track) => ({
-        track,
-        weekly: weeklyMinutes(cat, track.id),
-        s: trackSummary(
-          cat.topics.filter((t) => t.trackId === track.id),
-          weeklyMinutes(cat, track.id),
-          today,
-        ),
-      }))
+    ? cat.tracks.map((track) => {
+        const ts = cat.topics.filter((t) => t.trackId === track.id)
+        return { track, weekly: weeklyTopics(cat, track.id), s: { total: ts.length, doneCount: ts.filter((t) => t.done).length } }
+      })
     : []
   const done = rows.reduce((n, r) => n + r.s.doneCount, 0)
   const total = rows.reduce((n, r) => n + r.s.total, 0)
@@ -45,23 +35,21 @@ export default function Tracks() {
                 items={[
                   { icon: 'book', value: cat.tracks.length, label: 'Tracks' },
                   { icon: 'list', value: total, label: 'Topics' },
-                  { icon: 'clock', value: fmtMin(rows.reduce((n, r) => n + r.s.spentMin, 0)), label: 'Spent' },
-                  { icon: 'hourglass', value: fmtMin(rows.reduce((n, r) => n + r.s.remainingEstMin, 0)), label: 'Left' },
+                  { icon: 'check', value: done, label: 'Done' },
+                  { icon: 'flag', value: total - done, label: 'Left' },
                 ]}
               />
             </div>
 
             <div className="overflow-x-auto rounded-[14px] border border-line">
-              <table className="w-full min-w-[820px] text-left">
+              <table className="w-full min-w-[640px] text-left">
                 <thead className="bg-card text-xs text-muted">
                   <tr className="border-b border-line">
                     <th className={th}>Track</th>
                     <th className={`${th} w-[28%]`}>Progress</th>
                     <th className={`${th} text-right`}>Topics</th>
-                    <th className={`${th} text-right`}>Per week</th>
-                    <th className={`${th} text-right`}>Spent</th>
                     <th className={`${th} text-right`}>Left</th>
-                    <th className={th}>Est. finish</th>
+                    <th className={`${th} text-right`}>Topics / week</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
@@ -89,15 +77,8 @@ export default function Tracks() {
                         <td className="px-4 py-3.5 text-right text-soft">
                           {s.doneCount}/{s.total}
                         </td>
-                        <td className="px-4 py-3.5 text-right text-soft">{weekly ? fmtMin(weekly) : '—'}</td>
-                        <td className="px-4 py-3.5 text-right text-soft">{fmtMin(s.spentMin)}</td>
-                        <td className="px-4 py-3.5 text-right text-soft">{leftLabel(s)}</td>
-                        <td className="px-4 py-3.5">
-                          <span className="flex flex-wrap items-center gap-2">
-                            <span className={s.completion.kind === 'date' ? '' : 'text-muted'}>{finishLabel(s.completion)}</span>
-                            {s.unestimatedCount > 0 && <Pill tone="warn">{s.unestimatedCount} unestimated</Pill>}
-                          </span>
-                        </td>
+                        <td className="px-4 py-3.5 text-right text-soft">{s.total - s.doneCount}</td>
+                        <td className="px-4 py-3.5 text-right text-soft">{weekly || '—'}</td>
                       </tr>
                     )
                   })}

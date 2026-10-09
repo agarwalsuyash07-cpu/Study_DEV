@@ -9,7 +9,6 @@
       "order": 1,
       "name": "Linear Programming",
       "co": "CO1",
-      "estMinutes": 585,
       "topics": [
         {
           "id": "ops-research-m1-t1",
@@ -17,7 +16,6 @@
           "title": "OR scope, intro to LP",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -26,7 +24,6 @@
           "title": "LP illustrations",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -35,7 +32,6 @@
           "title": "LP formulation",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -44,7 +40,6 @@
           "title": "graphical method",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -53,7 +48,6 @@
           "title": "simplex",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -62,7 +56,6 @@
           "title": "unboundedness",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -71,7 +64,6 @@
           "title": "multiple optima",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -80,7 +72,6 @@
           "title": "degeneracy",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -89,7 +80,6 @@
           "title": "primal & dual",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -98,7 +88,6 @@
           "title": "dual properties & solution",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -107,7 +96,6 @@
           "title": "dual simplex, artificial variables, Big-M, sensitivity analysis",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -117,7 +105,6 @@
       "order": 2,
       "name": "Special LPPs",
       "co": "CO2",
-      "estMinutes": 465,
       "topics": [
         {
           "id": "ops-research-m2-t1",
@@ -125,7 +112,6 @@
           "title": "transportation problem",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -134,7 +120,6 @@
           "title": "balanced/unbalanced, initial BFS methods",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -143,7 +128,6 @@
           "title": "MODI optimality",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -152,7 +136,6 @@
           "title": "assignment — Hungarian method",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -161,7 +144,6 @@
           "title": "sensitivity analysis, IPP formulation",
           "bloom": "Analyze",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -170,7 +152,6 @@
           "title": "solving IPP",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -179,7 +160,6 @@
           "title": "branch and bound",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -189,7 +169,6 @@
       "order": 3,
       "name": "Network Analysis",
       "co": "CO3",
-      "estMinutes": 240,
       "topics": [
         {
           "id": "ops-research-m3-t1",
@@ -197,7 +176,6 @@
           "title": "network construction",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -206,7 +184,6 @@
           "title": "CPM & PERT rules/precautions",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -215,7 +192,6 @@
           "title": "critical path",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -224,7 +200,6 @@
           "title": "probability & cost consideration",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -234,7 +209,6 @@
       "order": 4,
       "name": "Theory of Games",
       "co": "CO3",
-      "estMinutes": 330,
       "topics": [
         {
           "id": "ops-research-m4-t1",
@@ -242,7 +216,6 @@
           "title": "two-person zero-sum terminology",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -251,7 +224,6 @@
           "title": "saddle point games",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -260,7 +232,6 @@
           "title": "2x2 without saddle point",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -269,7 +240,6 @@
           "title": "mx2 & 2xn graphical method",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -278,7 +248,6 @@
           "title": "dominance principle",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -288,7 +257,6 @@
       "order": 5,
       "name": "Queuing Theory",
       "co": "CO3",
-      "estMinutes": 390,
       "topics": [
         {
           "id": "ops-research-m5-t1",
@@ -296,7 +264,6 @@
           "title": "queuing model characteristics",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -305,7 +272,6 @@
           "title": "arrival/service distributions, steady state M/M/1 & M/M/c",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -314,7 +280,6 @@
           "title": "queue length & waiting time distributions",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -323,7 +288,6 @@
           "title": "M/G/1 via embedded Markov chain",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -332,7 +296,6 @@
           "title": "transition probabilities",
           "bloom": "Evaluate",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -341,7 +304,6 @@
           "title": "steady state probabilities applications",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]

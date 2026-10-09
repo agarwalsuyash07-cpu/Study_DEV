@@ -9,7 +9,6 @@
       "order": 1,
       "name": "Database Systems & Data Models",
       "co": "CO1",
-      "estMinutes": 270,
       "topics": [
         {
           "id": "dbms-m1-t1",
@@ -17,7 +16,6 @@
           "title": "intro, DB approach characteristics, DBMS advantages",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -26,7 +24,6 @@
           "title": "actors on the scene, DBMS classification",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -35,7 +32,6 @@
           "title": "data models, schemas/instances, three-schema architecture",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -44,7 +40,6 @@
           "title": "DB system environment",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -53,7 +48,6 @@
           "title": "relational, semi-structured, graph, vector, time-series, distributed, unstructured DBs",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -62,7 +56,6 @@
           "title": "relational model concepts — relation characteristics, domain/key/null constraints",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -71,7 +64,6 @@
           "title": "entity & referential integrity, foreign keys, constraint violations",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -81,7 +73,6 @@
       "order": 2,
       "name": "ER Modeling & Relational DB Design",
       "co": "CO5",
-      "estMinutes": 570,
       "topics": [
         {
           "id": "dbms-m2-t1",
@@ -89,7 +80,6 @@
           "title": "ER attributes, relationship types/sets",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -98,7 +88,6 @@
           "title": "roles, structural constraints, weak entity, ER-to-relational mapping",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -107,7 +96,6 @@
           "title": "EER generalization, specialization, aggregation",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -116,7 +104,6 @@
           "title": "relational schema guidelines",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -125,7 +112,6 @@
           "title": "FDs — inference rules, equivalence, minimal cover",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -134,7 +120,6 @@
           "title": "FD axioms",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -143,7 +128,6 @@
           "title": "1NF/2NF/3NF",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -152,7 +136,6 @@
           "title": "BCNF",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -161,7 +144,6 @@
           "title": "MVD & 4NF",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -170,7 +152,6 @@
           "title": "join dependency & 5NF",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -180,7 +161,6 @@
       "order": 3,
       "name": "Physical DB Design & Query Processing",
       "co": "CO2",
-      "estMinutes": 330,
       "topics": [
         {
           "id": "dbms-m3-t1",
@@ -188,7 +168,6 @@
           "title": "file operations",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -197,7 +176,6 @@
           "title": "unordered/ordered record files",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -206,7 +184,6 @@
           "title": "static & dynamic hashing",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -215,7 +192,6 @@
           "title": "single/multi-level indexing",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -224,7 +200,6 @@
           "title": "dynamic multilevel indexing, B+ tree",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -233,7 +208,6 @@
           "title": "LSM trees & variants",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -242,7 +216,6 @@
           "title": "relational algebra, SQL-to-RA translation",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -251,7 +224,6 @@
           "title": "tuple relational calculus",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -260,7 +232,6 @@
           "title": "query trees, heuristic optimization",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -270,7 +241,6 @@
       "order": 4,
       "name": "Transactions, Concurrency Control & Recovery",
       "co": "CO3",
-      "estMinutes": 435,
       "topics": [
         {
           "id": "dbms-m4-t1",
@@ -278,7 +248,6 @@
           "title": "ACID, transaction states",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -287,7 +256,6 @@
           "title": "serial & serializable schedules",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -296,7 +264,6 @@
           "title": "recoverability & conflict serializability",
           "bloom": "Analyze",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -305,7 +272,6 @@
           "title": "need for concurrency control",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -314,7 +280,6 @@
           "title": "two-phase locking",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -323,7 +288,6 @@
           "title": "2PL serializability, deadlock & starvation",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -332,7 +296,6 @@
           "title": "timestamp ordering algorithm",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -341,7 +304,6 @@
           "title": "multiple granularity locking",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -350,7 +312,6 @@
           "title": "recovery algorithm categories",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -359,7 +320,6 @@
           "title": "deferred & immediate update recovery",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -369,7 +329,6 @@
       "order": 5,
       "name": "Distributed & NoSQL DBs",
       "co": "CO4",
-      "estMinutes": 330,
       "topics": [
         {
           "id": "dbms-m5-t1",
@@ -377,7 +336,6 @@
           "title": "distributed DB architectures, fragmentation, replication, allocation",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -386,7 +344,6 @@
           "title": "distributed transactions, concurrency, recovery",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -395,7 +352,6 @@
           "title": "distributed query processing & optimization",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -404,7 +360,6 @@
           "title": "NoSQL characteristics",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -413,7 +368,6 @@
           "title": "CAP theorem, ACID vs BASE",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -422,7 +376,6 @@
           "title": "NoSQL modeling — aggregate models, distribution models, MapReduce",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -431,7 +384,6 @@
           "title": "key-value, document, column, graph DBs",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]

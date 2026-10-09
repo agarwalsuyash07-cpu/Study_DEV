@@ -3,21 +3,20 @@ import ErrorBanner from '../components/ErrorBanner'
 import ProgressBar from '../components/ProgressBar'
 import { trackColor } from '../components/trackColor'
 import { PageHeader, Pill } from '../components/ui'
-import { blocksFor, loadPlansBetween, minutesByDay, type Catalog, type Item } from '../lib/data'
+import { blocksFor, loadPlansBetween, type Catalog, type Item } from '../lib/data'
 import { todayIST, weekDates } from '../lib/date'
-import { fmtMin } from '../lib/format'
 import { previewDays, type PlanItem } from '../lib/plan'
 import { message, useCatalog } from '../lib/useCatalog'
 
 type Row = { key: string; blockId: number | null; topicId: string | null; label: string | null; done: boolean }
-type Day = { date: string; kind: 'past' | 'today' | 'future'; preview: boolean; rows: Row[] | null; studied: number }
+type Day = { date: string; kind: 'past' | 'today' | 'future'; preview: boolean; rows: Row[] | null }
 
 const fromSaved = (items: Item[]): Row[] =>
   items.map((i) => ({ key: `s${i.id}`, blockId: i.block_id, topicId: i.topic_id, label: i.label, done: i.done_at !== null }))
 const fromPreview = (items: PlanItem[]): Row[] =>
   items.map((i, n) => ({ key: `p${n}`, blockId: i.blockId, topicId: i.topicId, label: i.label, done: false }))
 
-function buildDays(cat: Catalog, dates: string[], today: string, plans: Map<string, Item[]>, studied: Map<string, number>): Day[] {
+function buildDays(cat: Catalog, dates: string[], today: string, plans: Map<string, Item[]>): Day[] {
   const upcoming = dates.filter((d) => d >= today)
   // saved days reserve their topics so later previews don't repeat them
   const previews = previewDays(
@@ -36,7 +35,6 @@ function buildDays(cat: Catalog, dates: string[], today: string, plans: Map<stri
       kind,
       preview: preview !== null,
       rows: saved ? fromSaved(saved) : preview ? fromPreview(preview) : null,
-      studied: studied.get(date) ?? 0,
     }
   })
 }
@@ -49,17 +47,14 @@ export default function Week() {
   const [today] = useState(todayIST)
   const dates = weekDates(today)
   const [plans, setPlans] = useState<Map<string, Item[]> | null>(null)
-  const [studied, setStudied] = useState<Map<string, number>>(new Map())
 
   const from = dates[0]!
   const to = dates[6]!
   useEffect(() => {
     let cancelled = false
-    Promise.all([loadPlansBetween(from, to), minutesByDay(from, to)]).then(
-      ([p, s]) => {
-        if (cancelled) return
-        setPlans(p)
-        setStudied(s)
+    loadPlansBetween(from, to).then(
+      (p) => {
+        if (!cancelled) setPlans(p)
       },
       (e: unknown) => {
         if (!cancelled) setError(message(e))
@@ -82,8 +77,7 @@ export default function Week() {
     )
   }
 
-  const days = buildDays(cat, dates, today, plans, studied)
-  const blockById = new Map(cat.blocks.map((b) => [b.id, b]))
+  const days = buildDays(cat, dates, today, plans)
   const trackById = new Map(cat.tracks.map((t) => [t.id, t]))
 
   return (
@@ -104,16 +98,6 @@ export default function Week() {
         {days.map((d) => {
           const rows = d.rows ?? []
           const done = rows.filter((r) => r.done).length
-          let planned = 0
-          let unestimated = 0
-          for (const r of rows) {
-            if (!r.topicId) planned += (r.blockId !== null ? blockById.get(r.blockId)?.minutes : 0) ?? 0
-            else {
-              const est = cat.topicById.get(r.topicId)?.est ?? null
-              if (est === null) unestimated++
-              else planned += est
-            }
-          }
           const weekday = fmtDay(d.date, { weekday: 'long' })
           return (
             <li key={d.date}>
@@ -127,19 +111,9 @@ export default function Week() {
                     <span className="ml-auto text-sm text-muted tabular-nums">{d.rows ? `${done}/${rows.length}` : ''}</span>
                   </div>
                   {rows.length > 0 && <ProgressBar value={done / rows.length} label={`${weekday} progress`} />}
-                  <div className="mt-2 flex flex-wrap gap-x-4 text-xs text-muted tabular-nums">
-                    {d.rows === null ? (
-                      <span>{d.kind === 'past' ? 'No plan saved' : 'Nothing scheduled'}</span>
-                    ) : rows.length === 0 ? (
-                      <span>Nothing scheduled</span>
-                    ) : (
-                      <span>
-                        Planned {unestimated > 0 && planned === 0 ? '—' : fmtMin(planned)}
-                        {unestimated > 0 && <span className="text-warn"> +{unestimated} unestimated</span>}
-                      </span>
-                    )}
-                    {d.kind !== 'future' && <span>Studied {fmtMin(d.studied)}</span>}
-                  </div>
+                  {rows.length === 0 && (
+                    <p className="mt-2 text-xs text-muted">{d.rows === null && d.kind === 'past' ? 'No plan saved' : 'Nothing scheduled'}</p>
+                  )}
                 </div>
                 {rows.length > 0 && (
                   <ul className="divide-y divide-line border-t border-line">

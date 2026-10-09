@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import ErrorBanner from '../components/ErrorBanner'
-import { addBlock, deleteBlock, exportAll, updateBlock, type Block, type Track } from '../lib/data'
+import { addBlock, deleteBlock, exportAll, MAX_BLOCK_TOPICS, updateBlock, type Block, type Track } from '../lib/data'
 import { todayIST } from '../lib/date'
-import { fmtMin } from '../lib/format'
 import { PageHeader } from '../components/ui'
 import { supabase } from '../lib/supabase'
 import { message, useCatalog } from '../lib/useCatalog'
@@ -19,7 +18,7 @@ const DAYS: [number, string][] = [
 ]
 
 const inputCls = 'rounded-lg border border-line bg-raised px-2 py-2 outline-none focus:border-accent'
-type BlockPatch = Partial<Pick<Block, 'track_id' | 'label' | 'minutes' | 'sort_order'>>
+type BlockPatch = Partial<Pick<Block, 'track_id' | 'label' | 'topics' | 'sort_order'>>
 
 function BlockRow({
   block,
@@ -38,7 +37,7 @@ function BlockRow({
   onMove: (dir: -1 | 1) => Promise<void>
   onRemove: () => Promise<void>
 }) {
-  const [minutes, setMinutes] = useState(String(block.minutes))
+  const [count, setCount] = useState(String(block.topics))
   const [label, setLabel] = useState(block.label ?? '')
   const [busy, setBusy] = useState(false)
   const name = tracks.find((t) => t.id === block.track_id)?.name ?? block.label ?? 'block'
@@ -52,13 +51,13 @@ function BlockRow({
     }
   }
 
-  function saveMinutes() {
-    const n = Number(minutes)
-    if (!Number.isInteger(n) || n < 1 || n > 1440) {
-      setMinutes(String(block.minutes))
+  function saveCount() {
+    const n = Number(count)
+    if (!Number.isInteger(n) || n < 1 || n > MAX_BLOCK_TOPICS) {
+      setCount(String(block.topics))
       return
     }
-    if (n !== block.minutes) void run(() => onPatch({ minutes: n }))
+    if (n !== block.topics) void run(() => onPatch({ topics: n }))
   }
 
   function saveLabel() {
@@ -92,20 +91,24 @@ function BlockRow({
           ))}
           <option value="">No track (checklist item)</option>
         </select>
-        <input
-          aria-label={`Minutes for ${name}`}
-          type="number"
-          inputMode="numeric"
-          min={1}
-          max={1440}
-          value={minutes}
-          disabled={busy}
-          onChange={(e) => setMinutes(e.target.value)}
-          onBlur={saveMinutes}
-          onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-          className={`${inputCls} w-16 tabular-nums`}
-        />
-        <span className="text-sm text-muted">min</span>
+        {block.track_id !== null && (
+          <>
+            <input
+              aria-label={`Topics for ${name}`}
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={MAX_BLOCK_TOPICS}
+              value={count}
+              disabled={busy}
+              onChange={(e) => setCount(e.target.value)}
+              onBlur={saveCount}
+              onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+              className={`${inputCls} w-16 tabular-nums`}
+            />
+            <span className="text-sm text-muted">topics</span>
+          </>
+        )}
       </div>
       {block.track_id === null && (
         <input
@@ -208,12 +211,12 @@ export default function Settings() {
           <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {DAYS.map(([weekday, dayName]) => {
               const blocks = cat.blocks.filter((b) => b.weekday === weekday).sort((a, b) => a.sort_order - b.sort_order)
-              const total = blocks.reduce((s, b) => s + b.minutes, 0)
+              const total = blocks.reduce((s, b) => (b.track_id === null ? s : s + b.topics), 0)
               return (
                 <section key={weekday} aria-label={dayName} className="overflow-hidden rounded-[14px] border border-line bg-card">
                   <div className="flex items-baseline justify-between px-3 pt-3 pb-1">
                     <h3 className="font-medium">{dayName}</h3>
-                    <span className="text-xs text-soft tabular-nums">{total ? fmtMin(total) : 'Rest day'}</span>
+                    <span className="text-xs text-soft tabular-nums">{blocks.length === 0 ? 'Rest day' : total ? `${total} ${total === 1 ? 'topic' : 'topics'}` : ''}</span>
                   </div>
                   <ul className="divide-y divide-line">
                     {blocks.map((b, i) => (
@@ -273,7 +276,7 @@ export default function Settings() {
         <h2 id="data" className="text-base font-medium">
           Your data
         </h2>
-        <p className="mb-3 text-soft">Download every track, topic, session and plan as one JSON file.</p>
+        <p className="mb-3 text-soft">Download every track, topic, schedule block and plan as one JSON file.</p>
         <button
           type="button"
           onClick={() => void exportJson()}

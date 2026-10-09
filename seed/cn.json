@@ -9,7 +9,6 @@
       "order": 1,
       "name": "Networking Foundations",
       "co": "CO1",
-      "estMinutes": 210,
       "topics": [
         {
           "id": "cn-m1-t1",
@@ -17,7 +16,6 @@
           "title": "layering, protocols, topology",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -26,7 +24,6 @@
           "title": "encapsulation, mux/demux",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -35,7 +32,6 @@
           "title": "OSI & TCP/IP models",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -44,7 +40,6 @@
           "title": "physical layer basics, internet architecture",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -53,7 +48,6 @@
           "title": "sockets API",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -62,7 +56,6 @@
           "title": "throughput, bandwidth, delay, latency + example problems",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -71,7 +64,6 @@
           "title": "high-speed networks",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -81,7 +73,6 @@
       "order": 2,
       "name": "Direct Links",
       "co": "CO2",
-      "estMinutes": 435,
       "topics": [
         {
           "id": "cn-m2-t1",
@@ -89,7 +80,6 @@
           "title": "encoding",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -98,7 +88,6 @@
           "title": "framing PPP, HDLC, Ethernet 802.3",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -107,7 +96,6 @@
           "title": "Internet checksum, CRC",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -116,7 +104,6 @@
           "title": "Hamming code",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -125,7 +112,6 @@
           "title": "stop-and-wait",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -134,7 +120,6 @@
           "title": "sliding window",
           "bloom": "Analyze",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -143,7 +128,6 @@
           "title": "multiple-access protocols",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -152,7 +136,6 @@
           "title": "802.11 Wi-Fi, Bluetooth 802.15.1",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -161,7 +144,6 @@
           "title": "access & cellular networks",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -171,7 +153,6 @@
       "order": 3,
       "name": "Internetworking",
       "co": "CO3",
-      "estMinutes": 405,
       "topics": [
         {
           "id": "cn-m3-t1",
@@ -179,7 +160,6 @@
           "title": "datagrams, virtual circuits, VLANs",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -188,7 +168,6 @@
           "title": "IP service model, global addresses",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -197,7 +176,6 @@
           "title": "IP forwarding, classful, subnetting, classless",
           "bloom": "Analyze",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -206,7 +184,6 @@
           "title": "ARP, DHCP",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -215,7 +192,6 @@
           "title": "ICMP, NAT",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -224,7 +200,6 @@
           "title": "routing — graph, RIP distance vector, OSPF link state, metrics",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -233,7 +208,6 @@
           "title": "implementation, performance, Packet Tracer",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -242,7 +216,6 @@
           "title": "routing areas, BGP",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -251,7 +224,6 @@
           "title": "IPv6",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -260,7 +232,6 @@
           "title": "multicast, DVMRP",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -270,7 +241,6 @@
       "order": 4,
       "name": "End-to-End Protocols",
       "co": "CO4",
-      "estMinutes": 330,
       "topics": [
         {
           "id": "cn-m4-t1",
@@ -278,7 +248,6 @@
           "title": "UDP, TCP",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -287,7 +256,6 @@
           "title": "segment format, connection setup/teardown",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -296,7 +264,6 @@
           "title": "sliding window, triggering transmission",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -305,7 +272,6 @@
           "title": "adaptive retransmission, record boundaries",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -314,7 +280,6 @@
           "title": "TCP extensions, SCTP",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -323,7 +288,6 @@
           "title": "RPC, QoS",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -332,7 +296,6 @@
           "title": "resource allocation, FIFO, fair queuing",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -341,7 +304,6 @@
           "title": "TCP congestion control, advanced congestion control",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -351,7 +313,6 @@
       "order": 5,
       "name": "End-to-End Data",
       "co": "CO5",
-      "estMinutes": 300,
       "topics": [
         {
           "id": "cn-m5-t1",
@@ -359,7 +320,6 @@
           "title": "attacks, trust, threats",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -368,7 +328,6 @@
           "title": "IPsec",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -377,7 +336,6 @@
           "title": "firewalls",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -386,7 +344,6 @@
           "title": "email SMTP, MIME, POP3",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -395,7 +352,6 @@
           "title": "HTTP, FTP, Telnet",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -404,7 +360,6 @@
           "title": "DNS",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -413,7 +368,6 @@
           "title": "SNMP",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -422,7 +376,6 @@
           "title": "SDN intro",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]

@@ -1,4 +1,4 @@
-// Idempotent seed import: upserts tracks/modules/topics, prunes ones dropped from the seed that have no progress. Never touches sessions-with-time, done/starred topics, plans or the schedule.
+// Idempotent seed import: upserts tracks/modules/topics, prunes ones dropped from the seed that have no progress. Never touches done/starred topics, plans or the schedule.
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { createClient } from '@supabase/supabase-js'
@@ -27,7 +27,6 @@ const Module = z.object({
   order: z.number().int(),
   name: z.string().min(1),
   co: z.string().nullish(),
-  estMinutes: z.number().int().positive().nullable(),
   topics: z.array(Topic),
 })
 const Track = z.object({
@@ -65,25 +64,26 @@ function loadTracks() {
 
 function defaultSchedule(userId: string): TablesInsert<'schedule_blocks'>[] {
   // weekday: 0 = Sunday … 6 = Saturday
+  // [weekday, track, checklist label, topics]
   const rows: [number, string | null, string | null, number][] = [
-    [1, 'dsa', null, 75],
-    [2, 'ops-research', null, 145],
-    [3, 'cn', null, 100],
-    [3, 'dbms', null, 90],
-    [3, 'prob-stats', null, 120],
-    [4, 'dsa', null, 75],
-    [4, 'micro-econ', null, 120],
-    [5, 'dbms', null, 90],
-    [5, 'cn', null, 120],
-    [6, null, 'PYQs (weakest subject)', 180],
-    [0, null, 'Weekly review', 30],
+    [1, 'dsa', null, 1],
+    [2, 'ops-research', null, 2],
+    [3, 'cn', null, 2],
+    [3, 'dbms', null, 2],
+    [3, 'prob-stats', null, 2],
+    [4, 'dsa', null, 1],
+    [4, 'micro-econ', null, 2],
+    [5, 'dbms', null, 2],
+    [5, 'cn', null, 2],
+    [6, null, 'PYQs (weakest subject)', 1],
+    [0, null, 'Weekly review', 1],
   ]
-  return rows.map(([weekday, track_id, label, minutes], i) => ({
+  return rows.map(([weekday, track_id, label, topics], i) => ({
     user_id: userId,
     weekday,
     track_id,
     label,
-    minutes,
+    topics,
     sort_order: i,
   }))
 }
@@ -100,7 +100,7 @@ async function main() {
     course_code: t.courseCode ?? null,
     sort_order: i,
   }))
-  const allModules = tracks.flatMap((t) =>
+  const moduleRows: TablesInsert<'modules'>[] = tracks.flatMap((t) =>
     t.modules.map((m) => ({
       id: m.id,
       user_id: userId,
@@ -108,16 +108,8 @@ async function main() {
       sort_order: m.order,
       name: m.name,
       co: m.co ?? null,
-      est: m.estMinutes,
     })),
   )
-  // Split so a null seed estimate never overwrites an estimate edited in the app.
-  const modulesWithEst: TablesInsert<'modules'>[] = allModules
-    .filter((m) => m.est !== null)
-    .map(({ est, ...m }) => ({ ...m, est_minutes: est }))
-  const modulesNoEst: TablesInsert<'modules'>[] = allModules
-    .filter((m) => m.est === null)
-    .map(({ est: _est, ...m }) => m)
   const topicRows: TablesInsert<'topics'>[] = tracks.flatMap((t) =>
     t.modules.flatMap((m) =>
       m.topics.map((tp) => ({
@@ -132,29 +124,23 @@ async function main() {
   )
 
   ok(await db.from('tracks').upsert(trackRows, { onConflict: 'id' }), 'upsert tracks')
-  if (modulesWithEst.length)
-    ok(await db.from('modules').upsert(modulesWithEst, { onConflict: 'id' }), 'upsert modules (est)')
-  if (modulesNoEst.length)
-    ok(await db.from('modules').upsert(modulesNoEst, { onConflict: 'id' }), 'upsert modules')
+  ok(await db.from('modules').upsert(moduleRows, { onConflict: 'id' }), 'upsert modules')
   ok(await db.from('topics').upsert(topicRows, { onConflict: 'id' }), 'upsert topics')
 
-  // Topics/modules dropped from the seed are deleted, unless they carry progress (done, starred, or logged time).
+  // Topics/modules dropped from the seed are deleted, unless they carry progress (done or starred).
   const seedTopicIds = new Set(topicRows.map((t) => t.id))
   const dbTopics = await db.from('topics').select('id, done_at, revision').eq('user_id', userId)
   ok(dbTopics, 'select topics')
   const orphans = (dbTopics.data ?? []).filter((t) => !seedTopicIds.has(t.id))
   if (orphans.length) {
-    const logged = await db.from('sessions').select('topic_id').in('topic_id', orphans.map((t) => t.id))
-    ok(logged, 'select orphan sessions')
-    const hasTime = new Set((logged.data ?? []).map((s) => s.topic_id))
-    const kept = orphans.filter((t) => t.done_at !== null || t.revision || hasTime.has(t.id)).map((t) => t.id)
+    const kept = orphans.filter((t) => t.done_at !== null || t.revision).map((t) => t.id)
     const dropped = orphans.map((t) => t.id).filter((id) => !kept.includes(id))
     if (dropped.length) ok(await db.from('topics').delete().in('id', dropped), 'delete orphan topics')
     console.log(`Removed ${dropped.length} topics no longer in the seed.`)
     if (kept.length) console.warn(`Kept (not in seed but have progress): ${kept.join(', ')}`)
   }
 
-  const seedModuleIds = new Set(allModules.map((m) => m.id))
+  const seedModuleIds = new Set(moduleRows.map((m) => m.id))
   const dbModules = await db.from('modules').select('id').eq('user_id', userId)
   ok(dbModules, 'select modules')
   const orphanModules = (dbModules.data ?? []).map((m) => m.id).filter((id) => !seedModuleIds.has(id))
@@ -199,7 +185,7 @@ async function main() {
   }
 
   console.log(
-    `Upserted ${trackRows.length} tracks, ${allModules.length} modules (${modulesWithEst.length} with est), ${topicRows.length} topics.`,
+    `Upserted ${trackRows.length} tracks, ${moduleRows.length} modules, ${topicRows.length} topics.`,
   )
 }
 

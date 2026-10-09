@@ -9,7 +9,6 @@
       "order": 1,
       "name": "Probability & Random Variables",
       "co": "CO1",
-      "estMinutes": 360,
       "topics": [
         {
           "id": "prob-stats-m1-t1",
@@ -17,7 +16,6 @@
           "title": "axioms, probability spaces",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -26,7 +24,6 @@
           "title": "conditional probability, Bayes",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -35,7 +32,6 @@
           "title": "discrete/continuous RVs",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -44,7 +40,6 @@
           "title": "PMF, PDF",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -53,7 +48,6 @@
           "title": "joint, marginal, conditional distributions",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -62,7 +56,6 @@
           "title": "expectation & variance",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -71,7 +64,6 @@
           "title": "moments, variance, covariance",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -80,7 +72,6 @@
           "title": "correlation & independence",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -89,7 +80,6 @@
           "title": "functions of 1-D RVs",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -99,7 +89,6 @@
       "order": 2,
       "name": "Probability Distributions",
       "co": "CO2",
-      "estMinutes": 390,
       "topics": [
         {
           "id": "prob-stats-m2-t1",
@@ -107,7 +96,6 @@
           "title": "Bernoulli & Binomial",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -116,7 +104,6 @@
           "title": "Poisson & Geometric",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -125,7 +112,6 @@
           "title": "Negative Binomial & Uniform",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -134,7 +120,6 @@
           "title": "Normal",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -143,7 +128,6 @@
           "title": "Exponential & Gamma",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -152,7 +136,6 @@
           "title": "Weibull",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -161,7 +144,6 @@
           "title": "Central Limit Theorem",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -170,7 +152,6 @@
           "title": "sampling distributions t, F, Chi-square (concept only)",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -180,7 +161,6 @@
       "order": 3,
       "name": "Testing of Hypothesis",
       "co": "CO3",
-      "estMinutes": 450,
       "topics": [
         {
           "id": "prob-stats-m3-t1",
@@ -188,7 +168,6 @@
           "title": "formulating hypotheses, simple vs composite",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -197,7 +176,6 @@
           "title": "Type I/II errors",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -206,7 +184,6 @@
           "title": "Z test means",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -215,7 +192,6 @@
           "title": "Z test proportions",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -224,7 +200,6 @@
           "title": "t test means",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -233,7 +208,6 @@
           "title": "F-test variance",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -242,7 +216,6 @@
           "title": "Chi-square goodness of fit",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -251,7 +224,6 @@
           "title": "Chi-square independence of attributes",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -260,7 +232,6 @@
           "title": "confidence intervals for each test",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -270,7 +241,6 @@
       "order": 4,
       "name": "Correlation & Regression",
       "co": "CO4",
-      "estMinutes": 420,
       "topics": [
         {
           "id": "prob-stats-m4-t1",
@@ -278,7 +248,6 @@
           "title": "correlation coefficient, Pearson",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -287,7 +256,6 @@
           "title": "Spearman rank",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -296,7 +264,6 @@
           "title": "partial correlation",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -305,7 +272,6 @@
           "title": "multiple correlation",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -314,7 +280,6 @@
           "title": "simple linear regression model & assumptions",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -323,7 +288,6 @@
           "title": "SLR estimation & coefficient interpretation",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -332,7 +296,6 @@
           "title": "multiple linear regression model & assumptions",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -341,7 +304,6 @@
           "title": "MLR estimation & interpretation",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -350,7 +312,6 @@
           "title": "model diagnostics & validation",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]
@@ -360,7 +321,6 @@
       "order": 5,
       "name": "ANOVA & Design of Experiments",
       "co": "CO5",
-      "estMinutes": 300,
       "topics": [
         {
           "id": "prob-stats-m5-t1",
@@ -368,7 +328,6 @@
           "title": "intro to ANOVA",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -377,7 +336,6 @@
           "title": "one-way ANOVA",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -386,7 +344,6 @@
           "title": "two-way ANOVA",
           "bloom": "Apply",
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -395,7 +352,6 @@
           "title": "CRD",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -404,7 +360,6 @@
           "title": "RBD",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -413,7 +368,6 @@
           "title": "LSD (Latin square design)",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -422,7 +376,6 @@
           "title": "problems on CRD, RBD, LSD",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         },
         {
@@ -431,7 +384,6 @@
           "title": "revision",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]

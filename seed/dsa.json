@@ -8,7 +8,6 @@
       "id": "dsa-m1",
       "order": 1,
       "name": "DSA on Planly",
-      "estMinutes": 45,
       "topics": [
         {
           "id": "dsa-m1-t1",
@@ -16,7 +15,6 @@
           "title": "Open Planly and finish today's DSA tasks there (Java, raw, no AI)",
           "bloom": null,
           "done": false,
-          "timeSpentMin": 0,
           "revision": false
         }
       ]

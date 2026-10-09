@@ -30,11 +30,12 @@ describe('heatmapWeeks', () => {
 })
 
 describe('heatLevel', () => {
-  it('buckets minutes into 0â€“4', () => {
+  it('buckets topics done into 0–4', () => {
     expect(heatLevel(0)).toBe(0)
-    expect(heatLevel(20)).toBe(1)
-    expect(heatLevel(60)).toBe(2)
-    expect(heatLevel(150)).toBe(3)
-    expect(heatLevel(300)).toBe(4)
+    expect(heatLevel(1)).toBe(1)
+    expect(heatLevel(2)).toBe(2)
+    expect(heatLevel(3)).toBe(3)
+    expect(heatLevel(4)).toBe(4)
+    expect(heatLevel(9)).toBe(4)
   })
 })

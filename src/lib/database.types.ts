@@ -90,7 +90,6 @@ export type Database = {
       modules: {
         Row: {
           co: string | null
-          est_minutes: number | null
           id: string
           name: string
           sort_order: number
@@ -99,7 +98,6 @@ export type Database = {
         }
         Insert: {
           co?: string | null
-          est_minutes?: number | null
           id: string
           name: string
           sort_order: number
@@ -108,7 +106,6 @@ export type Database = {
         }
         Update: {
           co?: string | null
-          est_minutes?: number | null
           id?: string
           name?: string
           sort_order?: number
@@ -129,7 +126,7 @@ export type Database = {
         Row: {
           id: number
           label: string | null
-          minutes: number
+          topics: number
           sort_order: number
           track_id: string | null
           user_id: string
@@ -138,7 +135,7 @@ export type Database = {
         Insert: {
           id?: never
           label?: string | null
-          minutes: number
+          topics?: number
           sort_order: number
           track_id?: string | null
           user_id?: string
@@ -147,7 +144,7 @@ export type Database = {
         Update: {
           id?: never
           label?: string | null
-          minutes?: number
+          topics?: number
           sort_order?: number
           track_id?: string | null
           user_id?: string
@@ -159,41 +156,6 @@ export type Database = {
             columns: ["track_id"]
             isOneToOne: false
             referencedRelation: "tracks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      sessions: {
-        Row: {
-          ended_at: string
-          id: number
-          minutes: number
-          started_at: string
-          topic_id: string
-          user_id: string
-        }
-        Insert: {
-          ended_at: string
-          id?: never
-          minutes: number
-          started_at: string
-          topic_id: string
-          user_id?: string
-        }
-        Update: {
-          ended_at?: string
-          id?: never
-          minutes?: number
-          started_at?: string
-          topic_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sessions_topic_id_fkey"
-            columns: ["topic_id"]
-            isOneToOne: false
-            referencedRelation: "topics"
             referencedColumns: ["id"]
           },
         ]
@@ -268,21 +230,7 @@ export type Database = {
       }
     }
     Views: {
-      topic_spent: {
-        Row: {
-          minutes: number | null
-          topic_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sessions_topic_id_fkey"
-            columns: ["topic_id"]
-            isOneToOne: false
-            referencedRelation: "topics"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       save_day_plan: {
