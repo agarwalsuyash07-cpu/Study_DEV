@@ -68,6 +68,67 @@ export function keptByBlock(kept: readonly { blockId: number | null; topicId: st
   return out
 }
 
+/** A saved plan item as the pure planner sees it; `done` is the caller's truth (topic done for topic items). */
+export type DayItem = {
+  id: number
+  date: string
+  blockId: number | null
+  topicId: string | null
+  label: string | null
+  sortOrder: number
+  done: boolean
+  manual: boolean
+  deferredTo: string | null
+}
+
+const survivesRegenerate = (i: DayItem) => i.done || i.manual || i.deferredTo !== null
+const itemKey = (i: { topicId: string | null; label: string | null }) => i.topicId ?? `label:${i.label}`
+
+/** What "Regenerate" would do: new items to save, plus the net removals/additions to show before confirming. */
+export function planRegeneration(
+  blocks: readonly PlanBlock[],
+  topics: readonly PlanTopic[],
+  current: readonly DayItem[],
+): { items: PlanItem[]; removed: DayItem[]; added: PlanItem[] } {
+  const keep = current.filter(survivesRegenerate)
+  const drop = current.filter((i) => !survivesRegenerate(i))
+  const exclude = new Set(keep.flatMap((i) => (i.topicId ? [i.topicId] : [])))
+  const items = assignDay(blocks, topics, { exclude, kept: keptByBlock(keep) })
+  const before = new Set(drop.map(itemKey))
+  const after = new Set(items.map(itemKey))
+  return { items, removed: drop.filter((i) => !after.has(itemKey(i))), added: items.filter((i) => !before.has(itemKey(i))) }
+}
+
+/** Unfinished topics from earlier days that are still undone and not on today's list: latest day per topic, oldest first. */
+export function overdueItems(
+  past: readonly DayItem[],
+  today: string,
+  isTopicDone: (topicId: string) => boolean,
+  onToday: ReadonlySet<string>,
+): DayItem[] {
+  const latest = new Map<string, DayItem>()
+  for (const i of past) {
+    if (i.date >= today || i.topicId === null || i.deferredTo !== null) continue
+    if (isTopicDone(i.topicId) || onToday.has(i.topicId)) continue
+    const prev = latest.get(i.topicId)
+    if (!prev || i.date > prev.date) latest.set(i.topicId, i)
+  }
+  return [...latest.values()].sort((a, b) => a.date.localeCompare(b.date) || a.sortOrder - b.sortOrder)
+}
+
+/** Moves group[from] to `to`, reusing the group's own sort slots; returns only the rows whose slot changed. */
+export function reorderGroup<T extends { id: number; sortOrder: number }>(
+  group: readonly T[],
+  from: number,
+  to: number,
+): { id: number; sortOrder: number }[] {
+  if (from === to || from < 0 || to < 0 || from >= group.length || to >= group.length) return []
+  const slots = group.map((g) => g.sortOrder).sort((a, b) => a - b)
+  const moved = [...group]
+  moved.splice(to, 0, ...moved.splice(from, 1))
+  return moved.flatMap((g, i) => (g.sortOrder === slots[i] ? [] : [{ id: g.id, sortOrder: slots[i]! }]))
+}
+
 /** Simulates consecutive days without saving. Saved days return null but still reserve their topics. */
 export function previewDays(
   days: readonly ({ existingTopicIds: readonly string[] } | { blocks: readonly PlanBlock[] })[],

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import ProgressBar from './ProgressBar'
 
@@ -92,4 +92,62 @@ export function Pill({ children, tone }: { children: ReactNode; tone?: 'warn' | 
         ? 'border-accent/40 bg-accent/10 text-accent'
         : 'border-line bg-raised text-soft'
   return <span className={`rounded-md border px-1.5 py-px text-[11px] ${cls}`}>{children}</span>
+}
+
+/** Native modal dialog: focus trap, Esc and backdrop come from the browser. */
+export function ConfirmDialog({
+  open,
+  title,
+  children,
+  confirmLabel,
+  confirmDisabled,
+  busy,
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean
+  title: string
+  children: ReactNode
+  confirmLabel: string
+  confirmDisabled?: boolean
+  busy?: boolean
+  onConfirm: () => void
+  onCancel: () => void
+}) {
+  const ref = useRef<HTMLDialogElement>(null)
+  useEffect(() => {
+    const d = ref.current
+    if (!d) return
+    if (open && !d.open) d.showModal()
+    if (!open && d.open) d.close()
+  }, [open])
+
+  return (
+    <dialog
+      ref={ref}
+      onClose={onCancel}
+      aria-labelledby="confirm-title"
+      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-[14px] border border-line bg-card p-0 text-text backdrop:bg-black/60"
+    >
+      <div className="p-5">
+        <h2 id="confirm-title" className="text-base font-medium">
+          {title}
+        </h2>
+        <div className="mt-3 max-h-[60vh] overflow-y-auto">{children}</div>
+        <div className="mt-5 flex justify-end gap-2">
+          <button type="button" onClick={onCancel} className="rounded-[10px] border border-line px-4 py-2.5 text-soft hover:text-text">
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={busy || confirmDisabled}
+            className="rounded-[10px] bg-accent px-4 py-2.5 font-medium text-white disabled:opacity-50"
+          >
+            {busy ? 'Working…' : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </dialog>
+  )
 }

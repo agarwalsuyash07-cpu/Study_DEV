@@ -1,37 +1,59 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import { Link } from 'react-router'
 import ErrorBanner from '../components/ErrorBanner'
+import { AddItem, ItemMenu } from '../components/PlanControls'
 import TopicRow, { Check } from '../components/TopicRow'
 import { trackColor } from '../components/trackColor'
-import { MiniProgress, PageHeader, ProgressCard, StatGrid } from '../components/ui'
-import { ensureDayPlan, loadCatalog, regenerateDay, setItemDone, type Block, type Item } from '../lib/data'
-import { todayIST, weekdayOf } from '../lib/date'
+import { ConfirmDialog, MiniProgress, PageHeader, Pill, ProgressCard, StatGrid } from '../components/ui'
+import {
+  addPlanItem,
+  deferItem,
+  ensureDayPlan,
+  loadCatalog,
+  loadItems,
+  loadPastUndone,
+  previewRegeneration,
+  saveRegeneration,
+  setItemDone,
+  setItemOrder,
+  toDayItem,
+  type Block,
+  type Item,
+} from '../lib/data'
+import { addDays, todayIST, weekdayOf } from '../lib/date'
+import { overdueItems, reorderGroup } from '../lib/plan'
 import { message, useCatalog } from '../lib/useCatalog'
 
 const dayLabel = (date: string) =>
   new Date(`${date}T00:00:00Z`).toLocaleDateString('en-IN', { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long' })
+const shortDay = (date: string) =>
+  new Date(`${date}T00:00:00Z`).toLocaleDateString('en-IN', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short' })
 
-type Group = { block: Block | null; items: Item[] }
+type Group = { key: string; block: Block | null; items: Item[] }
 
 export default function Today() {
   const [date, setDate] = useState(todayIST)
   const [items, setItems] = useState<Item[]>([])
-  const [regenerating, setRegenerating] = useState(false)
+  const [pastUndone, setPastUndone] = useState<Item[]>([])
+  const [regen, setRegen] = useState<ReturnType<typeof previewRegeneration> | null>(null)
+  const [saving, setSaving] = useState(false)
+  const dragFrom = useRef<{ group: string; index: number } | null>(null)
   const { cat, setCat, error, setError, actions } = useCatalog({
     autoLoad: false,
     // mirrors the DB trigger for today's items
     onDoneChanged: (topicId, doneAt) =>
-      setItems((its) => its.map((i) => (i.topic_id === topicId ? { ...i, done_at: doneAt } : i))),
+      setItems((its) => its.map((i) => (i.topic_id === topicId && i.deferred_to === null ? { ...i, done_at: doneAt } : i))),
   })
 
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       const c = await loadCatalog()
-      const its = await ensureDayPlan(c, date)
+      const [its, past] = await Promise.all([ensureDayPlan(c, date), loadPastUndone(date)])
       if (cancelled) return
       setCat(c)
       setItems(its)
+      setPastUndone(past)
     })().catch((e: unknown) => {
       if (!cancelled) setError(message(e))
     })
@@ -49,39 +71,79 @@ export default function Today() {
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])
 
+  async function reload() {
+    const [its, past] = await Promise.all([loadItems(date), loadPastUndone(date)])
+    setItems(its)
+    setPastUndone(past)
+  }
+
+  // reports failures in the banner instead of letting them reject unhandled
+  function run(fn: () => Promise<void>) {
+    fn().catch((e: unknown) => setError(message(e)))
+  }
+
   async function toggleItem(item: Item) {
+    const doneAt = await setItemDone(item.id, item.done_at === null)
+    setItems((its) => its.map((i) => (i.id === item.id ? { ...i, done_at: doneAt } : i)))
+  }
+
+  async function defer(itemId: number, to: string) {
+    await deferItem(itemId, to)
+    await reload()
+  }
+
+  async function add(topicId: string | null, label: string | null) {
     try {
-      const doneAt = await setItemDone(item.id, item.done_at === null)
-      setItems((its) => its.map((i) => (i.id === item.id ? { ...i, done_at: doneAt } : i)))
+      if (!(await addPlanItem(date, topicId, label))) setError("That topic is already on today's list.")
+      await reload()
     } catch (e) {
       setError(message(e))
     }
   }
 
-  async function regenerate() {
-    if (!cat) return
-    setRegenerating(true)
+  async function move(group: Group, from: number, to: number) {
+    const updates = reorderGroup(group.items.map((i) => ({ id: i.id, sortOrder: i.sort_order })), from, to)
+    if (updates.length === 0) return
+    const next = new Map(updates.map((u) => [u.id, u.sortOrder]))
+    // optimistic; a failed save reloads the real order
+    setItems((its) => its.map((i) => (next.has(i.id) ? { ...i, sort_order: next.get(i.id)! } : i)).sort((a, b) => a.sort_order - b.sort_order))
     try {
-      setItems(await regenerateDay(cat, date, items))
+      await setItemOrder(updates)
+    } catch (e) {
+      setError(message(e))
+      await reload()
+    }
+  }
+
+  async function confirmRegenerate() {
+    if (!regen) return
+    setSaving(true)
+    try {
+      setItems(await saveRegeneration(date, regen.items))
+      setRegen(null)
     } catch (e) {
       setError(message(e))
     } finally {
-      setRegenerating(false)
+      setSaving(false)
     }
   }
+
+  const visible = useMemo(() => items.filter((i) => i.deferred_to === null), [items])
 
   const groups = useMemo<Group[]>(() => {
     if (!cat) return []
     const blockById = new Map(cat.blocks.map((b) => [b.id, b]))
-    const byBlock = new Map<number | null, Item[]>()
-    for (const i of items) {
-      const key = i.block_id !== null && blockById.has(i.block_id) ? i.block_id : null
-      byBlock.set(key, [...(byBlock.get(key) ?? []), i])
+    const byKey = new Map<string, Group>()
+    for (const i of visible) {
+      const block = i.block_id !== null ? (blockById.get(i.block_id) ?? null) : null
+      const key = block ? `b${block.id}` : 'added'
+      const g = byKey.get(key) ?? { key, block, items: [] }
+      g.items.push(i)
+      byKey.set(key, g)
     }
-    return [...byBlock]
-      .map(([id, its]) => ({ block: id === null ? null : (blockById.get(id) ?? null), items: its }))
-      .sort((a, b) => (a.block?.sort_order ?? Infinity) - (b.block?.sort_order ?? Infinity))
-  }, [cat, items])
+    // hand-added and orphaned items go last
+    return [...byKey.values()].sort((a, b) => (a.block?.sort_order ?? Infinity) - (b.block?.sort_order ?? Infinity))
+  }, [cat, visible])
 
   if (!cat) {
     return (
@@ -95,11 +157,82 @@ export default function Today() {
     )
   }
 
-  const isDone = (i: Item) => (i.topic_id ? (cat.topicById.get(i.topic_id)?.done ?? false) : i.done_at !== null)
-  const doneCount = items.filter(isDone).length
-  const allDone = items.length > 0 && doneCount === items.length
+  const tomorrow = addDays(date, 1)
+  const isDone = (i: Item) => toDayItem(cat, i).done
+  const doneCount = visible.filter(isDone).length
+  const allDone = visible.length > 0 && doneCount === visible.length
   const trackById = new Map(cat.tracks.map((t) => [t.id, t]))
   const hasBlocksToday = cat.blocks.some((b) => b.weekday === weekdayOf(date))
+  const onToday = new Set(items.flatMap((i) => (i.topic_id ? [i.topic_id] : [])))
+  const overdue = overdueItems(
+    pastUndone.map((i) => toDayItem(cat, i)),
+    date,
+    (id) => cat.topicById.get(id)?.done ?? false,
+    onToday,
+  )
+  const deferredCount = items.length - visible.length
+  const addOptions = cat.topics
+    .filter((t) => !t.done && !onToday.has(t.id))
+    .map((t) => ({ id: t.id, text: `${t.title} · ${trackById.get(t.trackId)?.name ?? ''}` }))
+  const titleOf = (i: { topicId: string | null; label: string | null }) =>
+    i.topicId ? (cat.topicById.get(i.topicId)?.title ?? 'Removed topic') : (i.label ?? 'Study block')
+  const nothingChanges = regen !== null && regen.removed.length === 0 && regen.added.length === 0
+
+  function dragProps(g: Group, index: number) {
+    return {
+      draggable: true,
+      onDragStart: (e: DragEvent<HTMLLIElement>) => {
+        dragFrom.current = { group: g.key, index }
+        e.dataTransfer.effectAllowed = 'move'
+      },
+      onDragOver: (e: DragEvent<HTMLLIElement>) => {
+        if (dragFrom.current?.group === g.key) e.preventDefault()
+      },
+      onDrop: (e: DragEvent<HTMLLIElement>) => {
+        e.preventDefault()
+        const from = dragFrom.current
+        dragFrom.current = null
+        if (from?.group === g.key) void move(g, from.index, index)
+      },
+    }
+  }
+
+  function renderItem(g: Group, i: Item, index: number) {
+    const topic = i.topic_id ? cat!.topicById.get(i.topic_id) : undefined
+    const name = topic?.title ?? i.label ?? 'item'
+    const menu = (
+      <ItemMenu
+        name={name}
+        onMove={(dir) => void move(g, index, index + dir)}
+        canUp={index > 0}
+        canDown={index < g.items.length - 1}
+        defers={[{ label: 'Defer to tomorrow', date: tomorrow }]}
+        minDate={tomorrow}
+        onDefer={(to) => run(() => defer(i.id, to))}
+      />
+    )
+    if (topic) {
+      return (
+        <TopicRow
+          key={i.id}
+          topic={topic}
+          actions={actions}
+          extra={menu}
+          rowProps={dragProps(g, index)}
+          note={i.manual ? <Pill>Added</Pill> : undefined}
+        />
+      )
+    }
+    return (
+      <li key={i.id} {...dragProps(g, index)} className="flex items-center gap-3 px-3 py-2.5">
+        <span className="py-0.5">
+          <Check checked={i.done_at !== null} label={`Mark "${i.label ?? ''}" done`} onClick={() => run(() => toggleItem(i))} />
+        </span>
+        <span className={`min-w-0 flex-1 ${i.done_at ? 'text-muted line-through decoration-muted/70' : 'text-soft'}`}>{i.label}</span>
+        <span className="-my-1.5 -mr-1">{menu}</span>
+      </li>
+    )
+  }
 
   return (
     <main>
@@ -109,11 +242,10 @@ export default function Today() {
           hasBlocksToday && (
             <button
               type="button"
-              onClick={() => void regenerate()}
-              disabled={regenerating}
-              className="shrink-0 rounded-lg border border-line bg-raised px-3 py-1.5 text-xs font-medium hover:border-check disabled:opacity-50"
+              onClick={() => setRegen(previewRegeneration(cat, date, items))}
+              className="shrink-0 rounded-lg border border-line bg-raised px-3 py-1.5 text-xs font-medium hover:border-check"
             >
-              {regenerating ? 'Regenerating…' : 'Regenerate today'}
+              Regenerate today
             </button>
           )
         }
@@ -121,13 +253,15 @@ export default function Today() {
 
       <div className="grid items-start gap-6 px-4 pb-8 md:px-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <aside className="flex flex-col gap-4 lg:sticky lg:top-20 lg:order-2">
-          {items.length > 0 && (
+          {visible.length > 0 && (
             <>
-              <ProgressCard done={doneCount} total={items.length} label="Today's progress" />
+              <ProgressCard done={doneCount} total={visible.length} label="Today's progress" />
               <StatGrid
                 items={[
-                  { icon: 'list', value: items.length, label: items.length === 1 ? 'Item' : 'Items' },
+                  { icon: 'list', value: visible.length, label: visible.length === 1 ? 'Item' : 'Items' },
                   { icon: 'check', value: doneCount, label: 'Done' },
+                  { icon: 'flag', value: overdue.length, label: 'Overdue', tone: overdue.length ? 'warn' : undefined },
+                  { icon: 'list', value: deferredCount, label: 'Deferred' },
                 ]}
               />
             </>
@@ -150,7 +284,44 @@ export default function Today() {
         <div className="flex min-w-0 flex-col gap-6 lg:order-1">
           <ErrorBanner error={error} onDismiss={() => setError(null)} />
 
-          {items.length === 0 && (
+          {overdue.length > 0 && (
+            <section aria-labelledby="overdue-heading">
+              <div className="flex items-center gap-2 px-1 pb-2">
+                <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-warn" />
+                <h3 id="overdue-heading" className="min-w-0 flex-1 truncate font-medium">
+                  Overdue
+                </h3>
+                <span className="text-[11px] text-warn tabular-nums">{overdue.length}</span>
+              </div>
+              <ul className="divide-y divide-line rounded-[14px] border border-warn/30 bg-card">
+                {overdue.map((o) => {
+                  const topic = cat.topicById.get(o.topicId!)
+                  if (!topic) return null
+                  return (
+                    <TopicRow
+                      key={o.id}
+                      topic={topic}
+                      actions={actions}
+                      note={<span className="text-warn">from {shortDay(o.date)}</span>}
+                      extra={
+                        <ItemMenu
+                          name={topic.title}
+                          defers={[
+                            { label: 'Do it today', date },
+                            { label: 'Defer to tomorrow', date: tomorrow },
+                          ]}
+                          minDate={date}
+                          onDefer={(to) => run(() => defer(o.id, to))}
+                        />
+                      }
+                    />
+                  )
+                })}
+              </ul>
+            </section>
+          )}
+
+          {visible.length === 0 && (
             <p className="text-soft">
               {hasBlocksToday ? 'Every track scheduled today is complete. ' : 'Nothing is scheduled today. '}
               <Link to="/settings" className="text-accent underline">
@@ -162,10 +333,10 @@ export default function Today() {
           <div className="grid items-start gap-6 2xl:grid-cols-2">
             {groups.map((g) => {
               const track = g.block?.track_id ? trackById.get(g.block.track_id) : undefined
-              const name = track?.name ?? g.block?.label ?? 'Removed block'
+              const name = track?.name ?? g.block?.label ?? 'Added'
               const done = g.items.filter(isDone).length
               return (
-                <section key={g.block?.id ?? 'other'} aria-label={name}>
+                <section key={g.key} aria-label={name}>
                   <div className="flex items-center gap-2 px-1 pb-2">
                     {track && (
                       <span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ background: trackColor(track.sort_order) }} />
@@ -173,24 +344,63 @@ export default function Today() {
                     <h3 className="min-w-0 flex-1 truncate font-medium">{name}</h3>
                     <MiniProgress done={done} total={g.items.length} label={`${name} progress`} />
                   </div>
-                  <ul className="divide-y divide-line overflow-hidden rounded-[14px] border border-line bg-card">
-                    {g.items.map((i) => {
-                      const topic = i.topic_id ? cat.topicById.get(i.topic_id) : undefined
-                      if (topic) return <TopicRow key={i.id} topic={topic} actions={actions} />
-                      return (
-                        <li key={i.id} className="flex items-center gap-3 px-3 py-3">
-                          <Check checked={i.done_at !== null} label={`Mark "${i.label ?? ''}" done`} onClick={() => void toggleItem(i)} />
-                          <span className={i.done_at ? 'text-muted line-through decoration-muted/70' : 'text-soft'}>{i.label}</span>
-                        </li>
-                      )
-                    })}
-                  </ul>
+                  {/* no overflow-hidden: row menus must be able to open past the card edge */}
+                  <ul className="divide-y divide-line rounded-[14px] border border-line bg-card">{g.items.map((i, n) => renderItem(g, i, n))}</ul>
                 </section>
               )
             })}
           </div>
+
+          <AddItem options={addOptions} onAdd={add} />
         </div>
       </div>
+
+      <ConfirmDialog
+        open={regen !== null}
+        title="Regenerate today?"
+        confirmLabel="Regenerate"
+        confirmDisabled={nothingChanges}
+        busy={saving}
+        onConfirm={() => void confirmRegenerate()}
+        onCancel={() => setRegen(null)}
+      >
+        {regen &&
+          (nothingChanges ? (
+            <p className="text-soft">Nothing would change: today already matches your schedule.</p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <p className="text-soft">Done, added and deferred items stay. Overdue items aren't touched.</p>
+              {regen.removed.length > 0 && (
+                <div>
+                  <h3 className="text-xs text-muted">Removed ({regen.removed.length})</h3>
+                  <ul className="mt-1 flex flex-col gap-1">
+                    {regen.removed.map((r) => (
+                      <li key={r.id} className="text-red-300">
+                        <span aria-hidden="true">− </span>
+                        <span className="sr-only">Removed: </span>
+                        {titleOf(r)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {regen.added.length > 0 && (
+                <div>
+                  <h3 className="text-xs text-muted">Added ({regen.added.length})</h3>
+                  <ul className="mt-1 flex flex-col gap-1">
+                    {regen.added.map((a) => (
+                      <li key={`${a.blockId}-${a.topicId ?? a.label}`} className="text-done">
+                        <span aria-hidden="true">+ </span>
+                        <span className="sr-only">Added: </span>
+                        {titleOf(a)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ))}
+      </ConfirmDialog>
     </main>
   )
 }

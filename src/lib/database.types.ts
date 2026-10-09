@@ -19,6 +19,8 @@ export type Database = {
           block_id: number | null
           date: string
           done_at: string | null
+          deferred_to: string | null
+          manual: boolean
           id: number
           label: string | null
           sort_order: number
@@ -29,6 +31,8 @@ export type Database = {
           block_id?: number | null
           date: string
           done_at?: string | null
+          deferred_to?: string | null
+          manual?: boolean
           id?: never
           label?: string | null
           sort_order: number
@@ -39,6 +43,8 @@ export type Database = {
           block_id?: number | null
           date?: string
           done_at?: string | null
+          deferred_to?: string | null
+          manual?: boolean
           id?: never
           label?: string | null
           sort_order?: number
@@ -72,17 +78,17 @@ export type Database = {
       day_plans: {
         Row: {
           date: string
-          generated_at: string
+          generated_at: string | null
           user_id: string
         }
         Insert: {
           date: string
-          generated_at?: string
+          generated_at?: string | null
           user_id?: string
         }
         Update: {
           date?: string
-          generated_at?: string
+          generated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -239,6 +245,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_plan_item: {
+        Args: { p_date: string; p_topic_id: string | null; p_label: string | null }
+        Returns: number | null
+      }
+      defer_plan_item: {
+        Args: { p_item_id: number; p_to: string }
+        Returns: number | null
+      }
       save_day_plan: {
         Args: { p_date: string; p_items: Json; p_replace: boolean }
         Returns: boolean

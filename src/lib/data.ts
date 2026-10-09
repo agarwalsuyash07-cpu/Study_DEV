@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 import type { Tables } from './database.types'
-import { weekdayOf } from './date'
-import { assignDay, keptByBlock, type PlanBlock, type PlanItem, type PlanTopic } from './plan'
+import { addDays, weekdayOf } from './date'
+import { assignDay, planRegeneration, type DayItem, type PlanBlock, type PlanItem, type PlanTopic } from './plan'
 
 export type Track = Tables<'tracks'>
 export type Module = Tables<'modules'>
@@ -89,7 +89,7 @@ export function weeklyTopics(cat: Catalog, trackId?: string): number {
   return cat.blocks.reduce((sum, b) => (b.track_id !== null && (trackId === undefined || b.track_id === trackId) ? sum + b.topics : sum), 0)
 }
 
-const toRpcItems =(items: PlanItem[]) =>
+const toRpcItems = (items: PlanItem[]) =>
   items.map((i) => ({ block_id: i.blockId, topic_id: i.topicId, label: i.label, sort_order: i.sortOrder }))
 
 export async function loadItems(date: string): Promise<Item[]> {
@@ -98,28 +98,75 @@ export async function loadItems(date: string): Promise<Item[]> {
 
 /** Generates and freezes the plan on first open of `date`; afterwards just loads it. */
 export async function ensureDayPlan(cat: Catalog, date: string): Promise<Item[]> {
-  const existing = await supabase.from('day_plans').select('date').eq('date', date).maybeSingle()
+  const existing = await supabase.from('day_plans').select('generated_at').eq('date', date).maybeSingle()
   if (existing.error) throw new Error(`load day plan: ${existing.error.message}`)
-  if (!existing.data) {
-    const items = assignDay(blocksFor(cat, date), cat.topics)
-    // false = another tab created it first; loading below picks that up
+  if (!existing.data || existing.data.generated_at === null) {
+    // the day may already hold deferred or hand-added items; don't plan those topics twice
+    const held = existing.data ? await loadItems(date) : []
+    const exclude = new Set(held.flatMap((i) => (i.topic_id ? [i.topic_id] : [])))
+    const items = assignDay(blocksFor(cat, date), cat.topics, { exclude })
+    // false = another tab generated it first; loading below picks that up
     ok(await supabase.rpc('save_day_plan', { p_date: date, p_items: toRpcItems(items), p_replace: false }), 'save plan')
   }
   return loadItems(date)
 }
 
-/** Drops undone items for `date` and re-runs assignment around the done ones. */
-export async function regenerateDay(cat: Catalog, date: string, current: Item[]): Promise<Item[]> {
-  const kept = current.filter((i) => i.done_at !== null)
-  const exclude = new Set(kept.flatMap((i) => (i.topic_id ? [i.topic_id] : [])))
-  const keptCount = keptByBlock(kept.map((i) => ({ blockId: i.block_id, topicId: i.topic_id })))
-  const offset = Math.max(-1, ...kept.map((i) => i.sort_order)) + 1
-  const items = assignDay(blocksFor(cat, date), cat.topics, { exclude, kept: keptCount }).map((i) => ({
-    ...i,
-    sortOrder: i.sortOrder + offset,
-  }))
+/** Pure-planner view of a saved item; topic items count as done when the topic is. */
+export const toDayItem = (cat: Catalog, i: Item): DayItem => ({
+  id: i.id,
+  date: i.date,
+  blockId: i.block_id,
+  topicId: i.topic_id,
+  label: i.label,
+  sortOrder: i.sort_order,
+  done: i.topic_id ? (cat.topicById.get(i.topic_id)?.done ?? false) : i.done_at !== null,
+  manual: i.manual,
+  deferredTo: i.deferred_to,
+})
+
+/** Dry run of "Regenerate": nothing is saved. */
+export const previewRegeneration = (cat: Catalog, date: string, current: Item[]) =>
+  planRegeneration(blocksFor(cat, date), cat.topics, current.map((i) => toDayItem(cat, i)))
+
+/** Saves a confirmed regeneration. The RPC keeps done, hand-added and deferred items and appends after them. */
+export async function saveRegeneration(date: string, items: PlanItem[]): Promise<Item[]> {
   ok(await supabase.rpc('save_day_plan', { p_date: date, p_items: toRpcItems(items), p_replace: true }), 'regenerate plan')
   return loadItems(date)
+}
+
+/** Adds a topic or free-text item to `date`. Returns false if that topic is already planned there. */
+export async function addPlanItem(date: string, topicId: string | null, label: string | null): Promise<boolean> {
+  const res = await supabase.rpc('add_plan_item', { p_date: date, p_topic_id: topicId, p_label: label })
+  if (res.error) throw new Error(`add item: ${res.error.message}`)
+  return res.data !== null
+}
+
+/** Moves an unfinished item to `to`; the original stays as history. */
+export async function deferItem(itemId: number, to: string): Promise<void> {
+  ok(await supabase.rpc('defer_plan_item', { p_item_id: itemId, p_to: to }), 'defer item')
+}
+
+export async function setItemOrder(updates: { id: number; sortOrder: number }[]): Promise<void> {
+  const res = await Promise.all(updates.map((u) => supabase.from('day_plan_items').update({ sort_order: u.sortOrder }).eq('id', u.id)))
+  for (const r of res) ok(r, 'reorder')
+}
+
+// ponytail: misses older than 30 days stop carrying over; widen if older ones should resurface
+const OVERDUE_DAYS = 30
+
+/** Undone, undeferred topic items from the last month before `today` (overdueItems() filters the rest). */
+export async function loadPastUndone(today: string): Promise<Item[]> {
+  return rows(
+    await supabase
+      .from('day_plan_items')
+      .select('*')
+      .lt('date', today)
+      .gte('date', addDays(today, -OVERDUE_DAYS))
+      .is('done_at', null)
+      .is('deferred_to', null)
+      .not('topic_id', 'is', null),
+    'load overdue',
+  )
 }
 
 /** Returns the new done_at. A DB trigger mirrors it onto today's plan item. */

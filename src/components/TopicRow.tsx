@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type LiHTMLAttributes, type ReactNode } from 'react'
 import type { Topic } from '../lib/data'
 import { trackLink } from '../lib/links'
 import { Pill } from './ui'
@@ -42,10 +42,16 @@ export default function TopicRow({
   topic,
   actions,
   showModule = true,
+  note,
+  extra,
+  rowProps,
 }: {
   topic: Topic
   actions: TopicActions
   showModule?: boolean
+  note?: ReactNode
+  extra?: ReactNode
+  rowProps?: LiHTMLAttributes<HTMLLIElement>
 }) {
   const [busy, setBusy] = useState(false)
 
@@ -67,7 +73,7 @@ export default function TopicRow({
   const link = trackLink(topic.trackId)
 
   return (
-    <li className="px-3 py-2.5">
+    <li className="px-3 py-2.5" {...rowProps}>
       <div className="flex items-start gap-3">
         <span className="pt-0.5">
           <Check checked={topic.done} label={`Mark "${topic.title}" done`} onClick={toggleDone} disabled={busy} />
@@ -83,14 +89,16 @@ export default function TopicRow({
               topic.title
             )}
           </p>
-          {(showModule || topic.bloom) && (
+          {(showModule || topic.bloom || note) && (
             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted tabular-nums">
               {showModule && <span className="truncate">{topic.moduleName}</span>}
               {topic.bloom && <Pill>{topic.bloom}</Pill>}
+              {note}
             </div>
           )}
         </div>
         <div className="-my-1.5 -mr-1 flex shrink-0 items-center">
+          {extra}
           <button
             type="button"
             aria-pressed={topic.revision}
