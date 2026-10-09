@@ -131,6 +131,30 @@ export type Database = {
           },
         ]
       }
+      revisions: {
+        Row: {
+          due_date: string | null
+          interval_step: number
+          topic_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          due_date?: string | null
+          interval_step?: number
+          topic_id: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          due_date?: string | null
+          interval_step?: number
+          topic_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       schedule_blocks: {
         Row: {
           id: number
@@ -175,6 +199,8 @@ export type Database = {
       topics: {
         Row: {
           bloom: string | null
+          confidence: number | null
+          last_reviewed_at: string | null
           done_at: string | null
           id: string
           module_id: string
@@ -185,6 +211,8 @@ export type Database = {
         }
         Insert: {
           bloom?: string | null
+          confidence?: number | null
+          last_reviewed_at?: string | null
           done_at?: string | null
           id: string
           module_id: string
@@ -195,6 +223,8 @@ export type Database = {
         }
         Update: {
           bloom?: string | null
+          confidence?: number | null
+          last_reviewed_at?: string | null
           done_at?: string | null
           id?: string
           module_id?: string

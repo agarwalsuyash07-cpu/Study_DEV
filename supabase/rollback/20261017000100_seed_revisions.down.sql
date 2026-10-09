@@ -1,0 +1,1 @@
+-- 20261017000100_seed_revisions only inserted schedule rows; undoing it is covered by 20261017000000_revisions.down.sql.

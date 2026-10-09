@@ -1,5 +1,6 @@
 import { useState, type LiHTMLAttributes, type ReactNode } from 'react'
 import type { Topic } from '../lib/data'
+import type { Confidence } from '../lib/revision'
 import { trackLink } from '../lib/links'
 import { Pill } from './ui'
 
@@ -7,6 +8,9 @@ export type TopicActions = {
   onToggleDone: (topic: Topic, done: boolean) => Promise<void>
   /** Explicit completion time (backfill); null = not done. */
   onSetDoneAt: (topic: Topic, doneAt: string | null) => Promise<void>
+  onSetConfidence: (topic: Topic, confidence: Confidence | null) => Promise<void>
+  /** Spaced revision: "done" moves up the ladder, "again" resets it. */
+  onReview: (topic: Topic, outcome: 'done' | 'again') => Promise<void>
   onToggleStar: (topic: Topic) => Promise<void>
   onError: (e: unknown) => void
 }

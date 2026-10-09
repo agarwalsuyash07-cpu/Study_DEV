@@ -4,7 +4,7 @@ import ErrorBanner from '../components/ErrorBanner'
 import { AddItem, ItemMenu } from '../components/PlanControls'
 import TopicRow, { Check } from '../components/TopicRow'
 import { trackColor } from '../components/trackColor'
-import { ConfirmDialog, MiniProgress, PageHeader, Pill, ProgressCard, StatGrid } from '../components/ui'
+import { ConfirmDialog, MiniProgress, PageHeader, Pill, ProgressCard, RevisionDueChip, StatGrid } from '../components/ui'
 import {
   addPlanItem,
   deferItem,
@@ -13,6 +13,7 @@ import {
   loadItems,
   loadPastUndone,
   previewRegeneration,
+  revisionsDue,
   saveRegeneration,
   setItemDoneAt,
   setItemOrder,
@@ -297,6 +298,9 @@ export default function Today() {
 
         <div className="flex min-w-0 flex-col gap-6 lg:order-1">
           <ErrorBanner error={error} onDismiss={() => setError(null)} />
+          <div>
+            <RevisionDueChip count={revisionsDue(cat, date)} />
+          </div>
 
           {overdue.length > 0 && (
             <section aria-labelledby="overdue-heading">

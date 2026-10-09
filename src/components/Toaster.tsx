@@ -24,11 +24,11 @@ export default function Toaster() {
           onMouseLeave={() => releaseToast(t.id)}
           onFocus={() => holdToast(t.id)}
           onBlur={() => releaseToast(t.id)}
-          className={`pointer-events-auto flex w-full max-w-md items-center gap-2 rounded-[12px] border bg-raised py-1.5 pr-1.5 pl-4 shadow-xl shadow-black/50 ${
+          className={`pointer-events-auto flex w-full max-w-md flex-wrap items-center gap-x-1 rounded-[12px] border bg-raised py-1.5 pr-1.5 pl-4 shadow-xl shadow-black/50 ${
             t.tone === 'error' ? 'border-red-400/40' : 'border-line'
           }`}
         >
-          <p className={`min-w-0 flex-1 truncate py-2 ${t.tone === 'error' ? 'text-red-300' : ''}`}>{t.message}</p>
+          <p className={`min-w-[12rem] flex-1 truncate py-2 ${t.tone === 'error' ? 'text-red-300' : ''}`}>{t.message}</p>
           {t.actions.map((a) => (
             <button
               key={a.label}

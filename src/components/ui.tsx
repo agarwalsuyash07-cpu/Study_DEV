@@ -189,3 +189,20 @@ export function ExamDateField({ id, value, onSave }: { id: string; value: string
     </span>
   )
 }
+
+/** "Revision due: N" link chip for Today and the Dashboard. */
+export function RevisionDueChip({ count }: { count: number }) {
+  return (
+    <Link
+      to="/revision"
+      className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3 text-xs font-medium ${
+        count > 0 ? 'border-warn/40 bg-warn/10 text-warn' : 'border-line text-soft'
+      }`}
+    >
+      <svg viewBox="0 0 20 20" className="size-3.5" aria-hidden="true">
+        <path d="M4 10a6 6 0 1 0 1.8-4.3M4 3.5v2.7h2.7" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      Revision due: <span className="tabular-nums">{count}</span>
+    </Link>
+  )
+}

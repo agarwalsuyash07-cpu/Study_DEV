@@ -3,8 +3,8 @@ import { Link } from 'react-router'
 import ErrorBanner from '../components/ErrorBanner'
 import ProgressBar from '../components/ProgressBar'
 import { trackColor } from '../components/trackColor'
-import { PageHeader } from '../components/ui'
-import { checklistOf, loadPlansBetween, paceFor, toDayItem, weeklyItems, weeklyTopics, type Item } from '../lib/data'
+import { PageHeader, RevisionDueChip } from '../components/ui'
+import { checklistOf, loadPlansBetween, paceFor, revisionsDue, toDayItem, weeklyItems, weeklyTopics, type Item } from '../lib/data'
 import { todayIST, weekDates } from '../lib/date'
 import { trackLink } from '../lib/links'
 import { overallStatus, paceLabel } from '../lib/pace'
@@ -140,7 +140,12 @@ export default function Dashboard() {
     <main>
       <PageHeader
         title="Dashboard"
-        action={<span className="text-xs text-muted">{fmtDate(today, { weekday: 'long', day: 'numeric', month: 'long' })}</span>}
+        action={
+          <span className="flex items-center gap-3">
+            <span className="hidden text-xs text-muted sm:inline">{fmtDate(today, { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+            <RevisionDueChip count={revisionsDue(cat, today)} />
+          </span>
+        }
       />
       <div className="flex flex-col gap-6 px-4 pb-8 md:px-8">
         <ErrorBanner error={error} onDismiss={() => setError(null)} />

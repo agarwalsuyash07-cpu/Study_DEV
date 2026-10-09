@@ -2,6 +2,7 @@ import { supabase } from './supabase'
 import type { Tables } from './database.types'
 import { addDays, weekdayOf } from './date'
 import { trackPace, type Pace } from './pace'
+import { isDue, type Confidence, type ReviewState } from './revision'
 import { assignDay, planRegeneration, type DayItem, type PlanBlock, type PlanItem, type PlanTopic } from './plan'
 
 export type Track = Tables<'tracks'>
@@ -15,6 +16,8 @@ export type Topic = PlanTopic & {
   bloom: string | null
   revision: boolean
   doneAt: string | null
+  confidence: Confidence | null
+  lastReviewedAt: string | null
 }
 export type Settings = Omit<Tables<'user_settings'>, 'user_id' | 'updated_at'>
 /** Mirrors the column defaults in user_settings; used until the first save creates the row. */
@@ -27,7 +30,11 @@ export type Catalog = {
   topicById: Map<string, Topic>
   blocks: Block[]
   settings: Settings
+  /** Review schedule per topic; topics never completed have no entry. */
+  revisions: Map<string, ReviewState>
 }
+
+const toConfidence = (n: number | null): Confidence | null => (n === 1 || n === 2 || n === 3 ? n : null)
 
 function rows<T>(res: { data: T[] | null; error: { message: string } | null }, what: string): T[] {
   if (res.error) throw new Error(`${what}: ${res.error.message}`)
@@ -39,12 +46,13 @@ function ok(res: { error: { message: string } | null }, what: string): void {
 
 // ponytail: plain selects cap at the API's 1000-row limit; fine for ~300 topics, paginate if the syllabus grows past that.
 export async function loadCatalog(): Promise<Catalog> {
-  const [t, m, tp, b, s] = await Promise.all([
+  const [t, m, tp, b, s, r] = await Promise.all([
     supabase.from('tracks').select('*').order('sort_order'),
     supabase.from('modules').select('*').order('sort_order'),
     supabase.from('topics').select('*').order('sort_order'),
     supabase.from('schedule_blocks').select('*').order('weekday').order('sort_order'),
     supabase.from('user_settings').select('*').maybeSingle(),
+    supabase.from('revisions').select('topic_id, due_date, interval_step'),
   ])
   if (s.error) throw new Error(`load settings: ${s.error.message}`)
   const { user_id: _u, updated_at: _at, ...saved } = s.data ?? { user_id: '', updated_at: '', ...DEFAULT_SETTINGS }
@@ -75,10 +83,13 @@ export async function loadCatalog(): Promise<Catalog> {
       bloom: x.bloom,
       revision: x.revision,
       doneAt: x.done_at,
+      confidence: toConfidence(x.confidence),
+      lastReviewedAt: x.last_reviewed_at,
     })
   }
   topics.sort((a, b) => a.moduleOrder - b.moduleOrder || a.order - b.order)
-  return { tracks, modules, topics, topicById: new Map(topics.map((x) => [x.id, x])), blocks, settings }
+  const revisions = new Map(rows(r, 'load revisions').map((x) => [x.topic_id, { dueDate: x.due_date, step: x.interval_step }]))
+  return { tracks, modules, topics, topicById: new Map(topics.map((x) => [x.id, x])), blocks, settings, revisions }
 }
 
 const toPlanBlock = (b: Block): PlanBlock => ({
@@ -297,3 +308,22 @@ export const checklistOf = (plans: Map<string, Item[]>) =>
 export async function saveSettings(patch: Partial<Settings>): Promise<void> {
   ok(await supabase.from('user_settings').upsert({ ...patch, updated_at: new Date().toISOString() }), 'save settings')
 }
+
+/** Saves a topic's review schedule; `reviewedAt` also stamps the topic's last review. */
+export async function saveReview(topicId: string, state: ReviewState, reviewedAt?: string): Promise<void> {
+  ok(
+    await supabase
+      .from('revisions')
+      .upsert({ topic_id: topicId, due_date: state.dueDate, interval_step: state.step, updated_at: new Date().toISOString() }),
+    'save review',
+  )
+  if (reviewedAt) ok(await supabase.from('topics').update({ last_reviewed_at: reviewedAt }).eq('id', topicId), 'stamp review')
+}
+
+export async function setConfidence(topicId: string, confidence: Confidence | null): Promise<void> {
+  ok(await supabase.from('topics').update({ confidence }).eq('id', topicId), 'update confidence')
+}
+
+/** Reviews due today or earlier, for completed topics only. */
+export const revisionsDue = (cat: Catalog, today: string): number =>
+  [...cat.revisions].filter(([id, r]) => cat.topicById.get(id)?.done && isDue(r, today)).length
