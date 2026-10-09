@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
-import type { Tables } from './database.types'
+import type { Tables, TablesUpdate } from './database.types'
 import { addDays, weekdayOf } from './date'
+import { safeUrl } from './markdown'
 import { trackPace, type Pace } from './pace'
 import { isDue, type Confidence, type ReviewState } from './revision'
 import { assignDay, planRegeneration, type DayItem, type PlanBlock, type PlanItem, type PlanTopic } from './plan'
@@ -22,6 +23,11 @@ export type Topic = PlanTopic & {
   estMinutes: number
   /** The topic's own estimate, null when derived. */
   estOverride: number | null
+  /** What the estimate would be without an override. */
+  estDerived: number
+  notes: string
+  links: string[]
+  practiceDone: boolean
 }
 export type Settings = Omit<Tables<'user_settings'>, 'user_id' | 'updated_at'>
 /** Mirrors the column defaults in user_settings; used until the first save creates the row. */
@@ -104,6 +110,10 @@ export async function loadCatalog(): Promise<Catalog> {
       lastReviewedAt: x.last_reviewed_at,
       estMinutes: estimateMinutes(x.est_minutes, mod.est_minutes, perModule.get(mod.id) ?? 0, x.bloom),
       estOverride: x.est_minutes,
+      estDerived: estimateMinutes(null, mod.est_minutes, perModule.get(mod.id) ?? 0, x.bloom),
+      notes: x.notes ?? '',
+      links: x.links,
+      practiceDone: x.practice_done,
     })
   }
   topics.sort((a, b) => a.moduleOrder - b.moduleOrder || a.order - b.order)
@@ -367,7 +377,24 @@ const budgetOf = (cat: Catalog, date: string) => ({
   estimate: (id: string) => cat.topicById.get(id)?.estMinutes ?? DEFAULT_TOPIC_MINUTES,
 })
 
-export async function setTopicEstimate(topicId: string, minutes: number | null): Promise<void> {
-  if (minutes !== null && (!Number.isInteger(minutes) || minutes < 1 || minutes > 600)) throw new Error('estimate must be 1–600 minutes')
-  ok(await supabase.from('topics').update({ est_minutes: minutes }).eq('id', topicId), 'update estimate')
+export const BLOOM_LEVELS = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'] as const
+/** Bloom levels that get a "practice problems" checkbox. */
+export const PRACTICE_LEVELS: readonly string[] = ['Apply', 'Analyze']
+
+export type TopicPatch = Partial<Pick<Topic, 'notes' | 'links' | 'bloom' | 'practiceDone' | 'estOverride'>>
+
+/** Saves drawer edits; links are re-validated here as http(s) only. */
+export async function updateTopic(topicId: string, patch: TopicPatch): Promise<void> {
+  if (patch.links?.some((l) => !safeUrl(l))) throw new Error('links must be http(s) URLs')
+  if (patch.estOverride !== undefined && patch.estOverride !== null) {
+    const m = patch.estOverride
+    if (!Number.isInteger(m) || m < 1 || m > 600) throw new Error('estimate must be 1–600 minutes')
+  }
+  const row: TablesUpdate<'topics'> = {}
+  if (patch.notes !== undefined) row.notes = patch.notes.trim() ? patch.notes : null
+  if (patch.links !== undefined) row.links = patch.links
+  if (patch.bloom !== undefined) row.bloom = patch.bloom
+  if (patch.practiceDone !== undefined) row.practice_done = patch.practiceDone
+  if (patch.estOverride !== undefined) row.est_minutes = patch.estOverride
+  ok(await supabase.from('topics').update(row).eq('id', topicId), 'update topic')
 }

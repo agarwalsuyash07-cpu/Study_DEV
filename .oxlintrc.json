@@ -15,7 +15,7 @@
   },
   "overrides": [
     { "files": ["scripts/**"], "rules": { "no-console": "off" } },
-    { "files": ["**/*.test.ts"], "rules": { "unicorn/no-thenable": "off", "unicorn/consistent-function-scoping": "off" } }
+    { "files": ["**/*.test.ts", "**/*.test.tsx"], "rules": { "unicorn/no-thenable": "off", "unicorn/consistent-function-scoping": "off" } }
   ],
   "ignorePatterns": ["dist", "src/lib/database.types.ts"]
 }

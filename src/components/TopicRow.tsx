@@ -1,5 +1,5 @@
 import { useState, type LiHTMLAttributes, type ReactNode } from 'react'
-import type { Topic } from '../lib/data'
+import { PRACTICE_LEVELS, type Topic, type TopicPatch } from '../lib/data'
 import type { Confidence } from '../lib/revision'
 import { trackLink } from '../lib/links'
 import { fmtMinutes, Pill } from './ui'
@@ -13,6 +13,8 @@ export type TopicActions = {
   onReview: (topic: Topic, outcome: 'done' | 'again') => Promise<void>
   onToggleStar: (topic: Topic) => Promise<void>
   onError: (e: unknown) => void
+  onOpen: (topic: Topic) => void
+  onUpdate: (topic: Topic, patch: TopicPatch) => Promise<void>
 }
 
 /** Sheet-style 16px checkbox with a 44px tap target. */
@@ -86,19 +88,32 @@ export default function TopicRow({
         </span>
         <div className="min-w-0 flex-1">
           <p className={`leading-snug ${topic.done ? 'text-muted line-through decoration-muted/70' : 'text-soft'}`}>
-            {link ? (
-              <a href={link} target="_blank" rel="noopener noreferrer" className="underline decoration-accent/60 underline-offset-2 hover:text-accent">
-                {topic.title}
-                <span className="sr-only"> (opens in a new tab)</span>
+            {/* title opens the topic drawer; tracks worked elsewhere keep their external link as an icon */}
+            <button type="button" onClick={() => actions.onOpen(topic)} className="text-left hover:text-text hover:underline hover:underline-offset-2">
+              {topic.title}
+            </button>
+            {link && (
+              <a
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open "${topic.title}" on the track's site (new tab)`}
+                className="ml-1 inline-grid size-6 translate-y-1 place-items-center rounded text-accent hover:bg-raised"
+              >
+                <svg viewBox="0 0 16 16" className="size-3.5" aria-hidden="true">
+                  <path d="M9 3h4v4M13 3L7 9M11 9.5V13H3V5h3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </a>
-            ) : (
-              topic.title
             )}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted tabular-nums">
             {showModule && <span className="truncate">{topic.moduleName}</span>}
             <span title={topic.estOverride ? 'Your estimate' : 'Estimated from the module'}>~{fmtMinutes(topic.estMinutes)}</span>
             {topic.bloom && <Pill>{topic.bloom}</Pill>}
+            {topic.bloom && PRACTICE_LEVELS.includes(topic.bloom) && (
+              <span className={topic.practiceDone ? 'text-done' : ''}>{topic.practiceDone ? 'Practice done' : 'Practice to do'}</span>
+            )}
+            {topic.notes && <span title="Has notes">Notes</span>}
             {note}
           </div>
         </div>

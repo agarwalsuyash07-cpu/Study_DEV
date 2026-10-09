@@ -42,7 +42,7 @@ function ModuleSection({
 
 export default function TrackDetail() {
   const { trackId } = useParams()
-  const { cat, setCat, error, setError, actions } = useCatalog()
+  const { cat, setCat, error, setError, actions, drawer } = useCatalog()
   const back = { to: '/tracks', label: 'Back to tracks' }
 
   if (!cat) {
@@ -125,6 +125,7 @@ export default function TrackDetail() {
           </div>
         </div>
       </div>
+      {drawer}
     </main>
   )
 }

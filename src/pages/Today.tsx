@@ -44,7 +44,7 @@ export default function Today() {
   const [saving, setSaving] = useState(false)
   const [ignoreBudget, setIgnoreBudget] = useState(false)
   const dragFrom = useRef<{ group: string; index: number } | null>(null)
-  const { cat, setCat, error, setError, actions } = useCatalog({
+  const { cat, setCat, error, setError, actions, drawer } = useCatalog({
     autoLoad: false,
     // mirrors the DB trigger: the item on the completion day follows the topic
     onDoneChanged: (topicId, doneAt) =>
@@ -483,6 +483,7 @@ export default function Today() {
             </div>
           ))}
       </ConfirmDialog>
+      {drawer}
     </main>
   )
 }

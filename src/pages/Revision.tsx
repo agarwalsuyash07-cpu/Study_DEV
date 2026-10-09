@@ -4,7 +4,7 @@ import ConfidencePicker from '../components/ConfidencePicker'
 import ErrorBanner from '../components/ErrorBanner'
 import TopicRow, { type TopicActions } from '../components/TopicRow'
 import { trackColor } from '../components/trackColor'
-import { PageHeader } from '../components/ui'
+import { PageHeader, Pill } from '../components/ui'
 import type { Topic, Track } from '../lib/data'
 import { todayIST } from '../lib/date'
 import { INTERVALS, isDue, type ReviewState } from '../lib/revision'
@@ -58,6 +58,7 @@ function DueRow({ entry, track, today, actions }: { entry: Entry; track: Track |
           <span>
             Review {review.step + 1} of {INTERVALS.length}
           </span>
+          {topic.bloom && <Pill>{topic.bloom}</Pill>}
           {late > 0 && <span className="text-warn">{late === 1 ? '1 day late' : `${late} days late`}</span>}
         </p>
       </div>
@@ -90,7 +91,7 @@ function DueRow({ entry, track, today, actions }: { entry: Entry; track: Track |
 }
 
 export default function Revision() {
-  const { cat, error, setError, actions } = useCatalog()
+  const { cat, error, setError, actions, drawer } = useCatalog()
   const today = todayIST()
 
   if (!cat) {
@@ -200,6 +201,7 @@ export default function Revision() {
           )}
         </section>
       </div>
+      {drawer}
     </main>
   )
 }

@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { createElement, useEffect, useMemo, useRef, useState } from 'react'
+import TopicDrawer from '../components/TopicDrawer'
 import type { TopicActions } from '../components/TopicRow'
-import { loadCatalog, saveReview, setConfidence, setRevision, setTopicDoneAt, type Catalog, type Topic } from './data'
+import { loadCatalog, saveReview, setConfidence, setRevision, setTopicDoneAt, updateTopic, type Catalog, type Topic } from './data'
 import { todayIST } from './date'
 import { afterAgain, afterDone, CONFIDENCE_NAMES, firstReview, type Confidence, type ReviewState } from './revision'
 import { doneDay } from './stats'
@@ -21,6 +22,7 @@ type Hooks = {
 export function useCatalog({ autoLoad = true, ...hooks }: Hooks & { autoLoad?: boolean } = {}) {
   const [cat, setCat] = useState<Catalog | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [openId, setOpenId] = useState<string | null>(null)
   const hooksRef = useRef(hooks)
   // actions are created once; they read the latest catalog through this ref
   const catRef = useRef(cat)
@@ -106,8 +108,37 @@ export function useCatalog({ autoLoad = true, ...hooks }: Hooks & { autoLoad?: b
         setCat((c) => (c ? patchTopics(c, (t) => t.id === topic.id, () => ({ revision: !topic.revision })) : c))
       },
       onError: (e) => setError(message(e)),
+      onOpen: (topic) => setOpenId(topic.id),
+      onUpdate: async (topic, patch) => {
+        await updateTopic(topic.id, patch)
+        setCat((c) =>
+          c
+            ? patchTopics(
+                c,
+                (t) => t.id === topic.id,
+                (t) => {
+                  const next = { ...t, ...patch }
+                  return { ...patch, estMinutes: next.estOverride ?? next.estDerived }
+                },
+              )
+            : c,
+        )
+      },
     }
   }, [])
 
-  return { cat, setCat, error, setError, actions }
+  const open = openId && cat ? cat.topicById.get(openId) : undefined
+  const drawer = open
+    ? // oxlint-disable-next-line react/refs -- reason: actions read refs only inside event callbacks, never during render
+      createElement(TopicDrawer, {
+        key: open.id,
+        topic: open,
+        track: cat?.tracks.find((t) => t.id === open.trackId),
+        review: cat?.revisions.get(open.id) ?? null,
+        actions,
+        onClose: () => setOpenId(null),
+      })
+    : null
+
+  return { cat, setCat, error, setError, actions, drawer }
 }

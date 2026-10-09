@@ -201,6 +201,9 @@ export type Database = {
           bloom: string | null
           confidence: number | null
           last_reviewed_at: string | null
+          links: string[]
+          notes: string | null
+          practice_done: boolean
           done_at: string | null
           est_minutes: number | null
           id: string
@@ -214,6 +217,9 @@ export type Database = {
           bloom?: string | null
           confidence?: number | null
           last_reviewed_at?: string | null
+          links?: string[]
+          notes?: string | null
+          practice_done?: boolean
           done_at?: string | null
           est_minutes?: number | null
           id: string
@@ -227,6 +233,9 @@ export type Database = {
           bloom?: string | null
           confidence?: number | null
           last_reviewed_at?: string | null
+          links?: string[]
+          notes?: string | null
+          practice_done?: boolean
           done_at?: string | null
           est_minutes?: number | null
           id?: string

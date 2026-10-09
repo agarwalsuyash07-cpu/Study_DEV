@@ -177,7 +177,12 @@ export default function Week() {
                             <span className={r.done ? 'text-muted line-through decoration-muted/70' : 'text-soft'}>
                               {topic?.title ?? r.label ?? 'Removed topic'}
                             </span>
-                            {track && <span className="block text-xs text-muted">{track.name}</span>}
+                            {track && (
+                              <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
+                                {track.name}
+                                {topic?.bloom && <Pill>{topic.bloom}</Pill>}
+                              </span>
+                            )}
                           </span>
                         </li>
                       )
