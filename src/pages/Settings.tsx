@@ -2,12 +2,12 @@ import { useId, useRef, useState, type DragEvent, type LiHTMLAttributes, type Re
 import ErrorBanner from '../components/ErrorBanner'
 import { ConfirmDialog, ExamDateField, PageHeader } from '../components/ui'
 import { parseBackup, type Backup, type BackupCounts } from '../lib/backup'
+import { getCatalog } from '../lib/catalogStore'
 import {
   addBlock,
   deleteBlock,
   exportAll,
   importBackup,
-  loadCatalog,
   MAX_BLOCK_MINUTES,
   MAX_BLOCK_TOPICS,
   restoreBlock,
@@ -394,7 +394,7 @@ export default function Settings() {
     setRestoring(true)
     try {
       await importBackup(importing.data)
-      setCat(await loadCatalog())
+      await getCatalog({ force: true })
       setImporting(null)
       showToast({ message: `Imported ${importing.file}`, actions: [] })
     } catch (e) {

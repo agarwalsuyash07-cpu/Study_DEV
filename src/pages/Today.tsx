@@ -12,7 +12,6 @@ import {
   budgetFor,
   deferItem,
   ensureDayPlan,
-  loadCatalog,
   loadItems,
   loadPastUndone,
   needsSubject,
@@ -31,6 +30,7 @@ import { overdueItems, reorderGroup } from '../lib/plan'
 import { weakestTrack } from '../lib/review'
 import { doneDay, topicsCompletedOn } from '../lib/stats'
 import { showToast } from '../lib/toast'
+import { getCatalog } from '../lib/catalogStore'
 import { message, useCatalog } from '../lib/useCatalog'
 
 const dayLabel = (date: string) =>
@@ -60,7 +60,7 @@ export default function Today() {
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      const c = await loadCatalog()
+      const c = await getCatalog()
       const [its, past] = await Promise.all([ensureDayPlan(c, date), loadPastUndone(date)])
       if (cancelled) return
       setCat(c)

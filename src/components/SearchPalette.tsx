@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { loadCatalog, type Catalog } from '../lib/data'
+import { getCatalog } from '../lib/catalogStore'
+import type { Catalog } from '../lib/data'
 import { searchCatalog, type SearchDoc } from '../lib/search'
 import { shortTrackName, trackColor } from './trackColor'
 
@@ -53,9 +54,9 @@ export default function SearchPalette() {
     if (open && !d.open) d.showModal()
     if (!open && d.open) d.close()
     if (!open) return
-    // fresh catalog each time it opens, so new imports and edits are searchable
+    // cached catalog (refetched when stale); local edits and imports already patch it
     let cancelled = false
-    loadCatalog().then(
+    getCatalog().then(
       (c) => {
         if (!cancelled) setCat(c)
       },

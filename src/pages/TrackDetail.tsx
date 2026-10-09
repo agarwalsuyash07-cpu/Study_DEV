@@ -6,7 +6,8 @@ import CsvImport from '../components/CsvImport'
 import TrackStats from '../components/TrackStats'
 import { shortTrackName } from '../components/trackColor'
 import { Chevron, ExamDateField, MiniProgress, PageHeader, Pill, ProgressCard } from '../components/ui'
-import { loadCatalog, paceFor, setExamDate, weeklyTopics, type Module, type Topic } from '../lib/data'
+import { getCatalog } from '../lib/catalogStore'
+import { paceFor, setExamDate, weeklyTopics, type Module, type Topic } from '../lib/data'
 import { todayIST } from '../lib/date'
 import { message, useCatalog } from '../lib/useCatalog'
 
@@ -113,7 +114,9 @@ export default function TrackDetail() {
             track={track}
             modules={modules}
             onError={(e) => setError(message(e))}
-            onImported={async () => setCat(await loadCatalog())}
+            onImported={async () => {
+              await getCatalog({ force: true })
+            }}
           />
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-[14px] border border-line bg-card px-3 py-2">
             <label htmlFor="exam-date" className="text-soft">

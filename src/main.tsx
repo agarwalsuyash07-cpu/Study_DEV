@@ -2,6 +2,7 @@ import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import type { Session } from '@supabase/supabase-js'
+import { resetCatalogStore } from './lib/catalogStore'
 import { supabase } from './lib/supabase'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
@@ -19,7 +20,11 @@ function App() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+    const { data } = supabase.auth.onAuthStateChange((_e, s) => {
+      // signing out drops the cached catalog so nothing outlives the session in memory
+      if (!s) resetCatalogStore()
+      setSession(s)
+    })
     return () => data.subscription.unsubscribe()
   }, [])
 

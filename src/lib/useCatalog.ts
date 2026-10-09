@@ -1,7 +1,8 @@
 import { createElement, useEffect, useMemo, useRef, useState } from 'react'
 import TopicDrawer from '../components/TopicDrawer'
 import type { TopicActions } from '../components/TopicRow'
-import { loadCatalog, saveReview, setConfidence, setRevision, setTopicDoneAt, updateTopic, type Catalog, type Topic } from './data'
+import { getCatalog, isStale, peekCatalog, setCatalog, subscribeCatalog, updateCatalog } from './catalogStore'
+import { saveReview, setConfidence, setRevision, setTopicDoneAt, updateTopic, type Catalog, type Topic } from './data'
 import { todayIST } from './date'
 import { afterAgain, afterDone, CONFIDENCE_NAMES, firstReview, type Confidence, type ReviewState } from './revision'
 import { doneDay } from './stats'
@@ -18,10 +19,18 @@ type Hooks = {
   onDoneChanged?: (topicId: string, doneAt: string | null) => void
 }
 
+/** Writes go to the shared cache (catalogStore), which re-renders every page using it. */
+function setCat(next: Catalog | null | ((c: Catalog | null) => Catalog | null)): void {
+  if (typeof next === 'function') updateCatalog((c) => next(c) ?? c)
+  else if (next) setCatalog(next)
+}
+
 /** Catalog state plus the topic actions every page shares. `autoLoad: false` lets a page load it itself. */
 export function useCatalog({ autoLoad = true, ...hooks }: Hooks & { autoLoad?: boolean } = {}) {
-  const [cat, setCat] = useState<Catalog | null>(null)
+  // cached copy renders immediately; a stale one is revalidated below
+  const [cat, setCatState] = useState<Catalog | null>(peekCatalog)
   const [error, setError] = useState<string | null>(null)
+  useEffect(() => subscribeCatalog(setCatState), [])
   const [openId, setOpenId] = useState<string | null>(null)
   const hooksRef = useRef(hooks)
   // actions are created once; they read the latest catalog through this ref
@@ -34,16 +43,19 @@ export function useCatalog({ autoLoad = true, ...hooks }: Hooks & { autoLoad?: b
   useEffect(() => {
     if (!autoLoad) return
     let cancelled = false
-    loadCatalog().then(
-      (c) => {
-        if (!cancelled) setCat(c)
-      },
-      (e: unknown) => {
-        if (!cancelled) setError(message(e))
-      },
-    )
+    const fail = (e: unknown) => {
+      if (!cancelled) setError(message(e))
+    }
+    // fresh cache: no request at all; stale: one shared background request
+    getCatalog().catch(fail)
+    // coming back to the tab after a while picks up edits made elsewhere
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && isStale()) getCatalog().catch(fail)
+    }
+    document.addEventListener('visibilitychange', onVisible)
     return () => {
       cancelled = true
+      document.removeEventListener('visibilitychange', onVisible)
     }
   }, [autoLoad])
 
