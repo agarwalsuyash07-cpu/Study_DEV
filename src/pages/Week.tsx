@@ -6,13 +6,17 @@ import { PageHeader, Pill } from '../components/ui'
 import { blocksFor, loadPlansBetween, type Catalog, type Item } from '../lib/data'
 import { todayIST, weekDates } from '../lib/date'
 import { previewDays, type PlanItem } from '../lib/plan'
+import { topicsCompletedOn } from '../lib/stats'
 import { message, useCatalog } from '../lib/useCatalog'
 
 type Row = { key: string; blockId: number | null; topicId: string | null; label: string | null; done: boolean }
 type Day = { date: string; kind: 'past' | 'today' | 'future'; preview: boolean; rows: Row[] | null }
 
+// deferred originals live on in their new day, so they don't count here
 const fromSaved = (items: Item[]): Row[] =>
-  items.map((i) => ({ key: `s${i.id}`, blockId: i.block_id, topicId: i.topic_id, label: i.label, done: i.done_at !== null }))
+  items
+    .filter((i) => i.deferred_to === null)
+    .map((i) => ({ key: `s${i.id}`, blockId: i.block_id, topicId: i.topic_id, label: i.label, done: i.done_at !== null }))
 const fromPreview = (items: PlanItem[]): Row[] =>
   items.map((i, n) => ({ key: `p${n}`, blockId: i.blockId, topicId: i.topicId, label: i.label, done: false }))
 
@@ -99,6 +103,8 @@ export default function Week() {
           const rows = d.rows ?? []
           const done = rows.filter((r) => r.done).length
           const weekday = fmtDay(d.date, { weekday: 'long' })
+          const plannedIds = new Set(rows.flatMap((r) => (r.topicId ? [r.topicId] : [])))
+          const extra = d.kind === 'future' ? 0 : topicsCompletedOn(cat.topics, d.date).filter((t) => !plannedIds.has(t.id)).length
           return (
             <li key={d.date}>
               <div className={`flex flex-col overflow-hidden rounded-[14px] border bg-card ${d.kind === 'today' ? 'border-accent/50' : 'border-line'}`}>
@@ -108,7 +114,11 @@ export default function Week() {
                     <span className="text-sm text-muted">{fmtDay(d.date, { day: 'numeric', month: 'short' })}</span>
                     {d.kind === 'today' && <Pill tone="accent">Today</Pill>}
                     {d.preview && <Pill>Preview</Pill>}
-                    <span className="ml-auto text-sm text-muted tabular-nums">{d.rows ? `${done}/${rows.length}` : ''}</span>
+                    <span className="ml-auto text-sm text-muted tabular-nums">
+                      {d.rows ? `${done}/${rows.length}` : ''}
+                      {extra > 0 && <span className="ml-1.5 text-done">+{extra}</span>}
+                      {extra > 0 && <span className="sr-only"> plus {extra} done outside the plan</span>}
+                    </span>
                   </div>
                   {rows.length > 0 && <ProgressBar value={done / rows.length} label={`${weekday} progress`} />}
                   {rows.length === 0 && (

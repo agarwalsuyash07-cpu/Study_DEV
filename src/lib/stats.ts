@@ -1,4 +1,27 @@
-import { addDays, weekDates } from './date'
+import { addDays, todayIST, weekDates } from './date'
+
+/** IST day a topic was completed, or null. */
+export const doneDay = (doneAt: string | null): string | null => (doneAt ? todayIST(new Date(doneAt)) : null)
+
+/** The one definition of "completed on `date`": topics whose done_at falls on that IST day, wherever they were ticked. */
+export function topicsCompletedOn<T extends { doneAt: string | null }>(topics: readonly T[], date: string): T[] {
+  return topics.filter((t) => doneDay(t.doneAt) === date)
+}
+
+/** Completions per IST day: topics by done day + checklist items ticked on their own plan day. */
+export function completionsByDay(
+  topics: readonly { doneAt: string | null }[],
+  checklist: readonly { date: string; done: boolean }[],
+): Map<string, number> {
+  const out = new Map<string, number>()
+  const bump = (d: string) => out.set(d, (out.get(d) ?? 0) + 1)
+  for (const t of topics) {
+    const d = doneDay(t.doneAt)
+    if (d) bump(d)
+  }
+  for (const c of checklist) if (c.done) bump(c.date)
+  return out
+}
 
 /** Consecutive active days ending today (or yesterday, so an unstarted today doesn't zero it) + the longest run. */
 export function streaks(active: ReadonlySet<string>, today: string): { current: number; best: number } {

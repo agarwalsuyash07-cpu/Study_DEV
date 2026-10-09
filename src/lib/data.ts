@@ -187,14 +187,33 @@ export async function setRevision(topicId: string, revision: boolean): Promise<v
   ok(await supabase.from('topics').update({ revision }).eq('id', topicId), 'update star')
 }
 
+const PAGE = 1000
+
+/** Runs a ranged query page by page so results are never cut at the API's 1000-row cap. */
+async function allPages<T>(
+  page: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
+  what: string,
+): Promise<T[]> {
+  const all: T[] = []
+  for (let from = 0; ; from += PAGE) {
+    const got = rows(await page(from, from + PAGE - 1), what)
+    all.push(...got)
+    if (got.length < PAGE) return all
+  }
+}
+
 /** Saved plan items for a date range, keyed by date; dates without a saved plan are absent. */
 export async function loadPlansBetween(from: string, to: string): Promise<Map<string, Item[]>> {
   const [plans, items] = await Promise.all([
-    supabase.from('day_plans').select('date').gte('date', from).lte('date', to),
-    supabase.from('day_plan_items').select('*').gte('date', from).lte('date', to).order('sort_order'),
+    allPages((a, b) => supabase.from('day_plans').select('date').gte('date', from).lte('date', to).order('date').range(a, b), 'load plans'),
+    allPages(
+      (a, b) =>
+        supabase.from('day_plan_items').select('*').gte('date', from).lte('date', to).order('date').order('sort_order').order('id').range(a, b),
+      'load plan items',
+    ),
   ])
-  const out = new Map<string, Item[]>(rows(plans, 'load week plans').map((p) => [p.date, []]))
-  for (const i of rows(items, 'load week items')) out.get(i.date)?.push(i)
+  const out = new Map<string, Item[]>(plans.map((p) => [p.date, []]))
+  for (const i of items) out.get(i.date)?.push(i)
   return out
 }
 
@@ -235,19 +254,9 @@ const EXPORT_TABLES = [
 
 /** Every table, paged past the API row cap. */
 export async function exportAll(): Promise<Record<string, unknown[]>> {
-  const PAGE = 1000
   const out: Record<string, unknown[]> = {}
   for (const [table, orderBy] of EXPORT_TABLES) {
-    const all: unknown[] = []
-    for (let from = 0; ; from += PAGE) {
-      const page = rows(
-        await supabase.from(table).select('*').order(orderBy).range(from, from + PAGE - 1),
-        `export ${table}`,
-      )
-      all.push(...page)
-      if (page.length < PAGE) break
-    }
-    out[table] = all
+    out[table] = await allPages<unknown>((a, b) => supabase.from(table).select('*').order(orderBy).range(a, b), `export ${table}`)
   }
   return out
 }
@@ -265,3 +274,12 @@ export function paceFor(cat: Catalog, trackId: string, today: string): Pace {
 export async function setExamDate(trackId: string, examDate: string | null): Promise<void> {
   ok(await supabase.from('tracks').update({ exam_date: examDate }).eq('id', trackId), 'update exam date')
 }
+
+/** Items a week's schedule produces: topics from track blocks, one per checklist block. */
+export function weeklyItems(cat: Catalog): number {
+  return cat.blocks.reduce((sum, b) => sum + (b.track_id === null ? 1 : b.topics), 0)
+}
+
+/** Checklist (free-text) items of saved plans, in the shape completionsByDay() takes. */
+export const checklistOf = (plans: Map<string, Item[]>) =>
+  [...plans.values()].flat().flatMap((i) => (i.topic_id === null && i.deferred_to === null ? [{ date: i.date, done: i.done_at !== null }] : []))

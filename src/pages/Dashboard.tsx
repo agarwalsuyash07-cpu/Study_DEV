@@ -4,11 +4,11 @@ import ErrorBanner from '../components/ErrorBanner'
 import ProgressBar from '../components/ProgressBar'
 import { trackColor } from '../components/trackColor'
 import { PageHeader } from '../components/ui'
-import { loadItems, paceFor, weeklyTopics, type Item } from '../lib/data'
+import { checklistOf, loadPlansBetween, paceFor, toDayItem, weeklyItems, weeklyTopics, type Item } from '../lib/data'
 import { todayIST, weekDates } from '../lib/date'
 import { trackLink } from '../lib/links'
 import { overallStatus, paceLabel } from '../lib/pace'
-import { heatLevel, heatmapWeeks, streaks } from '../lib/stats'
+import { completionsByDay, heatLevel, heatmapWeeks, streaks, topicsCompletedOn } from '../lib/stats'
 import { message, useCatalog } from '../lib/useCatalog'
 
 const WEEKS = 26
@@ -75,14 +75,14 @@ export default function Dashboard() {
   const [today] = useState(todayIST)
   const weeks = heatmapWeeks(today, WEEKS)
   const from = weeks[0]![0]!
-  const [items, setItems] = useState<Item[] | null>(null)
+  const [plans, setPlans] = useState<Map<string, Item[]> | null>(null)
 
   useEffect(() => {
     let cancelled = false
-    // loadItems, not ensureDayPlan: viewing the dashboard shouldn't freeze today's plan
-    loadItems(today).then(
-      (i) => {
-        if (!cancelled) setItems(i)
+    // reads saved plans only, never ensureDayPlan: viewing the dashboard shouldn't freeze today's plan
+    loadPlansBetween(from, today).then(
+      (p) => {
+        if (!cancelled) setPlans(p)
       },
       (e: unknown) => {
         if (!cancelled) setError(message(e))
@@ -91,9 +91,9 @@ export default function Dashboard() {
     return () => {
       cancelled = true
     }
-  }, [today, setError])
+  }, [from, today, setError])
 
-  if (!cat || !items) {
+  if (!cat || !plans) {
     return (
       <main>
         <PageHeader title="Dashboard" />
@@ -108,19 +108,17 @@ export default function Dashboard() {
   const total = cat.topics.length
   const done = cat.topics.filter((t) => t.done)
 
-  const doneByDay = new Map<string, number>()
-  for (const t of done) {
-    if (!t.doneAt) continue
-    const d = todayIST(new Date(t.doneAt))
-    doneByDay.set(d, (doneByDay.get(d) ?? 0) + 1)
-  }
+  const doneByDay = completionsByDay(cat.topics, checklistOf(plans))
   const streak = streaks(new Set(doneByDay.keys()), today)
 
   const weekDone = weekDates(today).reduce((n, d) => n + (doneByDay.get(d) ?? 0), 0)
-  const weekGoal = weeklyTopics(cat)
+  const weekGoal = weeklyItems(cat)
   const heatTotal = [...doneByDay].reduce((n, [d, c]) => (d >= from ? n + c : n), 0)
 
-  const todayDone = items.filter((i) => i.done_at !== null).length
+  const items = (plans.get(today) ?? []).filter((i) => i.deferred_to === null)
+  const todayDone = items.filter((i) => toDayItem(cat, i).done).length
+  const planned = new Set(items.flatMap((i) => (i.topic_id ? [i.topic_id] : [])))
+  const alsoDone = topicsCompletedOn(cat.topics, today).filter((t) => !planned.has(t.id)).length
   const recent = done
     .filter((t) => t.doneAt)
     .sort((a, b) => b.doneAt!.localeCompare(a.doneAt!))
@@ -257,7 +255,9 @@ export default function Dashboard() {
                   <span className="text-xl font-semibold tabular-nums">
                     {todayDone}/{items.length}
                   </span>
-                  <span className="text-xs text-muted">{items.length - todayDone} left</span>
+                  <span className="text-xs text-muted">
+                    {items.length - todayDone} left{alsoDone > 0 && ` · +${alsoDone} outside plan`}
+                  </span>
                 </div>
                 <ProgressBar value={todayDone / items.length} label="Today's plan progress" color="var(--color-done)" />
                 <ul className="mt-4 flex flex-col gap-2">
@@ -269,20 +269,20 @@ export default function Dashboard() {
                       <li key={i.id} className="flex items-center gap-2">
                         <span
                           aria-hidden="true"
-                          className={`size-3.5 shrink-0 rounded-full border ${i.done_at ? 'border-done bg-done' : 'border-check'}`}
+                          className={`size-3.5 shrink-0 rounded-full border ${toDayItem(cat, i).done ? 'border-done bg-done' : 'border-check'}`}
                         />
                         {link ? (
                           <a
                             href={link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`truncate underline decoration-accent/60 underline-offset-2 hover:text-accent ${i.done_at ? 'text-muted line-through' : ''}`}
+                            className={`truncate underline decoration-accent/60 underline-offset-2 hover:text-accent ${toDayItem(cat, i).done ? 'text-muted line-through' : ''}`}
                           >
                             {title}
                             <span className="sr-only"> (opens in a new tab)</span>
                           </a>
                         ) : (
-                          <span className={`truncate ${i.done_at ? 'text-muted line-through' : ''}`}>{title}</span>
+                          <span className={`truncate ${toDayItem(cat, i).done ? 'text-muted line-through' : ''}`}>{title}</span>
                         )}
                       </li>
                     )

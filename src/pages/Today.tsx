@@ -22,6 +22,7 @@ import {
 } from '../lib/data'
 import { addDays, todayIST, weekdayOf } from '../lib/date'
 import { overdueItems, reorderGroup } from '../lib/plan'
+import { topicsCompletedOn } from '../lib/stats'
 import { message, useCatalog } from '../lib/useCatalog'
 
 const dayLabel = (date: string) =>
@@ -171,6 +172,9 @@ export default function Today() {
     onToday,
   )
   const deferredCount = items.length - visible.length
+  const planned = new Set(visible.flatMap((i) => (i.topic_id ? [i.topic_id] : [])))
+  // completed today from anywhere (track page, overdue list) but not part of today's plan
+  const alsoDone = topicsCompletedOn(cat.topics, date).filter((t) => !planned.has(t.id))
   const addOptions = cat.topics
     .filter((t) => !t.done && !onToday.has(t.id))
     .map((t) => ({ id: t.id, text: `${t.title} · ${trackById.get(t.trackId)?.name ?? ''}` }))
@@ -262,6 +266,7 @@ export default function Today() {
                   { icon: 'check', value: doneCount, label: 'Done' },
                   { icon: 'flag', value: overdue.length, label: 'Overdue', tone: overdue.length ? 'warn' : undefined },
                   { icon: 'list', value: deferredCount, label: 'Deferred' },
+                  { icon: 'check', value: alsoDone.length, label: 'Also done' },
                 ]}
               />
             </>
@@ -350,6 +355,23 @@ export default function Today() {
               )
             })}
           </div>
+
+          {alsoDone.length > 0 && (
+            <section aria-labelledby="also-done-heading">
+              <div className="flex items-center gap-2 px-1 pb-2">
+                <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-done" />
+                <h3 id="also-done-heading" className="min-w-0 flex-1 truncate font-medium">
+                  Also done today
+                </h3>
+                <span className="text-[11px] text-muted tabular-nums">{alsoDone.length}</span>
+              </div>
+              <ul className="divide-y divide-line rounded-[14px] border border-line bg-card">
+                {alsoDone.map((t) => (
+                  <TopicRow key={t.id} topic={t} actions={actions} />
+                ))}
+              </ul>
+            </section>
+          )}
 
           <AddItem options={addOptions} onAdd={add} />
         </div>
