@@ -216,6 +216,7 @@ export type Database = {
       tracks: {
         Row: {
           course_code: string | null
+          exam_date: string | null
           id: string
           name: string
           sort_order: number
@@ -224,6 +225,7 @@ export type Database = {
         }
         Insert: {
           course_code?: string | null
+          exam_date?: string | null
           id: string
           name: string
           sort_order: number
@@ -232,6 +234,7 @@ export type Database = {
         }
         Update: {
           course_code?: string | null
+          exam_date?: string | null
           id?: string
           name?: string
           sort_order?: number

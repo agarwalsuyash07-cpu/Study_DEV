@@ -3,17 +3,28 @@ import ErrorBanner from '../components/ErrorBanner'
 import ProgressBar from '../components/ProgressBar'
 import { trackColor } from '../components/trackColor'
 import { PageHeader, ProgressCard, StatGrid } from '../components/ui'
-import { weeklyTopics } from '../lib/data'
+import { paceFor, weeklyTopics } from '../lib/data'
+import { todayIST } from '../lib/date'
+import { fmtPerDay, paceLabel } from '../lib/pace'
 import { useCatalog } from '../lib/useCatalog'
+
+const fmtExam = (date: string) => new Date(`${date}T00:00:00Z`).toLocaleDateString('en-IN', { timeZone: 'UTC', day: 'numeric', month: 'short' })
 
 export default function Tracks() {
   const { cat, error, setError } = useCatalog()
   const navigate = useNavigate()
+  const today = todayIST()
 
   const rows = cat
     ? cat.tracks.map((track) => {
         const ts = cat.topics.filter((t) => t.trackId === track.id)
-        return { track, weekly: weeklyTopics(cat, track.id), s: { total: ts.length, doneCount: ts.filter((t) => t.done).length } }
+        const pace = paceFor(cat, track.id, today)
+        return {
+          track,
+          pace,
+          label: paceLabel(pace, weeklyTopics(cat, track.id)),
+          s: { total: ts.length, doneCount: ts.filter((t) => t.done).length },
+        }
       })
     : []
   const done = rows.reduce((n, r) => n + r.s.doneCount, 0)
@@ -42,18 +53,21 @@ export default function Tracks() {
             </div>
 
             <div className="overflow-x-auto rounded-[14px] border border-line">
-              <table className="w-full min-w-[640px] text-left">
+              <table className="w-full min-w-[880px] text-left">
                 <thead className="bg-card text-xs text-muted">
                   <tr className="border-b border-line">
                     <th className={th}>Track</th>
-                    <th className={`${th} w-[28%]`}>Progress</th>
+                    <th className={`${th} w-[22%]`}>Progress</th>
                     <th className={`${th} text-right`}>Topics</th>
                     <th className={`${th} text-right`}>Left</th>
-                    <th className={`${th} text-right`}>Topics / week</th>
+                    <th className={`${th} text-right`}>Exam</th>
+                    <th className={`${th} text-right`}>Need / day</th>
+                    <th className={`${th} text-right`}>7-day pace</th>
+                    <th className={th}>Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {rows.map(({ track, weekly, s }) => {
+                  {rows.map(({ track, pace, label, s }) => {
                     const pct = s.total ? Math.round((s.doneCount / s.total) * 100) : 0
                     return (
                       <tr
@@ -78,7 +92,21 @@ export default function Tracks() {
                           {s.doneCount}/{s.total}
                         </td>
                         <td className="px-4 py-3.5 text-right text-soft">{s.total - s.doneCount}</td>
-                        <td className="px-4 py-3.5 text-right text-soft">{weekly || '—'}</td>
+                        <td className="px-4 py-3.5 text-right text-soft">
+                          {track.exam_date ? (
+                            <>
+                              {fmtExam(track.exam_date)}
+                              {pace.daysLeft !== null && pace.daysLeft > 0 && <span className="block text-xs text-muted">{pace.daysLeft} days</span>}
+                            </>
+                          ) : (
+                            <span className="text-muted">Not set</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3.5 text-right text-soft">{pace.neededPerDay !== null ? fmtPerDay(pace.neededPerDay) : <span className="text-muted">n/a</span>}</td>
+                        <td className="px-4 py-3.5 text-right text-soft">{fmtPerDay(pace.recentPerDay)}</td>
+                        <td className={`px-4 py-3.5 text-xs ${label.tone === 'warn' ? 'text-warn' : label.tone === 'done' ? 'text-done' : 'text-muted'}`}>
+                          {label.text}
+                        </td>
                       </tr>
                     )
                   })}

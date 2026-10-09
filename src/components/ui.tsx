@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import ProgressBar from './ProgressBar'
 
@@ -149,5 +149,43 @@ export function ConfirmDialog({
         </div>
       </div>
     </dialog>
+  )
+}
+
+/** Date input + clear button for a track's exam date; the caller saves. */
+export function ExamDateField({ id, value, onSave }: { id: string; value: string | null; onSave: (v: string | null) => Promise<void> }) {
+  const [busy, setBusy] = useState(false)
+  async function save(v: string | null) {
+    setBusy(true)
+    try {
+      await onSave(v)
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <span className="flex items-center gap-1">
+      <input
+        id={id}
+        type="date"
+        value={value ?? ''}
+        disabled={busy}
+        onChange={(e) => void save(e.target.value || null)}
+        className="rounded-lg border border-line bg-raised px-2 py-1.5 tabular-nums [color-scheme:dark] disabled:opacity-50"
+      />
+      {value && (
+        <button
+          type="button"
+          aria-label="Clear exam date"
+          disabled={busy}
+          onClick={() => void save(null)}
+          className="grid size-10 place-items-center rounded-lg text-muted hover:text-text"
+        >
+          <svg viewBox="0 0 16 16" className="size-3.5" aria-hidden="true">
+            <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+        </button>
+      )}
+    </span>
   )
 }

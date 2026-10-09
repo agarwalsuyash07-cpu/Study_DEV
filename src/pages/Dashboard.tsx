@@ -4,9 +4,10 @@ import ErrorBanner from '../components/ErrorBanner'
 import ProgressBar from '../components/ProgressBar'
 import { trackColor } from '../components/trackColor'
 import { PageHeader } from '../components/ui'
-import { loadItems, weeklyTopics, type Item } from '../lib/data'
+import { loadItems, paceFor, weeklyTopics, type Item } from '../lib/data'
 import { todayIST, weekDates } from '../lib/date'
 import { trackLink } from '../lib/links'
+import { overallStatus, paceLabel } from '../lib/pace'
 import { heatLevel, heatmapWeeks, streaks } from '../lib/stats'
 import { message, useCatalog } from '../lib/useCatalog'
 
@@ -125,6 +126,12 @@ export default function Dashboard() {
     .sort((a, b) => b.doneAt!.localeCompare(a.doneAt!))
     .slice(0, 6)
   const trackById = new Map(cat.tracks.map((t) => [t.id, t]))
+  const paces = new Map(cat.tracks.map((t) => [t.id, paceFor(cat, t.id, today)]))
+  const overall = overallStatus([...paces.values()])
+  const behindNames = cat.tracks.flatMap((t) => {
+    const s = paces.get(t.id)!.status
+    return s.kind === 'behind' ? [`${t.name} (${s.by})`] : []
+  })
 
   return (
     <main>
@@ -134,6 +141,42 @@ export default function Dashboard() {
       />
       <div className="flex flex-col gap-6 px-4 pb-8 md:px-8">
         <ErrorBanner error={error} onDismiss={() => setError(null)} />
+
+        <div
+          role="status"
+          className={`flex items-center gap-3 rounded-[14px] border px-4 py-3 ${
+            overall.kind === 'behind' ? 'border-warn/30 bg-warn/10' : overall.kind === 'on-track' ? 'border-done/30 bg-done/10' : 'border-line bg-card'
+          }`}
+        >
+          <span
+            aria-hidden="true"
+            className={`size-2.5 shrink-0 rounded-full ${overall.kind === 'behind' ? 'bg-warn' : overall.kind === 'on-track' ? 'bg-done' : 'bg-muted'}`}
+          />
+          <p className="min-w-0 flex-1">
+            {overall.kind === 'on-track' && (
+              <>
+                <span className="font-medium">On track.</span>{' '}
+                <span className="text-soft">
+                  {overall.dated === 1 ? 'Your one track with an exam is' : `All ${overall.dated} tracks with exams are`} on pace at your last-7-days rate.
+                </span>
+              </>
+            )}
+            {overall.kind === 'behind' && (
+              <>
+                <span className="font-medium text-warn">
+                  Behind on {overall.behind} of {overall.dated} tracks.
+                </span>{' '}
+                <span className="text-soft">Short by topics at exam time: {behindNames.join(', ')}.</span>
+              </>
+            )}
+            {overall.kind === 'no-exams' && <span className="text-soft">Add exam dates to see whether you're on track.</span>}
+          </p>
+          {overall.kind === 'no-exams' && (
+            <Link to="/settings" className="shrink-0 text-xs text-accent">
+              Set dates →
+            </Link>
+          )}
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Kpi
@@ -258,7 +301,7 @@ export default function Dashboard() {
                 const ts = cat.topics.filter((t) => t.trackId === track.id)
                 const n = ts.filter((t) => t.done).length
                 const color = trackColor(track.sort_order)
-                const weekly = weeklyTopics(cat, track.id)
+                const pace = paceLabel(paces.get(track.id)!, weeklyTopics(cat, track.id))
                 return (
                   <li key={track.id}>
                     <Link to={`/tracks/${track.id}`} className="group block">
@@ -270,7 +313,9 @@ export default function Dashboard() {
                         </span>
                       </div>
                       <ProgressBar value={ts.length ? n / ts.length : 0} color={color} label={`${track.name} progress`} />
-                      <p className="mt-1 text-[11px] text-muted">{weekly ? `${topics(weekly)} / week` : 'Not scheduled'}</p>
+                      <p className={`mt-1 text-[11px] ${pace.tone === 'warn' ? 'text-warn' : pace.tone === 'done' ? 'text-done' : 'text-muted'}`}>
+                        {ts.length - n} left · {pace.text}
+                      </p>
                     </Link>
                   </li>
                 )

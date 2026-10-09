@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import type { Tables } from './database.types'
 import { addDays, weekdayOf } from './date'
+import { trackPace, type Pace } from './pace'
 import { assignDay, planRegeneration, type DayItem, type PlanBlock, type PlanItem, type PlanTopic } from './plan'
 
 export type Track = Tables<'tracks'>
@@ -249,4 +250,18 @@ export async function exportAll(): Promise<Record<string, unknown[]>> {
     out[table] = all
   }
   return out
+}
+
+/** Pace for one track from its topics and exam date. */
+export function paceFor(cat: Catalog, trackId: string, today: string): Pace {
+  const track = cat.tracks.find((t) => t.id === trackId)
+  return trackPace(
+    cat.topics.filter((t) => t.trackId === trackId),
+    track?.exam_date ?? null,
+    today,
+  )
+}
+
+export async function setExamDate(trackId: string, examDate: string | null): Promise<void> {
+  ok(await supabase.from('tracks').update({ exam_date: examDate }).eq('id', trackId), 'update exam date')
 }

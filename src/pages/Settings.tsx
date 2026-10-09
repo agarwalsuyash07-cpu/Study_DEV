@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import ErrorBanner from '../components/ErrorBanner'
-import { addBlock, deleteBlock, exportAll, MAX_BLOCK_TOPICS, updateBlock, type Block, type Track } from '../lib/data'
+import { addBlock, deleteBlock, exportAll, MAX_BLOCK_TOPICS, setExamDate, updateBlock, type Block, type Track } from '../lib/data'
 import { todayIST } from '../lib/date'
-import { PageHeader } from '../components/ui'
+import { ExamDateField, PageHeader } from '../components/ui'
 import { supabase } from '../lib/supabase'
 import { message, useCatalog } from '../lib/useCatalog'
 
@@ -271,6 +271,32 @@ export default function Settings() {
           </div>
         )}
       </section>
+
+      {cat && (
+        <section aria-labelledby="exams" className="mt-8 px-4 md:px-8">
+          <h2 id="exams" className="text-base font-medium">
+            Exam dates
+          </h2>
+          <p className="mb-3 text-soft">Used for days left, topics needed per day and the on-track banner.</p>
+          <ul className="max-w-xl divide-y divide-line rounded-[14px] border border-line bg-card">
+            {cat.tracks.map((t) => (
+              <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+                <label htmlFor={`exam-${t.id}`} className="min-w-0 flex-1 truncate">
+                  {t.name}
+                </label>
+                <ExamDateField
+                  id={`exam-${t.id}`}
+                  value={t.exam_date}
+                  onSave={guard(async (v: string | null) => {
+                    await setExamDate(t.id, v)
+                    setCat((c) => (c ? { ...c, tracks: c.tracks.map((x) => (x.id === t.id ? { ...x, exam_date: v } : x)) } : c))
+                  })}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section aria-labelledby="data" className="mt-8 px-4 md:px-8">
         <h2 id="data" className="text-base font-medium">
