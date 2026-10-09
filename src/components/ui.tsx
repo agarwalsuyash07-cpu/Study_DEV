@@ -206,3 +206,10 @@ export function RevisionDueChip({ count }: { count: number }) {
     </Link>
   )
 }
+
+/** 95 → "1h 35m", 45 → "45m". */
+export const fmtMinutes = (n: number) => {
+  const h = Math.floor(n / 60)
+  const m = Math.round(n % 60)
+  return h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`
+}

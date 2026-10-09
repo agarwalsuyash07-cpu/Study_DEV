@@ -4,9 +4,11 @@ import ErrorBanner from '../components/ErrorBanner'
 import { AddItem, ItemMenu } from '../components/PlanControls'
 import TopicRow, { Check } from '../components/TopicRow'
 import { trackColor } from '../components/trackColor'
-import { ConfirmDialog, MiniProgress, PageHeader, Pill, ProgressCard, RevisionDueChip, StatGrid } from '../components/ui'
+import ProgressBar from '../components/ProgressBar'
+import { ConfirmDialog, fmtMinutes, MiniProgress, PageHeader, Pill, ProgressCard, RevisionDueChip, StatGrid } from '../components/ui'
 import {
   addPlanItem,
+  budgetFor,
   deferItem,
   ensureDayPlan,
   loadCatalog,
@@ -40,6 +42,7 @@ export default function Today() {
   const [pastUndone, setPastUndone] = useState<Item[]>([])
   const [regen, setRegen] = useState<ReturnType<typeof previewRegeneration> | null>(null)
   const [saving, setSaving] = useState(false)
+  const [ignoreBudget, setIgnoreBudget] = useState(false)
   const dragFrom = useRef<{ group: string; index: number } | null>(null)
   const { cat, setCat, error, setError, actions } = useCatalog({
     autoLoad: false,
@@ -191,6 +194,16 @@ export default function Today() {
   const titleOf = (i: { topicId: string | null; label: string | null }) =>
     i.topicId ? (cat.topicById.get(i.topicId)?.title ?? 'Removed topic') : (i.label ?? 'Study block')
   const nothingChanges = regen !== null && regen.removed.length === 0 && regen.added.length === 0
+  const budget = budgetFor(cat, date)
+  const minutesOf = (i: Item) => (i.topic_id ? (cat.topicById.get(i.topic_id)?.estMinutes ?? 0) : 0)
+  const plannedMinutes = visible.reduce((n, i) => n + minutesOf(i), 0)
+  const leftMinutes = visible.reduce((n, i) => (isDone(i) ? n : n + minutesOf(i)), 0)
+  const overBy = plannedMinutes - budget
+
+  function openRegenerate(override: boolean) {
+    setIgnoreBudget(override)
+    setRegen(previewRegeneration(cat!, date, items, override))
+  }
 
   function dragProps(g: Group, index: number) {
     return {
@@ -256,7 +269,7 @@ export default function Today() {
           hasBlocksToday && (
             <button
               type="button"
-              onClick={() => setRegen(previewRegeneration(cat, date, items))}
+              onClick={() => openRegenerate(false)}
               className="shrink-0 rounded-lg border border-line bg-raised px-3 py-1.5 text-xs font-medium hover:border-check"
             >
               Regenerate today
@@ -280,6 +293,31 @@ export default function Today() {
                 ]}
               />
             </>
+          )}
+          {visible.length > 0 && (
+            <div className={`rounded-[14px] border px-3 py-3 ${overBy > 0 ? 'border-warn/40 bg-warn/10' : 'border-line bg-card'}`}>
+              <div className="mb-2 flex items-end justify-between">
+                <span className="text-xl font-semibold tabular-nums">{fmtMinutes(leftMinutes)}</span>
+                <span className="text-xs text-soft">left to do</span>
+              </div>
+              <ProgressBar
+                value={budget ? Math.min(1, plannedMinutes / budget) : 1}
+                label="Planned time against today's budget"
+                color={overBy > 0 ? 'var(--color-warn)' : undefined}
+              />
+              <p className="mt-2 text-xs text-soft tabular-nums">
+                {fmtMinutes(plannedMinutes)} planned of {fmtMinutes(budget)} budget
+              </p>
+              {overBy > 0 && (
+                <p role="status" className="mt-1 text-xs text-warn">
+                  Over by {fmtMinutes(overBy)}. Defer something, or raise today's budget in{' '}
+                  <Link to="/settings" className="underline">
+                    Settings
+                  </Link>
+                  .
+                </p>
+              )}
+            </div>
           )}
           {allDone && (
             <div className="flex items-center gap-3 rounded-[14px] border border-done/30 bg-done/10 px-3 py-3">
@@ -399,6 +437,15 @@ export default function Today() {
         onConfirm={() => void confirmRegenerate()}
         onCancel={() => setRegen(null)}
       >
+        <label className="mb-3 flex min-h-10 items-center gap-2 text-soft">
+          <input
+            type="checkbox"
+            checked={ignoreBudget}
+            onChange={(e) => openRegenerate(e.target.checked)}
+            className="size-4 accent-[var(--color-accent)]"
+          />
+          Ignore today's {fmtMinutes(budget)} time budget
+        </label>
         {regen &&
           (nothingChanges ? (
             <p className="text-soft">Nothing would change: today already matches your schedule.</p>

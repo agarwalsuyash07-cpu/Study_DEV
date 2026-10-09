@@ -2,7 +2,7 @@ import { useState, type LiHTMLAttributes, type ReactNode } from 'react'
 import type { Topic } from '../lib/data'
 import type { Confidence } from '../lib/revision'
 import { trackLink } from '../lib/links'
-import { Pill } from './ui'
+import { fmtMinutes, Pill } from './ui'
 
 export type TopicActions = {
   onToggleDone: (topic: Topic, done: boolean) => Promise<void>
@@ -95,13 +95,12 @@ export default function TopicRow({
               topic.title
             )}
           </p>
-          {(showModule || topic.bloom || note) && (
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted tabular-nums">
-              {showModule && <span className="truncate">{topic.moduleName}</span>}
-              {topic.bloom && <Pill>{topic.bloom}</Pill>}
-              {note}
-            </div>
-          )}
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted tabular-nums">
+            {showModule && <span className="truncate">{topic.moduleName}</span>}
+            <span title={topic.estOverride ? 'Your estimate' : 'Estimated from the module'}>~{fmtMinutes(topic.estMinutes)}</span>
+            {topic.bloom && <Pill>{topic.bloom}</Pill>}
+            {note}
+          </div>
         </div>
         <div className="-my-1.5 -mr-1 flex shrink-0 items-center">
           {extra}

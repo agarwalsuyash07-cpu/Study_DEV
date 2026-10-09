@@ -206,6 +206,44 @@ function NumberSetting({
   )
 }
 
+/** Daily minutes budget; empty = use the sum of the day's block minutes (shown as the placeholder). */
+function BudgetField({ id, value, fallback, onSave }: { id: string; value: number | null; fallback: number; onSave: (n: number | null) => Promise<void> }) {
+  const [text, setText] = useState(value === null ? '' : String(value))
+  function commit() {
+    const t = text.trim()
+    if (t === '') {
+      if (value !== null) void onSave(null)
+      return
+    }
+    const n = Number(t)
+    if (!Number.isInteger(n) || n < 0 || n > 1440) {
+      setText(value === null ? '' : String(value))
+      return
+    }
+    if (n !== value) void onSave(n)
+  }
+  return (
+    <div className="flex items-center gap-2 px-3 pb-2 text-xs text-soft">
+      <label htmlFor={id}>Time budget</label>
+      <input
+        id={id}
+        type="number"
+        inputMode="numeric"
+        min={0}
+        max={1440}
+        placeholder={String(fallback)}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+        className={`${inputCls} w-20 py-1.5 tabular-nums placeholder:text-muted`}
+      />
+      <span>min</span>
+      {value === null && <span className="text-muted">(from blocks)</span>}
+    </div>
+  )
+}
+
 export default function Settings() {
   const { cat, setCat, error, setError } = useCatalog()
   const [exporting, setExporting] = useState(false)
@@ -270,6 +308,17 @@ export default function Settings() {
                     <h3 className="font-medium">{dayName}</h3>
                     <span className="text-xs text-soft tabular-nums">{blocks.length === 0 ? 'Rest day' : total ? `${total} ${total === 1 ? 'topic' : 'topics'}` : ''}</span>
                   </div>
+                  <BudgetField
+                    id={`budget-${weekday}`}
+                    value={cat.settings.daily_budget?.[weekday] ?? null}
+                    fallback={blocks.reduce((n, b) => n + b.minutes, 0)}
+                    onSave={guard(async (minutes: number | null) => {
+                      const next = [...(cat.settings.daily_budget ?? Array<number | null>(7).fill(null))]
+                      next[weekday] = minutes
+                      await saveSettings({ daily_budget: next })
+                      setCat((c) => (c ? { ...c, settings: { ...c.settings, daily_budget: next } } : c))
+                    })}
+                  />
                   <ul className="divide-y divide-line">
                     {blocks.map((b, i) => (
                       <BlockRow

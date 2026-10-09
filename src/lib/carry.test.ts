@@ -122,3 +122,17 @@ describe('reorderGroup', () => {
     expect(reorderGroup(g, 2, 3)).toEqual([])
   })
 })
+
+describe('planRegeneration with a time budget', () => {
+  it('counts kept items against the budget; deferred ones free their time', () => {
+    const ts = [topic('cn'), topic('cn'), topic('cn'), topic('cn')]
+    const [done, deferred, a] = ts
+    const current = [
+      item({ blockId: 1, topicId: done!.id, done: true }),
+      item({ blockId: 1, topicId: deferred!.id, deferredTo: '2026-10-10' }),
+    ]
+    // block wants 4 (2 slots left); budget 60 at 30 each: done uses 30, deferred is free, so only 1 more fits
+    const { items } = planRegeneration([block(1, 'cn', 4)], ts, current, { minutes: 60, estimate: () => 30 })
+    expect(items.map((i) => i.topicId)).toEqual([a!.id])
+  })
+})

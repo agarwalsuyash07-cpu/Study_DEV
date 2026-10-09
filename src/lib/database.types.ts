@@ -202,6 +202,7 @@ export type Database = {
           confidence: number | null
           last_reviewed_at: string | null
           done_at: string | null
+          est_minutes: number | null
           id: string
           module_id: string
           revision: boolean
@@ -214,6 +215,7 @@ export type Database = {
           confidence?: number | null
           last_reviewed_at?: string | null
           done_at?: string | null
+          est_minutes?: number | null
           id: string
           module_id: string
           revision?: boolean
@@ -226,6 +228,7 @@ export type Database = {
           confidence?: number | null
           last_reviewed_at?: string | null
           done_at?: string | null
+          est_minutes?: number | null
           id?: string
           module_id?: string
           revision?: boolean
@@ -275,18 +278,21 @@ export type Database = {
       }
       user_settings: {
         Row: {
+          daily_budget: (number | null)[] | null
           streak_min_no_plan: number
           streak_plan_pct: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          daily_budget?: (number | null)[] | null
           streak_min_no_plan?: number
           streak_plan_pct?: number
           updated_at?: string
           user_id?: string
         }
         Update: {
+          daily_budget?: (number | null)[] | null
           streak_min_no_plan?: number
           streak_plan_pct?: number
           updated_at?: string

@@ -11,7 +11,7 @@ vi.mock('./supabase', () => {
   return { supabase: { from: query } }
 })
 
-const { doneAtFor, loadCatalog, weeklyTopics } = await import('./data')
+const { doneAtFor, estimateMinutes, loadCatalog, weeklyTopics } = await import('./data')
 const { doneDay } = await import('./stats')
 
 const block = (id: number, weekday: number, track_id: string | null, topics: unknown) => ({
@@ -51,5 +51,15 @@ describe('backfill timestamp', () => {
     expect(doneDay(doneAtFor('2026-10-07', '2026-10-09'))).toBe('2026-10-07')
     const now = Date.now()
     expect(Math.abs(Date.parse(doneAtFor('2026-10-09', '2026-10-09')) - now)).toBeLessThan(1000)
+  })
+})
+
+describe('topic estimate', () => {
+  it('prefers the topic, then the module split, then the Bloom tag, then 45', () => {
+    expect(estimateMinutes(20, 300, 5, 'Apply')).toBe(20)
+    expect(estimateMinutes(null, 300, 4, 'Apply')).toBe(75)
+    expect(estimateMinutes(null, null, 4, 'Evaluate')).toBe(75)
+    expect(estimateMinutes(null, null, 4, 'Weird')).toBe(45)
+    expect(estimateMinutes(null, null, 0, null)).toBe(45)
   })
 })

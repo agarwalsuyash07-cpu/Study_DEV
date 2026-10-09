@@ -116,3 +116,39 @@ describe('previewDays', () => {
     expect(previewDays([{ blocks: [] }], [topic('dsa')])).toEqual([[]])
   })
 })
+
+describe('assignDay time budget', () => {
+  const est = (mins: Record<string, number>) => (id: string) => mins[id] ?? 30
+
+  it('stops adding topics once the next one would exceed the budget', () => {
+    const ts = [topic('cn'), topic('cn'), topic('cn')]
+    const mins = { [ts[0]!.id]: 60, [ts[1]!.id]: 60, [ts[2]!.id]: 60 }
+    const items = assignDay([block(1, 'cn', 3)], ts, { budget: { minutes: 150, estimate: est(mins) } })
+    expect(topicIds(items)).toEqual([ts[0]!.id, ts[1]!.id])
+  })
+
+  it('counts minutes already kept and spans blocks in order', () => {
+    const cn = [topic('cn'), topic('cn')]
+    const db = [topic('dbms'), topic('dbms')]
+    const items = assignDay([block(1, 'cn', 2), block(2, 'dbms', 2)], [...cn, ...db], {
+      budget: { minutes: 120, used: 30, estimate: () => 30 },
+    })
+    expect(topicIds(items)).toEqual([cn[0]!.id, cn[1]!.id, db[0]!.id])
+  })
+
+  it('keeps syllabus order: a topic that does not fit ends its block instead of being skipped', () => {
+    const ts = [topic('or'), topic('or')]
+    const mins = { [ts[0]!.id]: 200, [ts[1]!.id]: 10 }
+    expect(assignDay([block(1, 'or', 2)], ts, { budget: { minutes: 60, estimate: est(mins) } })).toEqual([])
+  })
+
+  it('still adds checklist items, which have no estimate', () => {
+    const items = assignDay([block(1, null, 1)], [], { budget: { minutes: 0, estimate: () => 30 } })
+    expect(items.map((i) => i.label)).toEqual(['label-1'])
+  })
+
+  it('without a budget behaves exactly as before', () => {
+    const ts = [topic('cn'), topic('cn'), topic('cn')]
+    expect(assignDay([block(1, 'cn', 3)], ts)).toHaveLength(3)
+  })
+})

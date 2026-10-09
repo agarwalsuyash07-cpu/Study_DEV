@@ -21,12 +21,16 @@ export type PlanItem = {
   sortOrder: number
 }
 
+/** Daily time cap: topics are added while `used` + their estimate fits in `minutes`. */
+export type Budget = { minutes: number; used?: number; estimate: (topicId: string) => number }
+
 export function assignDay(
   blocks: readonly PlanBlock[],
   topics: readonly PlanTopic[],
-  opts: { exclude?: ReadonlySet<string>; kept?: ReadonlyMap<number, number> } = {},
+  opts: { exclude?: ReadonlySet<string>; kept?: ReadonlyMap<number, number>; budget?: Budget } = {},
 ): PlanItem[] {
   const kept = opts.kept ?? new Map<number, number>()
+  let used = opts.budget?.used ?? 0
   const taken = new Set(opts.exclude)
   const queues = new Map<string, PlanTopic[]>()
   for (const t of topics) {
@@ -50,6 +54,12 @@ export function assignDay(
     for (const t of queues.get(block.trackId) ?? []) {
       if (left <= 0) break
       if (taken.has(t.id)) continue
+      if (opts.budget) {
+        // syllabus order wins: a topic that doesn't fit ends this block rather than being skipped
+        const mins = opts.budget.estimate(t.id)
+        if (used + mins > opts.budget.minutes) break
+        used += mins
+      }
       push(block.id, t.id, null)
       taken.add(t.id)
       left--
@@ -89,11 +99,14 @@ export function planRegeneration(
   blocks: readonly PlanBlock[],
   topics: readonly PlanTopic[],
   current: readonly DayItem[],
+  budget?: Omit<Budget, 'used'>,
 ): { items: PlanItem[]; removed: DayItem[]; added: PlanItem[] } {
   const keep = current.filter(survivesRegenerate)
   const drop = current.filter((i) => !survivesRegenerate(i))
   const exclude = new Set(keep.flatMap((i) => (i.topicId ? [i.topicId] : [])))
-  const items = assignDay(blocks, topics, { exclude, kept: keptByBlock(keep) })
+  // time already committed today: kept topics, except ones deferred to another day
+  const used = budget ? keep.reduce((n, i) => (i.topicId && i.deferredTo === null ? n + budget.estimate(i.topicId) : n), 0) : 0
+  const items = assignDay(blocks, topics, { exclude, kept: keptByBlock(keep), budget: budget && { ...budget, used } })
   const before = new Set(drop.map(itemKey))
   const after = new Set(items.map(itemKey))
   return { items, removed: drop.filter((i) => !after.has(itemKey(i))), added: items.filter((i) => !before.has(itemKey(i))) }

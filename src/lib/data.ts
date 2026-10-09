@@ -18,10 +18,25 @@ export type Topic = PlanTopic & {
   doneAt: string | null
   confidence: Confidence | null
   lastReviewedAt: string | null
+  /** Minutes this topic is expected to take: its own estimate, else derived (see estimateMinutes). */
+  estMinutes: number
+  /** The topic's own estimate, null when derived. */
+  estOverride: number | null
 }
 export type Settings = Omit<Tables<'user_settings'>, 'user_id' | 'updated_at'>
 /** Mirrors the column defaults in user_settings; used until the first save creates the row. */
-export const DEFAULT_SETTINGS: Settings = { streak_plan_pct: 50, streak_min_no_plan: 3 }
+export const DEFAULT_SETTINGS: Settings = { streak_plan_pct: 50, streak_min_no_plan: 3, daily_budget: null }
+
+// fallback minutes by Bloom tag when the module has no estimate
+const BLOOM_MINUTES: Record<string, number> = { Remember: 30, Understand: 40, Apply: 60, Analyze: 60, Evaluate: 75, Create: 90 }
+export const DEFAULT_TOPIC_MINUTES = 45
+
+/** Topic estimate: its own, else its module's estimate split across the module's topics, else by Bloom tag, else 45. */
+export function estimateMinutes(own: number | null, moduleMinutes: number | null, moduleTopics: number, bloom: string | null): number {
+  if (own) return own
+  if (moduleMinutes && moduleTopics > 0) return Math.max(5, Math.round(moduleMinutes / moduleTopics))
+  return (bloom && BLOOM_MINUTES[bloom]) || DEFAULT_TOPIC_MINUTES
+}
 
 export type Catalog = {
   tracks: Track[]
@@ -66,6 +81,8 @@ export async function loadCatalog(): Promise<Catalog> {
   if (uncounted) throw new Error(`schedule block ${uncounted.id} has no topic count: apply the latest supabase/migrations`)
 
   const moduleById = new Map(modules.map((x) => [x.id, x]))
+  const perModule = new Map<string, number>()
+  for (const x of topicRows) perModule.set(x.module_id, (perModule.get(x.module_id) ?? 0) + 1)
 
   const topics: Topic[] = []
   for (const x of topicRows) {
@@ -85,6 +102,8 @@ export async function loadCatalog(): Promise<Catalog> {
       doneAt: x.done_at,
       confidence: toConfidence(x.confidence),
       lastReviewedAt: x.last_reviewed_at,
+      estMinutes: estimateMinutes(x.est_minutes, mod.est_minutes, perModule.get(mod.id) ?? 0, x.bloom),
+      estOverride: x.est_minutes,
     })
   }
   topics.sort((a, b) => a.moduleOrder - b.moduleOrder || a.order - b.order)
@@ -125,7 +144,9 @@ export async function ensureDayPlan(cat: Catalog, date: string): Promise<Item[]>
     // the day may already hold deferred or hand-added items; don't plan those topics twice
     const held = existing.data ? await loadItems(date) : []
     const exclude = new Set(held.flatMap((i) => (i.topic_id ? [i.topic_id] : [])))
-    const items = assignDay(blocksFor(cat, date), cat.topics, { exclude })
+    // hand-added / deferred-in topics already use part of the day's budget
+    const used = held.reduce((n, i) => (i.topic_id && i.deferred_to === null ? n + (cat.topicById.get(i.topic_id)?.estMinutes ?? 0) : n), 0)
+    const items = assignDay(blocksFor(cat, date), cat.topics, { exclude, budget: { ...budgetOf(cat, date), used } })
     // false = another tab generated it first; loading below picks that up
     ok(await supabase.rpc('save_day_plan', { p_date: date, p_items: toRpcItems(items), p_replace: false }), 'save plan')
   }
@@ -145,9 +166,14 @@ export const toDayItem = (cat: Catalog, i: Item): DayItem => ({
   deferredTo: i.deferred_to,
 })
 
-/** Dry run of "Regenerate": nothing is saved. */
-export const previewRegeneration = (cat: Catalog, date: string, current: Item[]) =>
-  planRegeneration(blocksFor(cat, date), cat.topics, current.map((i) => toDayItem(cat, i)))
+/** Dry run of "Regenerate": nothing is saved. `ignoreBudget` is the explicit override. */
+export const previewRegeneration = (cat: Catalog, date: string, current: Item[], ignoreBudget = false) =>
+  planRegeneration(
+    blocksFor(cat, date),
+    cat.topics,
+    current.map((i) => toDayItem(cat, i)),
+    ignoreBudget ? undefined : budgetOf(cat, date),
+  )
 
 /** Saves a confirmed regeneration. The RPC keeps done, hand-added and deferred items and appends after them. */
 export async function saveRegeneration(date: string, items: PlanItem[]): Promise<Item[]> {
@@ -327,3 +353,21 @@ export async function setConfidence(topicId: string, confidence: Confidence | nu
 /** Reviews due today or earlier, for completed topics only. */
 export const revisionsDue = (cat: Catalog, today: string): number =>
   [...cat.revisions].filter(([id, r]) => cat.topicById.get(id)?.done && isDue(r, today)).length
+
+/** Minutes budgeted for `date`: the weekday's saved budget, else the sum of that day's block minutes. */
+export function budgetFor(cat: Catalog, date: string): number {
+  const wd = weekdayOf(date)
+  const saved = cat.settings.daily_budget?.[wd]
+  if (saved !== null && saved !== undefined) return saved
+  return cat.blocks.reduce((n, b) => (b.weekday === wd ? n + b.minutes : n), 0)
+}
+
+const budgetOf = (cat: Catalog, date: string) => ({
+  minutes: budgetFor(cat, date),
+  estimate: (id: string) => cat.topicById.get(id)?.estMinutes ?? DEFAULT_TOPIC_MINUTES,
+})
+
+export async function setTopicEstimate(topicId: string, minutes: number | null): Promise<void> {
+  if (minutes !== null && (!Number.isInteger(minutes) || minutes < 1 || minutes > 600)) throw new Error('estimate must be 1–600 minutes')
+  ok(await supabase.from('topics').update({ est_minutes: minutes }).eq('id', topicId), 'update estimate')
+}
