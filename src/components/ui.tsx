@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import ProgressBar from './ProgressBar'
+import { openSearch } from './SearchPalette'
 
 /** Sticky top bar, takeUforward style: optional back arrow + 16px title. */
 export function PageHeader({ title, back, action }: { title: string; back?: { to: string; label: string }; action?: ReactNode }) {
@@ -15,6 +16,12 @@ export function PageHeader({ title, back, action }: { title: string; back?: { to
       )}
       <h1 className="min-w-0 flex-1 truncate text-base font-medium md:text-lg">{title}</h1>
       {action}
+      {/* phones have no sidebar search button */}
+      <button type="button" aria-label="Search" onClick={openSearch} className="-mr-2 grid size-10 shrink-0 place-items-center rounded-lg text-soft md:hidden">
+        <svg viewBox="0 0 20 20" className="size-5" aria-hidden="true">
+          <path d="M9 15a6 6 0 100-12 6 6 0 000 12zM17 17l-3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        </svg>
+      </button>
     </div>
   )
 }

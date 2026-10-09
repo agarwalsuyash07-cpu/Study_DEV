@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router'
+import SearchPalette, { openSearch } from './SearchPalette'
 import Toaster from './Toaster'
 
 const TABS = [
@@ -22,7 +23,18 @@ export default function Layout() {
   return (
     <div className="flex min-h-dvh">
       <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-line px-3 py-5 md:flex">
-        <p className="px-3 pb-6 text-base font-semibold">Study Tracker</p>
+        <p className="px-3 pb-4 text-base font-semibold">Study Tracker</p>
+        <button
+          type="button"
+          onClick={openSearch}
+          className="mb-4 flex min-h-10 items-center gap-3 rounded-[10px] border border-line px-3 text-soft hover:border-check hover:text-text"
+        >
+          <svg viewBox="0 0 20 20" className="size-[18px] shrink-0" aria-hidden="true">
+            <path d="M9 15a6 6 0 100-12 6 6 0 000 12zM17 17l-3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          <span className="flex-1 text-left">Search</span>
+          <kbd className="rounded border border-line px-1.5 text-[11px] text-muted">Ctrl K</kbd>
+        </button>
         <nav aria-label="Main">
           <ul className="flex flex-col gap-1">
             {TABS.map((t) => (
@@ -49,6 +61,7 @@ export default function Layout() {
         <Outlet />
       </div>
       <Toaster />
+      <SearchPalette />
 
       {/* narrow windows fall back to a bottom bar */}
       <nav aria-label="Main" className="fixed inset-x-0 bottom-0 border-t border-line bg-bg/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">

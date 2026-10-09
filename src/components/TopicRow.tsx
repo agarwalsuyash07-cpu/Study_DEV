@@ -54,6 +54,7 @@ export default function TopicRow({
   note,
   extra,
   rowProps,
+  highlight = false,
 }: {
   topic: Topic
   actions: TopicActions
@@ -61,6 +62,8 @@ export default function TopicRow({
   note?: ReactNode
   extra?: ReactNode
   rowProps?: LiHTMLAttributes<HTMLLIElement>
+  /** Briefly flashes the row (search jump). */
+  highlight?: boolean
 }) {
   const [busy, setBusy] = useState(false)
 
@@ -82,7 +85,7 @@ export default function TopicRow({
   const link = trackLink(topic.trackId)
 
   return (
-    <li className="px-3 py-2.5" {...rowProps}>
+    <li className={`px-3 py-2.5 ${highlight ? 'search-hit' : ''}`} {...rowProps}>
       <div className="flex items-start gap-3">
         <span className="pt-0.5">
           <Check checked={topic.done} label={`Mark "${topic.title}" done`} onClick={toggleDone} disabled={busy} />

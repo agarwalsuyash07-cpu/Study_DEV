@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { useEffect, useState } from 'react'
+import { Link, useParams, useSearchParams } from 'react-router'
 import ErrorBanner from '../components/ErrorBanner'
 import TopicRow, { type TopicActions } from '../components/TopicRow'
 import CsvImport from '../components/CsvImport'
@@ -13,17 +13,19 @@ function ModuleSection({
   module,
   topics,
   initiallyOpen,
+  focusTopic,
   actions,
 }: {
   module: Module
   topics: Topic[]
   initiallyOpen: boolean
+  focusTopic: string | null
   actions: TopicActions
 }) {
   const [open, setOpen] = useState(initiallyOpen)
   const done = topics.filter((t) => t.done).length
   return (
-    <details open={open} onToggle={(e) => setOpen(e.currentTarget.open)} className="border-b border-line">
+    <details id={`module-${module.id}`} open={open} onToggle={(e) => setOpen(e.currentTarget.open)} className="border-b border-line">
       <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2.5 py-3 [&::-webkit-details-marker]:hidden">
         <Chevron open={open} />
         <h2 className="min-w-0 flex-1 text-[13px] leading-snug">{module.name}</h2>
@@ -33,7 +35,14 @@ function ModuleSection({
       <div className="mb-3 overflow-hidden rounded-[14px] bg-card">
         <ul className="divide-y divide-line">
           {topics.map((t) => (
-            <TopicRow key={t.id} topic={t} actions={actions} showModule={false} />
+            <TopicRow
+              key={t.id}
+              topic={t}
+              actions={actions}
+              showModule={false}
+              rowProps={{ id: `topic-${t.id}` }}
+              highlight={t.id === focusTopic}
+            />
           ))}
         </ul>
       </div>
@@ -43,8 +52,21 @@ function ModuleSection({
 
 export default function TrackDetail() {
   const { trackId } = useParams()
+  const [params] = useSearchParams()
+  // set by search: ?topic=<id> or ?module=<id>
+  const focusTopic = params.get('topic')
+  const focusModule = params.get('module')
   const { cat, setCat, error, setError, actions, drawer } = useCatalog()
   const back = { to: '/tracks', label: 'Back to tracks' }
+  const loaded = cat !== null
+
+  // jump to the searched topic/module once its section has rendered open
+  useEffect(() => {
+    if (!loaded || (!focusTopic && !focusModule)) return
+    const el = document.getElementById(focusTopic ? `topic-${focusTopic}` : `module-${focusModule}`)
+    el?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+    el?.querySelector<HTMLElement>('button, summary')?.focus({ preventScroll: true })
+  }, [loaded, focusTopic, focusModule])
 
   if (!cat) {
     return (
@@ -128,10 +150,12 @@ export default function TrackDetail() {
           <div className="border-t border-line">
             {modules.map((m) => (
               <ModuleSection
-                key={m.id}
+                // a new search target remounts sections so they reopen around it
+                key={`${m.id}-${focusTopic ?? focusModule ?? ''}`}
                 module={m}
                 topics={byModule.get(m.id) ?? []}
-                initiallyOpen={m.id === firstOpen}
+                initiallyOpen={m.id === firstOpen || m.id === focusModule || byModule.get(m.id)?.some((t) => t.id === focusTopic) === true}
+                focusTopic={focusTopic}
                 actions={actions}
               />
             ))}
