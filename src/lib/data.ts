@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import type { Tables, TablesUpdate } from './database.types'
 import { addDays, weekdayOf } from './date'
+import type { Backup } from './backup'
 import type { TopicCsvRow } from './csv'
 import { safeUrl } from './markdown'
 import { trackPace, type Pace } from './pace'
@@ -289,13 +290,28 @@ export async function addBlock(weekday: number, trackId: string | null, sortOrde
   return res.data
 }
 
-export async function updateBlock(
-  id: number,
-  patch: Partial<Pick<Block, 'track_id' | 'label' | 'topics' | 'sort_order'>>,
-): Promise<void> {
+/** Mirrors schedule_blocks.minutes > 0, with a sane upper bound for one block. */
+export const MAX_BLOCK_MINUTES = 600
+
+export type BlockPatch = Partial<Pick<Block, 'track_id' | 'label' | 'topics' | 'minutes' | 'sort_order'>>
+
+export async function updateBlock(id: number, patch: BlockPatch): Promise<void> {
   if (patch.topics !== undefined && (!Number.isInteger(patch.topics) || patch.topics < 1 || patch.topics > MAX_BLOCK_TOPICS))
     throw new Error(`topics must be a whole number between 1 and ${MAX_BLOCK_TOPICS}`)
+  if (patch.minutes !== undefined && (!Number.isInteger(patch.minutes) || patch.minutes < 1 || patch.minutes > MAX_BLOCK_MINUTES))
+    throw new Error(`minutes must be a whole number between 1 and ${MAX_BLOCK_MINUTES}`)
   ok(await supabase.from('schedule_blocks').update(patch).eq('id', id), 'update block')
+}
+
+/** Re-creates a removed block (Undo); it gets a new id, past plans keep pointing at nothing as before. */
+export async function restoreBlock(b: Block): Promise<Block> {
+  const res = await supabase
+    .from('schedule_blocks')
+    .insert({ weekday: b.weekday, track_id: b.track_id, label: b.label, topics: b.topics, minutes: b.minutes, sort_order: b.sort_order })
+    .select()
+    .single()
+  if (res.error) throw new Error(`restore block: ${res.error.message}`)
+  return res.data
 }
 
 export async function deleteBlock(id: number): Promise<void> {
@@ -309,6 +325,9 @@ const EXPORT_TABLES = [
   ['schedule_blocks', 'id'],
   ['day_plans', 'date'],
   ['day_plan_items', 'id'],
+  ['revisions', 'topic_id'],
+  ['user_settings', 'user_id'],
+  ['weekly_reviews', 'week_start'],
 ] as const
 
 /** Every table, paged past the API row cap. */
@@ -454,3 +473,32 @@ export function streakFor(cat: Catalog, plans: Map<string, Item[]>, today: strin
 
 /** Start of "all history" for streaks and reviews. */
 export const HISTORY_START = '2000-01-01'
+
+const CHUNK = 500
+
+// callers pass a concretely typed write per table; chunks keep requests small
+async function inChunks<R>(rowsIn: R[], write: (part: R[]) => PromiseLike<{ error: { message: string } | null }>, what: string) {
+  for (let i = 0; i < rowsIn.length; i += CHUNK) ok(await write(rowsIn.slice(i, i + CHUNK)), what)
+}
+
+/**
+ * Restores a validated export. Upserts tracks → modules → topics → revisions, settings and weekly reviews;
+ * schedule blocks and plan items only update rows that still exist. Nothing is deleted.
+ * ponytail: not one transaction (PostgREST); every step is an idempotent upsert/update, so re-running after a failure is safe.
+ */
+export async function importBackup(b: Backup): Promise<void> {
+  await inChunks(b.tracks, (p) => supabase.from('tracks').upsert(p), 'restore tracks')
+  await inChunks(b.modules, (p) => supabase.from('modules').upsert(p), 'restore modules')
+  await inChunks(b.topics, (p) => supabase.from('topics').upsert(p), 'restore topics')
+  await inChunks(b.revisions, (p) => supabase.from('revisions').upsert(p), 'restore revisions')
+  await inChunks(b.weekly_reviews, (p) => supabase.from('weekly_reviews').upsert(p), 'restore weekly reviews')
+  if (b.user_settings[0]) await saveSettings(b.user_settings[0])
+  // existing rows only: updating a missing id is a no-op
+  const updates = [
+    ...b.schedule_blocks.map(({ id, ...row }) => () => supabase.from('schedule_blocks').update(row).eq('id', id)),
+    ...b.day_plan_items.map(({ id, ...row }) => () => supabase.from('day_plan_items').update(row).eq('id', id)),
+  ]
+  for (let i = 0; i < updates.length; i += 20) {
+    for (const r of await Promise.all(updates.slice(i, i + 20).map((u) => u()))) ok(r, 'restore plan')
+  }
+}
