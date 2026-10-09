@@ -8,8 +8,11 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "lint": "oxlint --deny-warnings src scripts",
+    "check": "npm run lint && npm test && npm run build",
     "import": "tsx --env-file=.env.local scripts/import-seed.ts",
-    "set-password": "tsx --env-file=.env.local scripts/set-password.ts"
+    "set-password": "tsx --env-file=.env.local scripts/set-password.ts",
+    "backup": "tsx --env-file=.env.local scripts/backup.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",
@@ -23,6 +26,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "oxlint": "^1.87.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",

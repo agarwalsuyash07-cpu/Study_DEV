@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "import", "unicorn"],
+  "categories": { "correctness": "error", "suspicious": "warn" },
+  "rules": {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/react-in-jsx-scope": "off",
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "typescript/no-explicit-any": "error",
+    "no-unused-vars": "error",
+    "unicorn/no-array-sort": "off",
+    "import/no-unassigned-import": "off",
+    "no-shadow": "off"
+  },
+  "overrides": [{ "files": ["scripts/**"], "rules": { "no-console": "off" } }],
+  "ignorePatterns": ["dist", "src/lib/database.types.ts"]
+}

@@ -30,7 +30,7 @@ describe('heatmapWeeks', () => {
 })
 
 describe('heatLevel', () => {
-  it('buckets topics done into 0–4', () => {
+  it('buckets topics done into 0â€“4', () => {
     expect(heatLevel(0)).toBe(0)
     expect(heatLevel(1)).toBe(1)
     expect(heatLevel(2)).toBe(2)
